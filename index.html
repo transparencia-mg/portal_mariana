@@ -2,623 +2,1386 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Acordo de Mariana</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Acordo de Mariana - Portal da Transparência MG</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary-dark:      #1a3a5c;
+            --primary-darker:    #0f2a44;
+            --accent-red:        #b93c42;
+            --accent-bright:     #db233f;
+            --background-light:  #f5f7fa;
+            --success-green:     #28a745;
+            --warning-yellow:    #ffc107;
+            --info-blue:         #17a2b8;
+            --border-color:      #dee2e6;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; overflow-x: hidden; margin: 0; padding: 0; height: auto; min-height: auto; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            min-height: 100vh;
+            font-family: 'Montserrat', Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-light);
+            padding-bottom: 15px;
+            overflow-x: hidden;
         }
+        body, button, input, select, textarea, span, div { font-family: 'Montserrat', sans-serif !important; }
+        .material-icons { font-family: 'Material Icons' !important; font-size: 14px; vertical-align: middle; }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            padding: 30px;
+        .main-container { height: auto; min-height: auto; overflow: visible; position: relative; }
+        .container-fluid { width: 100%; max-width: 88% !important; padding: 0 40px; margin: 0; height: auto; }
+        .dashboard-container { width: 100%; max-width: 100%; padding: 0 40px; margin: 0 auto; height: auto; }
+        .tab-content, .tab-pane { width: 100%; height: auto; min-height: auto; overflow: visible; }
+        .table-container { height: auto; min-height: auto; overflow: visible; position: relative; }
+        .iframe-mode { overflow: visible !important; }
+
+        .data-atualizacao-container { display: flex; justify-content: left; align-items: center; margin: 15px 0; }
+        .data-atualizacao-box {
+            background: transparent !important;
+            border-radius: 8px; padding: 8px 15px;
+            display: flex; align-items: center; gap: 8px;
+            font-size: 12px; color: var(--primary-dark); font-weight: 600; box-shadow: none;
         }
+        .data-atualizacao-box i { font-size: 14px; color: var(--accent-red); }
 
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
+        /* FILTROS */
+        .filter-container {
+            background: white; border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            padding: 20px; margin-bottom: 20px; width: 100%;
         }
+        .filter-label { font-size: 13px; font-weight: 600; color: #1a3a5c; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-control, .form-select { border: 2px solid #e9ecef; border-radius: 6px; padding: 10px 12px; font-size: 13px; transition: all 0.3s ease; height: auto; width: 100%; }
+        .form-control:focus, .form-select:focus { border-color: var(--accent-red); box-shadow: 0 0 0 2px rgba(185,60,66,0.15); outline: none; }
+        .modern-select { border: 1.5px solid #dfe5ec !important; border-radius: 8px !important; padding: 10px 12px !important; font-size: 13px !important; height: 42px !important; line-height: 1.5 !important; background-color: #fff; transition: all 0.2s ease; width: 100%; }
+        .modern-select:focus { border-color: #1a3a5c !important; box-shadow: 0 0 0 2px rgba(26,58,92,0.1); outline: none; }
+        .filters-row { display: flex; gap: 15px; width: 100%; flex-wrap: wrap; margin-bottom: 12px; }
+        .filter-group { flex: 1; min-width: 140px; }
+        .botoes-abaixo { margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; }
 
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
+        /* CARDS */
+        .metric-card { background: white; border-radius: 8px; border: 1px solid #e5e9ef; box-shadow: 0 3px 12px rgba(0,0,0,0.06); overflow: hidden; height: 100%; transition: box-shadow 0.25s ease, transform 0.25s ease; }
+        .metric-card:hover { box-shadow: 0 8px 24px rgba(26,58,92,0.13); transform: translateY(-2px); }
+        .metric-header { background: #20445d; color: white; font-size: 13px; font-weight: 600; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
+        .metric-body { padding: 12px 15px; }
+        .metric-value { font-size: 18px; font-weight: 700; color: #171c21; }
+        .metric-sublabel { font-size: 10px; color: #94a3b8; font-weight: 500; margin-top: 2px; }
 
-        /* View transitions */
-        .view {
-            display: none;
-        }
+        /* GRÁFICOS */
+        .chart-container { background: white; border-radius: 10px; box-shadow: 0 3px 12px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }
+        .chart-container canvas { max-width: 100%; }
+        .chart-header { background: #20445d; color: white; padding: 12px 16px; margin: 0; }
+        .chart-title { font-size: 14px; font-weight: 600; color: white; margin: 0; }
+        .chart-wrapper { height: 260px; padding: 10px 15px; width: 100%; }
 
-        .view.active {
-            display: block;
-        }
+        /* TABELAS */
+        .table-badge { background: #1a3a5c; color: white; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+        .table-fixed-header-container { position: relative; overflow: auto; width: 100%; max-height: 600px; }
+        .table-fixed-header-container table thead th { background-color: #54697b !important; color: white !important; position: sticky; top: 0; z-index: 10; font-weight: 600; padding: 12px 10px; font-size: 12px; text-transform: uppercase; white-space: nowrap; }
+        .table { width: 100%; font-size: 12px; border-collapse: collapse; table-layout: auto; }
+        .table th, .table td { border: 1px solid #d6dee6; }
+        .table thead th { background-color: #54697b !important; color: white !important; font-weight: 600; font-size: 12px; padding: 12px 10px; text-transform: uppercase; border: 1px solid #d6dee6; cursor: pointer; user-select: none; }
+        .table thead th:first-child { border-top-left-radius: 8px; }
+        .table thead th:last-child  { border-top-right-radius: 8px; }
+        .table thead th:hover { background-color: #3d5566 !important; }
+        .table tbody tr { background-color: #ffffff; }
+        .table tbody td { padding: 10px 10px; vertical-align: middle; border-bottom: 1px solid #f1f1f1; font-size: 12px; }
+        .table tbody tr:hover { background-color: rgba(41,67,90,0.04); }
+        .table tfoot tr, .table tfoot td { background-color: #dfe3e8 !important; font-weight: 700; font-size: 12px; }
+        .table-responsive { display: block; width: 100%; overflow-x: auto; }
 
-        /* Cards for metrics */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+        .proc-link, .org-link { color: #006a82; text-decoration: none; font-weight: 600; cursor: pointer; }
+        .proc-link:hover, .org-link:hover { color: var(--accent-red); text-decoration: underline; }
+        .contrato-link { color: #006a82; text-decoration: none; font-weight: 500; }
+        .contrato-link:hover { color: var(--accent-red); text-decoration: underline; }
+        .nao-aplica { color: #adb5bd; font-size: 11px; }
+        .sortable-header { cursor: pointer; position: relative; padding-right: 22px !important; }
+        .sortable-header:hover { background-color: #3d5566 !important; }
+        .sortable-header i { font-size: 13px; position: absolute; right: 5px; top: 50%; transform: translateY(-50%); opacity: 0.8; }
+        .text-right { text-align: right; }
 
-        .metric-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
+        /* BOTÕES */
+        .btn-pesquisa { background: linear-gradient(to right, #20445d, #20445d); border: none; padding: 0 16px; font-weight: 600; border-radius: 6px; transition: all 0.3s ease; font-size: 13px; color: white; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; height: 36px; white-space: nowrap; }
+        .btn-pesquisa:hover { background: linear-gradient(to right, var(--accent-red), #a32c32); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(185,60,66,0.2); color: white; }
+        .btn-secondary-custom { background: white; border: 2px solid var(--primary-darker); color: var(--primary-darker); padding: 0 16px; font-weight: 600; font-size: 13px; border-radius: 6px; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; height: 36px; white-space: nowrap; text-decoration: none !important; }
+        .btn-secondary-custom:hover { background-color: #132837 !important; color: white !important; border-color: #132837 !important; }
+        .btn-export { appearance: none; -webkit-appearance: none; background: transparent !important; border: 1px solid #d6dee6; color: #1a3a5c; padding: 0 14px; border-radius: 6px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; height: 32px; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+        .btn-export i { font-size: 14px !important; }
+        button.btn-export:hover { background-color: #1a3a5c !important; border-color: #1a3a5c !important; color: #ffffff !important; }
+        .btn-action { padding: 4px; border-radius: 7px; border: 1.5px solid #1a3a5c; background-color: #ffffff; color: #1a3a5c; width: 32px; height: 30px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; cursor: pointer; }
+        .btn-action:hover { background-color: #1a3a5c; color: #ffffff; }
+        .btn-topo { background: #eeeff5; color: #1a3a5c; border: 1px solid #d6dee6; border-radius: 12px; padding: 0 16px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; height: 32px; }
+        .btn-topo:hover { background-color: #1a3a5c; color: #ffffff; border-color: #1a3a5c; }
+        .btn-voltar { background: #f0f4f8; color: #1a3a5c; border: 1.5px solid #c5d0dc; padding: 0 16px; font-weight: 600; font-size: 13px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; height: 36px; transition: all 0.2s ease; }
+        .btn-voltar:hover { background-color: #1a3a5c; color: white; border-color: #1a3a5c; }
 
-        .metric-card:hover {
-            transform: translateY(-5px);
-        }
+        /* ABAS */
+        .nav-tabs-container { background: transparent; padding: 10px 0; margin-top: 15px; margin-bottom: 15px; width: 100%; }
+        .nav-tabs { border: none !important; gap: 10px; width: 100%; flex-wrap: wrap; }
+        .nav-tabs .nav-link { border: none !important; background: #ffffff !important; border-radius: 10px !important; padding: 8px 18px !important; font-weight: 500; font-size: 13px; color: #1a3a5c !important; display: inline-flex !important; align-items: center; gap: 6px; transition: all .25s ease; white-space: nowrap; }
+        .nav-tabs .nav-link:hover { background: #e6e9ed !important; }
+        .nav-tabs .nav-link.active { background: #234c63 !important; color: #fff !important; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .nav-tabs .material-icons { font-size: 14px !important; }
 
-        .metric-card h3 {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }
+        /* MODAL */
+        .modal-creative .modal-header { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-darker) 100%); color: white !important; padding: 15px 20px; border-bottom: none; }
+        .modal-creative .modal-header .modal-title { color: white !important; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .modal-creative .modal-header .btn-close { filter: brightness(0) invert(1); opacity: 1; }
+        .info-card { background: #f8fafd; border-radius: 10px; padding: 13px 16px; margin-bottom: 13px; border: 1px solid #e2e8f0; border-left: 4px solid var(--accent-red); }
+        .info-card.primary { border-left-color: var(--primary-dark); }
+        .info-label { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600; margin-bottom: 4px; }
+        .info-value { font-size: 13px; font-weight: 500; color: #1e293b; word-break: break-word; }
+        .info-value.highlight { font-size: 16px; color: var(--accent-red); font-weight: 700; }
 
-        .metric-value {
-            font-size: 32px;
-            font-weight: bold;
-        }
+        /* PAGINAÇÃO */
+        .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: white; border-top: 1px solid #dee2e6; width: 100%; flex-wrap: wrap; gap: 10px; border-radius: 0 0 8px 8px; }
+        .pagination-info { display: flex; align-items: center; gap: 12px; font-size: 12px; color: #6c757d; flex-wrap: wrap; }
+        .pagination-controls { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+        .pagination-controls button { min-width: 34px; height: 34px; border: 1px solid #dee2e6; background: white; color: var(--primary-dark); border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 13px; padding: 0 6px; }
+        .pagination-controls button:hover:not(:disabled) { background-color: var(--primary-dark); color: white; border-color: var(--primary-dark); }
+        .pagination-controls button.active { background-color: var(--primary-dark); color: white; border-color: var(--primary-dark); }
+        .pagination-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-size-selector { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6c757d; }
+        .page-size-selector select { width: 70px; border: 1px solid #d6dee6; border-radius: 6px; padding: 4px 6px; font-size: 12px; background-color: white; color: var(--primary-dark); font-weight: 600; cursor: pointer; }
+        .page-input { display: flex; align-items: center; gap: 6px; }
+        .page-input input { width: 56px; height: 32px; border: 1px solid #dee2e6; border-radius: 6px; text-align: center; font-size: 13px; padding: 0 4px; }
+        .page-input button { height: 32px; background: var(--primary-dark); color: white; border: none; border-radius: 6px; padding: 0 10px; font-size: 12px; cursor: pointer; }
+        .page-input button:hover { background: var(--accent-red); }
 
-        .metric-unit {
-            font-size: 14px;
-            opacity: 0.8;
-        }
+        /* TOOLBAR */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+        .toolbar-left  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-        /* Filters */
-        .filters {
-            background: #f5f5f5;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
+        /* LOADING */
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(238,241,246,0.95); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; gap: 14px; }
+        .loading-overlay.show { display: flex; }
+        .loading-progress { font-size: 13px; color: #20445d; font-weight: 700; }
 
-        .filter-group {
-            display: inline-block;
-            margin-right: 15px;
-            margin-bottom: 10px;
-        }
+        /* TOAST */
+        .toast-sucesso { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #e6f4ea; color: #1e4620; border-radius: 12px; padding: 14px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: none; align-items: center; justify-content: center; gap: 10px; z-index: 9999; min-width: 280px; }
+        .toast-notification { position: fixed; top: 20px; right: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 20px; transform: translateX(120%); transition: transform 0.3s ease; z-index: 10000; border-left: 4px solid; max-width: 350px; }
+        .toast-notification.show { transform: translateX(0); }
+        .toast-notification.success { border-left-color: var(--success-green); }
+        .toast-notification.error { border-left-color: var(--accent-red); }
+        .toast-content { display: flex; align-items: center; font-size: 13px; color: var(--primary-dark); gap: 8px; }
 
-        .filter-group label {
-            display: block;
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-        }
+        /* METADADOS */
+        .metadata-container { background: white; border-radius: 10px; box-shadow: 0 3px 12px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 20px; }
+        .metadata-header { background: #20445d; color: white; padding: 12px 16px; font-size: 13px; font-weight: 700; }
+        .metadata-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .metadata-table thead th { background-color: #54697b !important; color: white !important; padding: 10px; font-size: 11px; text-transform: uppercase; font-weight: 600; }
+        .metadata-table tbody tr:nth-child(even) { background: #f8fafd; }
+        .metadata-table tbody td { padding: 10px; border-bottom: 1px solid #f0f4f8; vertical-align: top; color: #334155; }
+        .metadata-table code { background: #e2e8f0; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
-        .filter-group select, .filter-group input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            min-width: 150px;
-        }
+        /* BADGE SITUAÇÃO */
+        .badge-situacao { padding: 3px 8px; border-radius: 20px; font-size: 10.5px; font-weight: 700; display: inline-block; letter-spacing: 0.2px; white-space: nowrap; }
+        .badge-ativo    { background: #dcf5e7; color: #0f6b3a; border: 1px solid #b2e6c8; }
+        .badge-concluido{ background: #cce5ff; color: #004085; border: 1px solid #b8d4f5; }
+        .badge-outros   { background: #f0f4f8; color: #334155; border: 1px solid #c5d0dc; }
 
-        button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
+        /* INICIATIVA CARD */
+        .iniciativa-row { cursor: pointer; }
+        .iniciativa-row:hover td { background-color: rgba(26,58,92,0.05) !important; }
+        .iniciativa-codigo { color: #006a82; font-weight: 700; text-decoration: none; }
+        .iniciativa-codigo:hover { color: var(--accent-red); text-decoration: underline; }
 
-        button:hover {
-            background: #764ba2;
-        }
-
-        /* Tables */
-        .table-container {
-            overflow-x: auto;
-            margin-top: 20px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background: #667eea;
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        tr:hover {
-            background: #f5f5f5;
-            cursor: pointer;
-        }
-
-        /* Charts */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .chart-container h3 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        /* Back button */
-        .back-button {
-            margin-bottom: 20px;
-        }
-
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: #666;
+        /* RESPONSIVO */
+        @media (max-width: 992px) { .container-fluid, .dashboard-container { padding: 0 15px !important; } }
+        @media (max-width: 768px) {
+            .container-fluid, .dashboard-container { padding: 0 10px !important; }
+            .nav-tabs { flex-direction: column; gap: 6px; }
+            .nav-tabs .nav-link { width: 100%; justify-content: flex-start; font-size: 13px; padding: 10px 14px !important; }
+            .filters-row { flex-direction: column; }
+            .filter-group { min-width: 100%; width: 100%; }
+            .botoes-abaixo { flex-direction: column; }
+            .btn-pesquisa, .btn-secondary-custom { width: 100%; justify-content: center; }
+            .toolbar { flex-direction: column; align-items: flex-start; }
+            .pagination-container { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .chart-wrapper { height: 200px; }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>🏗️ Dashboard do Acordo de Mariana</h1>
-        <div class="subtitle">Monitoramento da Execução Financeira por Iniciativa</div>
+<body class="iframe-mode">
 
-        <!-- View 1: Iniciativas -->
-        <div id="view-iniciativas" class="view active">
-            <div class="filters">
-                <div class="filter-group">
-                    <label>🔍 Filtro por Código da Iniciativa</label>
-                    <input type="text" id="filter-codigo" placeholder="Digite o código...">
-                </div>
-                <div class="filter-group">
-                    <label>📋 Filtro por Nome da Iniciativa</label>
-                    <input type="text" id="filter-nome" placeholder="Digite o nome...">
-                </div>
-                <button onclick="aplicarFiltrosIniciativas()">Aplicar Filtros</button>
-                <button onclick="limparFiltrosIniciativas()">Limpar</button>
-            </div>
-            <div class="table-container">
-                <table id="tabela-iniciativas">
-                    <thead>
-                        <tr>
-                            <th>Código Iniciativa</th>
-                            <th>Iniciativa</th>
-                            <th>Anexo</th>
-                            <th>Valor da Iniciativa (R$)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-iniciativas"></tbody>
-                </table>
+<div class="main-container">
+    <div class="container-fluid dashboard-container">
+
+        <!-- Abas -->
+        <div class="nav-tabs-container">
+            <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="iniciativas-tab" data-bs-toggle="tab" data-bs-target="#tab-iniciativas">
+                        <i class="material-icons">account_balance</i>Iniciativas
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="execucao-tab" data-bs-toggle="tab" data-bs-target="#tab-execucao">
+                        <i class="material-icons">receipt_long</i>Consulta Execução
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="downloads-tab" data-bs-toggle="tab" data-bs-target="#tab-downloads">
+                        <i class="material-icons">download</i>Downloads
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Data de atualização -->
+        <div class="data-atualizacao-container">
+            <div class="data-atualizacao-box">
+                <i class="material-icons">event</i>
+                Atualizado em: <span id="data-atualizacao-header" style="margin-left:4px;">Carregando...</span>
             </div>
         </div>
 
-        <!-- View 2: Execução -->
-        <div id="view-execucao" class="view">
-            <div class="back-button">
-                <button onclick="voltarParaIniciativas()">← Voltar para Iniciativas</button>
+        <!-- Conteúdo das abas -->
+        <div class="tab-content" id="dashboardTabsContent">
+            <div class="tab-pane fade show active" id="tab-iniciativas" role="tabpanel">
+                <div id="iniciativas-content"></div>
             </div>
-            <div class="filters">
-                <div class="filter-group">
-                    <label>📅 Ano</label>
-                    <select id="filter-ano"></select>
-                </div>
-                <div class="filter-group">
-                    <label>📋 Iniciativa</label>
-                    <select id="filter-iniciativa-exec"></select>
-                </div>
-                <div class="filter-group">
-                    <label>🏢 Órgão</label>
-                    <select id="filter-orgao"></select>
-                </div>
-                <div class="filter-group">
-                    <label>🏢 Razão Social Credor</label>
-                    <input type="text" id="filter-credor" placeholder="Digite...">
-                </div>
-                <div class="filter-group">
-                    <label>🆔 CNPJ/CPF Credor</label>
-                    <input type="text" id="filter-cnpj" placeholder="Digite...">
-                </div>
-                <div class="filter-group">
-                    <label>📜 Modalidade Licitatória</label>
-                    <select id="filter-modalidade"></select>
-                </div>
-                <div class="filter-group">
-                    <label>📄 Processo de Compra</label>
-                    <input type="text" id="filter-processo" placeholder="Digite...">
-                </div>
-                <button onclick="aplicarFiltrosExecucao()">Aplicar Filtros</button>
-                <button onclick="limparFiltrosExecucao()">Limpar</button>
+            <div class="tab-pane fade" id="tab-execucao" role="tabpanel">
+                <div id="execucao-content"></div>
             </div>
-            
-            <!-- Metrics Cards para Execução -->
-            <div class="metrics-grid" id="metrics-execucao"></div>
-            
-            <div class="table-container">
-                <table id="tabela-execucao">
-                    <thead>
-                        <tr>
-                            <th>Iniciativa</th><th>Anexo</th><th>Órgão</th><th>Empenho</th>
-                            <th>Data Empenho</th><th>Razão Social</th><th>CNPJ/CPF</th>
-                            <th>Processo Compra</th><th>Modalidade</th><th>Valor Empenhado</th>
-                            <th>Liquidado</th><th>Pago</th><th>Liquidado RP</th>
-                            <th>Cancelado RP</th><th>Empenhado Efetivo</th><th>Pago RP</th><th>Valor Pago</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-execucao"></tbody>
-                </table>
+            <div class="tab-pane fade" id="tab-downloads" role="tabpanel">
+                <div id="downloads-content"></div>
             </div>
-            
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <h3>📊 Top 10 Credores por Valor Pago</h3>
-                    <canvas id="chart-credores"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3>🍩 Distribuição por Modalidade Licitatória</h3>
-                    <canvas id="chart-modalidades"></canvas>
-                </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DETALHES EMPENHO -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-creative">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="material-icons">receipt_long</i> Detalhes do Empenho
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalContent"></div>
+            <div class="modal-footer" style="gap:8px;">
+                <button class="btn-export" onclick="exportarModalPDF()"><i class="material-icons">print</i> PDF</button>
+                <button class="btn-export" onclick="exportarModalCSV()"><i class="material-icons">description</i> CSV</button>
+                <button class="btn-export" onclick="copiarLinkDireto()"><i class="material-icons">link</i> Copiar Link</button>
+                <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">
+                    <i class="material-icons">close</i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div id="toastSucesso" class="toast-sucesso">
+    <div class="toast-content">
+        <i class="material-icons" style="color:#28a745">check_circle</i>
+        <span>Link copiado para área de transferência!</span>
+    </div>
+    <span style="cursor:pointer;margin-left:10px;font-size:14px;" onclick="document.getElementById('toastSucesso').style.display='none'">✖</span>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner-border" role="status" style="color:#20445d;width:2.5rem;height:2.5rem;"></div>
+    <div class="loading-progress" id="loadingProgress">Carregando dados...</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ============================================================
+// 1. GLOBALS
+// ============================================================
+const GITHUB_BASE = 'https://raw.githubusercontent.com/transparencia-mg/portal_mariana/refs/heads/main/dataset/data/';
+const LICITACOES_BASE = 'https://raw.githubusercontent.com/transparencia-mg/portal_licitacoes_mg/refs/heads/main/dataset/data/';
+
+let dadosIniciativas = [];
+let dadosEmpenho = [];
+let dadosOrgao = {}; // mapa: contratoconvenio_entrada -> dados do órgão
+let dadosLicitacoes = {}; // mapa: numero_processo_formatado -> dados da licitação
+
+let empenhoFiltradoTabela = [];
+let iniciativasFiltradas  = [];
+
+let sortCfg = {
+    iniciativas: { col: 'codigo_iniciativa', dir: 'asc' },
+    execucao:    { col: 'data_registro_doc_empenho', dir: 'desc' }
+};
+let pag = {
+    iniciativas: { atual: 1, porPag: 50, total: 1 },
+    execucao:    { atual: 1, porPag: 50, total: 1 }
+};
+
+let chartCredores = null;
+let chartModalidades = null;
+const chartPalette = ['#1a3a5c','#2c5f8a','#3a7cb8','#5a9fd4','#7ab8e0','#9dd1ec','#d4a017','#c0392b','#27ae60','#8e44ad'];
+
+// ============================================================
+// 2. UTILITÁRIOS
+// ============================================================
+function mostrarLoading(show, msg) {
+    const el = document.getElementById('loadingOverlay');
+    if (show) el.classList.add('show'); else { el.classList.remove('show'); el.style.display='none'; }
+    if (msg) document.getElementById('loadingProgress').textContent = msg;
+}
+
+function formatarMoeda(v) {
+    if (v===undefined||v===null||v==='') return 'R$ 0,00';
+    const n = parseFloat(v.toString().replace(',','.'));
+    if (isNaN(n)) return 'R$ 0,00';
+    return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2});
+}
+
+function formatarData(d) {
+    if (!d||d===''||d==='0000-00-00') return '-';
+    if (d.includes('/')) return d;
+    const p = d.split(' ')[0].split('-');
+    if (p.length<3) return d;
+    return `${p[2]}/${p[1]}/${p[0]}`;
+}
+
+function parseNum(v) {
+    if (!v||v==='') return 0;
+    return parseFloat(v.toString().replace(',','.')) || 0;
+}
+
+function ordenar(arr, col, dir) {
+    return [...arr].sort((a,b)=>{
+        let va = a[col]!==undefined&&a[col]!==null ? a[col] : '';
+        let vb = b[col]!==undefined&&b[col]!==null ? b[col] : '';
+        const isNum = col.includes('valor')||col.includes('Valor');
+        if (isNum) { va=parseNum(va); vb=parseNum(vb); }
+        else { va=va.toString().toLowerCase(); vb=vb.toString().toLowerCase(); }
+        return dir==='asc'?(va<vb?-1:va>vb?1:0):(va>vb?-1:va<vb?1:0);
+    });
+}
+
+function mostrarToast(msg, tipo) {
+    document.querySelectorAll('.toast-notification').forEach(t=>t.remove());
+    const t = document.createElement('div');
+    t.className = `toast-notification ${tipo}`;
+    t.innerHTML = `<div class="toast-content"><i class="material-icons me-1">${tipo==='success'?'check_circle':'error'}</i><span>${msg}</span></div>`;
+    document.body.appendChild(t);
+    setTimeout(()=>t.classList.add('show'),100);
+    setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},3000);
+}
+
+function iframeH() {
+    const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)+10;
+    try { if(window.parent&&window.parent!==window) window.parent.postMessage({iframeHeight:h,type:'resize'},'*'); } catch(e){}
+}
+
+function voltarAoTopo() {
+    if(window.parent&&window.parent!==window) window.parent.scrollTo({top:0,behavior:'smooth'});
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ============================================================
+// 3. CARREGAMENTO DE DADOS
+// ============================================================
+async function carregarDados() {
+    mostrarLoading(true,'Carregando iniciativas...');
+    try {
+        // Iniciativas
+        const r1 = await fetch(GITHUB_BASE+'iniciativa.csv');
+        const t1 = await r1.text();
+        const p1 = Papa.parse(t1,{header:true,delimiter:';'});
+        dadosIniciativas = p1.data.filter(r=>r.codigo_iniciativa&&r.codigo_iniciativa!=='Total Geral'&&r.codigo_iniciativa.trim()!=='');
+
+        // Órgão (referência: contratoconvenio_entrada)
+        mostrarLoading(true,'Carregando órgãos...');
+        const r0 = await fetch(GITHUB_BASE+'orgao.csv');
+        const t0 = await r0.text();
+        const p0 = Papa.parse(t0,{header:true,delimiter:';'});
+        dadosOrgao = {};
+        p0.data.forEach(r=>{
+            const chave = (r.contratoconvenio_entrada||'').trim();
+            if (chave) dadosOrgao[chave] = r;
+        });
+
+        mostrarLoading(true,'Carregando empenhos...');
+        // Empenho
+        const r2 = await fetch(GITHUB_BASE+'empenho.csv');
+        const t2 = await r2.text();
+        const p2 = Papa.parse(t2,{header:true,delimiter:';'});
+        dadosEmpenho = p2.data.filter(r=>r.numero_empenho&&r.numero_empenho.trim()!=='');
+
+        // Tentar carregar licitações dos anos disponíveis para cruzamento de processo de compra
+        mostrarLoading(true,'Carregando dados de compras (edital/contrato)...');
+        const anos = [2026,2025,2024,2023,2022];
+        for (const ano of anos) {
+            try {
+                const rl = await fetch(LICITACOES_BASE+`licitacoes${ano}.csv`);
+                if (rl.ok) {
+                    const tl = await rl.text();
+                    const linhas = tl.trim().split('\n');
+                    if (linhas.length>1) {
+                        const cabs = linhas[0].split(';').map(h=>h.trim().replace(/^\uFEFF/,'').replace(/"/g,''));
+                        for (let i=1;i<linhas.length;i++) {
+                            if (!linhas[i].trim()) continue;
+                            const vals=[]; let cur='', inQ=false;
+                            for (const c of linhas[i]) {
+                                if (c==='"') inQ=!inQ;
+                                else if (c===';'&&!inQ){vals.push(cur);cur='';}
+                                else cur+=c;
+                            }
+                            vals.push(cur);
+                            const obj={};
+                            cabs.forEach((cb,idx)=>{obj[cb]=vals[idx]!==undefined?vals[idx].replace(/"/g,''):null;});
+                            if (obj['numero_processo_formatado']) {
+                                dadosLicitacoes[obj['numero_processo_formatado'].trim()] = obj;
+                            }
+                        }
+                    }
+                }
+            } catch(e) { /* silencioso */ }
+        }
+
+        empenhoFiltradoTabela = [...dadosEmpenho];
+        iniciativasFiltradas  = [...dadosIniciativas];
+
+        renderizarIniciativas();
+        renderizarExecucao();
+        renderizarDownloads();
+        setupDataAtualizacao();
+        setTimeout(carregarFiltrosDaURL, 400);
+        setTimeout(iframeH, 500);
+    } catch(e) {
+        console.error(e);
+        mostrarToast('Erro ao carregar dados.','error');
+    } finally {
+        mostrarLoading(false);
+    }
+}
+
+async function setupDataAtualizacao() {
+    const el = document.getElementById('data-atualizacao-header');
+    try {
+        const r = await fetch('https://api.github.com/repos/transparencia-mg/portal_mariana/commits?path=dataset/data/empenho.csv&per_page=1');
+        if (r.ok) {
+            const cs = await r.json();
+            if (cs&&cs.length>0) { el.textContent = new Date(cs[0].commit.committer.date).toLocaleDateString('pt-BR'); return; }
+        }
+    } catch(e) {}
+    el.textContent = 'Não disponível';
+}
+
+// ============================================================
+// 4. INICIATIVAS
+// ============================================================
+function renderizarIniciativas() {
+    const c = document.getElementById('iniciativas-content');
+    if (!c) return;
+
+    const totalValor = dadosIniciativas.reduce((s,i)=>s+parseNum(i.valor_da_iniciativa),0);
+    const totalInic  = dadosIniciativas.length;
+
+    c.innerHTML = `
+    <div class="filter-container">
+        <div class="filters-row">
+            <div class="filter-group">
+                <label class="filter-label">Código da Iniciativa</label>
+                <input type="text" class="form-control" id="filtroCodigoINIC" placeholder="Digite o código...">
+            </div>
+            <div class="filter-group" style="flex:3;min-width:250px;">
+                <label class="filter-label">Nome da Iniciativa</label>
+                <input type="text" class="form-control" id="filtroNomeINIC" placeholder="Palavra-chave...">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Anexo</label>
+                <select class="form-select modern-select" id="filtroAnexoINIC">
+                    <option value="">Todos</option>
+                    ${[...new Set(dadosIniciativas.map(i=>i.anexo).filter(Boolean))].sort().map(a=>`<option value="${a}">${a}</option>`).join('')}
+                </select>
+            </div>
+        </div>
+        <div class="botoes-abaixo">
+            <button class="btn-pesquisa" onclick="aplicarFiltrosINIC()"><i class="material-icons">search</i> Pesquisar</button>
+            <button class="btn-secondary-custom" onclick="limparFiltrosINIC()"><i class="material-icons">clear</i> Limpar Filtros</button>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <button class="btn-export" onclick="exportarIniciativasCSV()"><i class="material-icons">description</i> CSV</button>
+            <button class="btn-export" onclick="exportarIniciativasPDF()"><i class="material-icons">print</i> PDF</button>
+            <button class="btn-export" onclick="copiarLinkDireto()"><i class="material-icons">link</i> Copiar Link</button>
+        </div>
+        <div class="toolbar-right" style="display:flex;align-items:center;gap:8px;">
+            <input type="text" id="buscaINIC" maxlength="30" placeholder="Buscar registros..." class="form-control" style="height:32px;font-size:12px;width:220px;padding:4px 10px;" oninput="buscarINIC(this.value)">
+            <span class="table-badge" id="badgeINIC">${totalInic} iniciativas</span>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-fixed-header-container">
+            <table class="table" id="tabelaIniciativas">
+                <thead><tr>
+                    <th class="sortable-header" onclick="sortINIC('codigo_iniciativa')">Código <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortINIC('iniciativa')">Iniciativa <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortINIC('anexo')">Anexo <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortINIC('valor_da_iniciativa')">Valor da Iniciativa <i class="material-icons">unfold_more</i></th>
+                    <th class="text-center">Ações</th>
+                </tr></thead>
+                <tbody id="tbodyIniciativas"></tbody>
+            </table>
+        </div>
+        <div class="pagination-container" id="pagContainerINIC"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="btn-topo" onclick="voltarAoTopo()"><i class="material-icons">arrow_upward</i> Voltar ao topo</button>
+    </div>`;
+
+    window.inicFiltradas = ordenar(iniciativasFiltradas, sortCfg.iniciativas.col, sortCfg.iniciativas.dir);
+    pag.iniciativas.atual = 1;
+    pag.iniciativas.total = Math.ceil(window.inicFiltradas.length / pag.iniciativas.porPag);
+    atualizarTabelaINIC();
+}
+
+function atualizarTabelaINIC() {
+    const ini = (pag.iniciativas.atual-1)*pag.iniciativas.porPag;
+    const fim = Math.min(ini+pag.iniciativas.porPag, window.inicFiltradas.length);
+    const rows = window.inicFiltradas.slice(ini,fim);
+    document.getElementById('tbodyIniciativas').innerHTML = rows.length===0
+        ? '<tr><td colspan="5" class="text-center py-4">Nenhuma iniciativa encontrada</td></tr>'
+        : rows.map(i=>`<tr class="iniciativa-row">
+            <td><a href="#" class="iniciativa-codigo" onclick="irParaExecucao('${esc(i.codigo_iniciativa)}','${esc(i.iniciativa)}');return false;">${i.codigo_iniciativa||'-'}</a></td>
+            <td>${i.iniciativa||'-'}</td>
+            <td>${i.anexo||'-'}</td>
+            <td class="text-right">${formatarMoeda(i.valor_da_iniciativa)}</td>
+            <td class="text-center">
+                <button class="btn-action" title="Ver execução" onclick="irParaExecucao('${esc(i.codigo_iniciativa)}','${esc(i.iniciativa)}')">
+                    <i class="material-icons" style="font-size:15px">open_in_new</i>
+                </button>
+            </td>
+        </tr>`).join('');
+    document.getElementById('badgeINIC').textContent = window.inicFiltradas.length+' iniciativas';
+    renderizarPag('iniciativas');
+}
+
+function esc(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+
+function sortINIC(col) {
+    if (sortCfg.iniciativas.col===col) sortCfg.iniciativas.dir = sortCfg.iniciativas.dir==='asc'?'desc':'asc';
+    else { sortCfg.iniciativas.col=col; sortCfg.iniciativas.dir='asc'; }
+    window.inicFiltradas = ordenar(window.inicFiltradas, sortCfg.iniciativas.col, sortCfg.iniciativas.dir);
+    pag.iniciativas.atual=1;
+    atualizarTabelaINIC();
+}
+
+window.aplicarFiltrosINIC = function() {
+    const cod  = (document.getElementById('filtroCodigoINIC')?.value||'').toLowerCase().trim();
+    const nome = (document.getElementById('filtroNomeINIC')?.value||'').toLowerCase().trim();
+    const anx  = document.getElementById('filtroAnexoINIC')?.value||'';
+    window.inicFiltradas = ordenar(dadosIniciativas.filter(i=>{
+        if (cod&&!String(i.codigo_iniciativa||'').toLowerCase().includes(cod)) return false;
+        if (nome&&!String(i.iniciativa||'').toLowerCase().includes(nome)) return false;
+        if (anx&&i.anexo!==anx) return false;
+        return true;
+    }), sortCfg.iniciativas.col, sortCfg.iniciativas.dir);
+    pag.iniciativas.atual=1;
+    pag.iniciativas.total=Math.ceil(window.inicFiltradas.length/pag.iniciativas.porPag);
+    atualizarTabelaINIC();
+};
+
+window.limparFiltrosINIC = function() {
+    ['filtroCodigoINIC','filtroNomeINIC','filtroAnexoINIC'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    window.inicFiltradas = ordenar(dadosIniciativas, sortCfg.iniciativas.col, sortCfg.iniciativas.dir);
+    pag.iniciativas.atual=1;
+    pag.iniciativas.total=Math.ceil(window.inicFiltradas.length/pag.iniciativas.porPag);
+    atualizarTabelaINIC();
+};
+
+window.buscarINIC = function(termo) {
+    const t = (termo||'').toLowerCase().trim();
+    const base = window.inicFiltradas || [];
+    if (!t) { atualizarTabelaINIC(); return; }
+    const f = base.filter(i=>
+        String(i.codigo_iniciativa||'').toLowerCase().includes(t)||
+        String(i.iniciativa||'').toLowerCase().includes(t)||
+        String(i.anexo||'').toLowerCase().includes(t)
+    );
+    document.getElementById('tbodyIniciativas').innerHTML = f.slice(0,pag.iniciativas.porPag).map(i=>`<tr class="iniciativa-row">
+        <td><a href="#" class="iniciativa-codigo" onclick="irParaExecucao('${esc(i.codigo_iniciativa)}','${esc(i.iniciativa)}');return false;">${i.codigo_iniciativa||'-'}</a></td>
+        <td>${i.iniciativa||'-'}</td><td>${i.anexo||'-'}</td>
+        <td class="text-right">${formatarMoeda(i.valor_da_iniciativa)}</td>
+        <td class="text-center"><button class="btn-action" onclick="irParaExecucao('${esc(i.codigo_iniciativa)}','${esc(i.iniciativa)}')"><i class="material-icons" style="font-size:15px">open_in_new</i></button></td>
+    </tr>`).join('');
+    document.getElementById('badgeINIC').textContent = f.length+' iniciativas';
+};
+
+// ============================================================
+// 5. IR PARA EXECUÇÃO
+// ============================================================
+window.irParaExecucao = function(codigoIniciativa, nome) {
+    document.getElementById('execucao-tab').click();
+    setTimeout(()=>{
+        const sel = document.getElementById('filtroInicExec');
+        if (sel) {
+            // Busca contratoconvenio_entrada da iniciativa para usar como chave no filtro
+            const iObj = dadosIniciativas.find(i=>i.codigo_iniciativa===codigoIniciativa);
+            const chave = iObj ? (iObj.contratoconvenio_entrada||'').trim() : '';
+            if (chave) sel.value = chave;
+        }
+        aplicarFiltrosEXEC();
+    }, 300);
+};
+
+// ============================================================
+// 6. EXECUÇÃO (EMPENHOS)
+// ============================================================
+function renderizarExecucao() {
+    const c = document.getElementById('execucao-content');
+    if (!c) return;
+
+    const anos       = [...new Set(dadosEmpenho.map(e=>e.ano_de_exercicio).filter(Boolean))].sort((a,b)=>b-a);
+    // Iniciativas presentes nos empenhos via contratoconvenio_entrada → iniciativa.csv
+    const chavesNoEmpenho = [...new Set(dadosEmpenho.map(e=>(e.contratoconvenio_entrada||'').trim()).filter(Boolean))].sort();
+    const modalidades= [...new Set(dadosEmpenho.map(e=>e.licitacao_descricao_da_modalidade).filter(Boolean))].sort();
+    const orgaos     = [...new Set(dadosEmpenho.map(e=>(e.unidade_orcamentaria_nome||'').trim()).filter(Boolean))].sort();
+
+    // Métricas iniciais
+    const metInicial = calcMetricas(empenhoFiltradoTabela);
+
+    c.innerHTML = `
+    <!-- FILTROS -->
+    <div class="filter-container">
+        <div class="filters-row">
+            <div class="filter-group">
+                <label class="filter-label">Ano</label>
+                <select class="form-select modern-select" id="filtroAnoExec">
+                    <option value="">Todos</option>
+                    ${anos.map(a=>`<option value="${a}">${a}</option>`).join('')}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Iniciativa</label>
+                <select class="form-select modern-select" id="filtroInicExec">
+                    <option value="">Todas</option>
+                    ${chavesNoEmpenho.map(chave=>{
+                        const iObj=dadosIniciativas.find(i=>(i.contratoconvenio_entrada||'').trim()===chave);
+                        const label=iObj?`${iObj.codigo_iniciativa||chave} - ${(iObj.iniciativa||'').substring(0,50)}`:chave;
+                        return `<option value="${chave}">${label}</option>`;
+                    }).join('')}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Modalidade</label>
+                <select class="form-select modern-select" id="filtroModalExec">
+                    <option value="">Todas</option>
+                    ${modalidades.map(m=>`<option value="${m}">${m}</option>`).join('')}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Órgão</label>
+                <select class="form-select modern-select" id="filtroOrgaoExec">
+                    <option value="">Todos</option>
+                    ${orgaos.map(o=>`<option value="${o}">${o}</option>`).join('')}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Credor</label>
+                <input type="text" class="form-control" id="filtroCredorExec" placeholder="Digite...">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">CNPJ/CPF</label>
+                <input type="text" class="form-control" id="filtroCnpjExec" placeholder="Digite...">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Proc. Compra</label>
+                <input type="text" class="form-control" id="filtroProcessoExec" placeholder="Digite...">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Nº Empenho</label>
+                <input type="text" class="form-control" id="filtroEmpenhoExec" placeholder="Digite...">
+            </div>
+        </div>
+        <div class="botoes-abaixo">
+            <button class="btn-pesquisa" onclick="aplicarFiltrosEXEC()"><i class="material-icons">search</i> Pesquisar</button>
+            <button class="btn-secondary-custom" onclick="limparFiltrosEXEC()"><i class="material-icons">clear</i> Limpar Filtros</button>
+        </div>
+    </div>
+
+    <!-- MÉTRICAS -->
+    <div class="row g-3 mb-4" id="metricasExec">
+        <div class="col-6 col-md-3">
+            <div class="metric-card"><div class="metric-header">Empenhos</div>
+            <div class="metric-body"><div class="metric-value" id="mEmpenhos">${metInicial.qtdEmpenhos.toLocaleString('pt-BR')}</div><div class="metric-sublabel">registros</div></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="metric-card"><div class="metric-header">Total Empenhado</div>
+            <div class="metric-body"><div class="metric-value" id="mEmpenhado" style="font-size:14px">${formatarMoeda(metInicial.empenhado)}</div><div class="metric-sublabel">valor empenhado</div></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="metric-card"><div class="metric-header">Total Liquidado</div>
+            <div class="metric-body"><div class="metric-value" id="mLiquidado" style="font-size:14px">${formatarMoeda(metInicial.liquidado)}</div><div class="metric-sublabel">valor liquidado</div></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="metric-card"><div class="metric-header">Total Pago</div>
+            <div class="metric-body"><div class="metric-value" id="mPago" style="font-size:14px">${formatarMoeda(metInicial.pago)}</div><div class="metric-sublabel">valor total pago</div></div></div>
+        </div>
+    </div>
+
+    <!-- GRÁFICOS -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div class="chart-header"><h4 class="chart-title">Top 10 Credores por Valor Pago</h4></div>
+                <div class="chart-wrapper"><canvas id="chartCredores"></canvas></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div class="chart-header"><h4 class="chart-title">Distribuição por Modalidade</h4></div>
+                <div class="chart-wrapper"><canvas id="chartModalidades"></canvas></div>
             </div>
         </div>
     </div>
 
-    <script>
-        let dadosIniciativas = [];
-        let dadosEmpenho = [];
-        let dadosExecucaoFiltrados = [];
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <button class="btn-export" onclick="exportarExecucaoCSV()"><i class="material-icons">description</i> CSV</button>
+            <button class="btn-export" onclick="exportarExecucaoPDF()"><i class="material-icons">print</i> PDF</button>
+            <button class="btn-export" onclick="copiarLinkDireto()"><i class="material-icons">link</i> Copiar Link</button>
+        </div>
+        <div class="toolbar-right" style="display:flex;align-items:center;gap:8px;">
+            <input type="text" id="buscaEXEC" maxlength="30" placeholder="Buscar registros..." class="form-control" style="height:32px;font-size:12px;width:220px;padding:4px 10px;" oninput="buscarEXEC(this.value)">
+            <span class="table-badge" id="badgeExec">${empenhoFiltradoTabela.length} registros</span>
+        </div>
+    </div>
 
-        // Carregar dados
-        async function carregarDados() {
-            showLoading();
-            try {
-                // Carregar iniciativa.csv
-                const iniciativaResponse = await fetch('https://raw.githubusercontent.com/transparencia-mg/portal_mariana/refs/heads/main/dataset/data/iniciativa.csv');
-                const iniciativaText = await iniciativaResponse.text();
-                const iniciativaParsed = Papa.parse(iniciativaText, { header: true, delimiter: ';' });
-                dadosIniciativas = iniciativaParsed.data.filter(row => row.codigo_iniciativa && row.codigo_iniciativa !== 'Total Geral');
-                
-                // Carregar empenho.csv
-                const empenhoResponse = await fetch('https://raw.githubusercontent.com/transparencia-mg/portal_mariana/refs/heads/main/dataset/data/empenho.csv');
-                const empenhoText = await empenhoResponse.text();
-                const empenhoParsed = Papa.parse(empenhoText, { header: true, delimiter: ';' });
-                dadosEmpenho = empenhoParsed.data;
-                
-                renderizarIniciativas();
-                initFilters();
-                hideLoading();
-            } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                alert('Erro ao carregar dados. Verifique se os arquivos estão acessíveis.');
-                hideLoading();
+    <!-- TABELA -->
+    <div class="table-container">
+        <div class="table-fixed-header-container">
+            <table class="table" id="tabelaExecucao">
+                <thead><tr>
+                    <th class="sortable-header" onclick="sortEXEC('ano_de_exercicio')">Ano <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortEXEC('contratoconvenio_entrada')">Iniciativa <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortEXEC('numero_empenho')">Empenho <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortEXEC('data_registro_doc_empenho')">Data <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortEXEC('unidade_orcamentaria_nome')">Órgão <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortEXEC('razao_social_credor')">Credor <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortEXEC('cnpj_cpf_credor_formatado')">CNPJ/CPF <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortEXEC('numero_processo_compra_siad')">Proc. Compra <i class="material-icons">unfold_more</i></th>
+                    <th>Contrato</th>
+                    <th class="sortable-header" onclick="sortEXEC('licitacao_descricao_da_modalidade')">Modalidade <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortEXEC('valor_despesa_empenhada')">Empenhado <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortEXEC('valor_despesa_liquidada')">Liquidado <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortEXEC('valor_pago_total_6_16')">Pago <i class="material-icons">unfold_more</i></th>
+                    <th class="text-center">Ações</th>
+                </tr></thead>
+                <tbody id="tbodyExecucao"></tbody>
+            </table>
+        </div>
+        <div class="pagination-container" id="pagContainerEXEC"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="btn-topo" onclick="voltarAoTopo()"><i class="material-icons">arrow_upward</i> Voltar ao topo</button>
+    </div>`;
+
+    window.execFiltrada = ordenar(empenhoFiltradoTabela, sortCfg.execucao.col, sortCfg.execucao.dir);
+    pag.execucao.atual=1;
+    pag.execucao.total=Math.ceil(window.execFiltrada.length/pag.execucao.porPag);
+    atualizarTabelaEXEC();
+    setTimeout(()=>{ atualizarGraficos(window.execFiltrada); },200);
+}
+
+function calcMetricas(dados) {
+    return {
+        qtdEmpenhos: dados.length,
+        empenhado: dados.reduce((s,e)=>s+parseNum(e.valor_despesa_empenhada),0),
+        liquidado: dados.reduce((s,e)=>s+parseNum(e.valor_despesa_liquidada),0),
+        pago: dados.reduce((s,e)=>s+parseNum(e.valor_pago_total_6_16||e.valor_pago_financeiro),0)
+    };
+}
+
+function atualizarMetricasEXEC(dados) {
+    const m = calcMetricas(dados);
+    const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+    set('mEmpenhos', m.qtdEmpenhos.toLocaleString('pt-BR'));
+    set('mEmpenhado', formatarMoeda(m.empenhado));
+    set('mLiquidado', formatarMoeda(m.liquidado));
+    set('mPago', formatarMoeda(m.pago));
+}
+
+function getLicitacaoParaProcesso(numProcesso) {
+    if (!numProcesso||!numProcesso.trim()) return null;
+    return dadosLicitacoes[numProcesso.trim()] || null;
+}
+
+function atualizarTabelaEXEC() {
+    const ini=(pag.execucao.atual-1)*pag.execucao.porPag;
+    const fim=Math.min(ini+pag.execucao.porPag, window.execFiltrada.length);
+    const rows = window.execFiltrada.slice(ini,fim);
+    document.getElementById('tbodyExecucao').innerHTML = rows.length===0
+        ? '<tr><td colspan="14" class="text-center py-4">Nenhum registro encontrado</td></tr>'
+        : rows.map(e=>{
+            const proc = e.numero_processo_compra_siad||'';
+            const lic  = getLicitacaoParaProcesso(proc);
+            // Contrato
+            let contratoDisplay = '<span class="nao-aplica">-</span>';
+            if (lic && lic['numero_contrato'] && lic['numero_contrato'].trim()&&lic['numero_contrato'].trim()!=='0') {
+                if (lic['contrato_termoaditivo_arquivos']&&lic['contrato_termoaditivo_arquivos'].trim()) {
+                    contratoDisplay = `<a href="${lic['contrato_termoaditivo_arquivos'].trim()}" target="_blank" class="contrato-link">${lic['numero_contrato'].trim()}</a>`;
+                } else {
+                    contratoDisplay = `<span class="contrato-link" style="cursor:default">${lic['numero_contrato'].trim()}</span>`;
+                }
+            }
+            // Proc. Compra com link do edital embutido
+            let procDisplay = '-';
+            if (proc) {
+                const editalUrl = (lic&&lic['edital_retificacao_arquivos']&&lic['edital_retificacao_arquivos'].trim()) ? lic['edital_retificacao_arquivos'].trim() : '';
+                const procTxt = proc.substring(0,25)+(proc.length>25?'...':'');
+                if (editalUrl) {
+                    procDisplay = `<span style="display:flex;align-items:center;gap:4px;">
+                        <a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${procTxt}</a>
+                        <a href="${editalUrl}" target="_blank" class="contrato-link" title="Ver Edital" style="font-size:11px;">📄</a>
+                    </span>`;
+                } else {
+                    procDisplay = `<a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${procTxt}</a>`;
+                }
+            }
+            // Iniciativa via contratoconvenio_entrada
+            const chaveInc = (e.contratoconvenio_entrada||'').trim();
+            const inicObj = dadosIniciativas.find(i=>(i.contratoconvenio_entrada||'').trim()===chaveInc);
+            const inicCod = inicObj ? (inicObj.codigo_iniciativa||chaveInc) : (chaveInc||'-');
+            const inicNome = inicObj ? (inicObj.iniciativa||'') : '';
+            const inicTitle = inicNome ? `${inicCod} - ${inicNome}` : inicCod;
+            const inicDisplay = `<span title="${inicTitle}" style="cursor:default;white-space:nowrap;">${inicCod}</span>`;
+            // Órgão
+            const orgaoTxt = e.unidade_orcamentaria_nome||'-';
+            return `<tr>
+                <td>${e.ano_de_exercicio||'-'}</td>
+                <td>${inicDisplay}</td>
+                <td><a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${e.numero_empenho||'-'}</a></td>
+                <td>${formatarData(e.data_registro_doc_empenho)}</td>
+                <td title="${orgaoTxt}">${orgaoTxt.substring(0,30)}${orgaoTxt.length>30?'...':''}</td>
+                <td title="${e.razao_social_credor||''}">${(e.razao_social_credor||'-').substring(0,30)}${(e.razao_social_credor||'').length>30?'...':''}</td>
+                <td>${e.cnpj_cpf_credor_formatado||'-'}</td>
+                <td>${procDisplay}</td>
+                <td>${contratoDisplay}</td>
+                <td>${(e.licitacao_descricao_da_modalidade||'-').substring(0,25)}${(e.licitacao_descricao_da_modalidade||'').length>25?'...':''}</td>
+                <td class="text-right">${formatarMoeda(e.valor_despesa_empenhada)}</td>
+                <td class="text-right">${formatarMoeda(e.valor_despesa_liquidada)}</td>
+                <td class="text-right">${formatarMoeda(e.valor_pago_total_6_16||e.valor_pago_financeiro)}</td>
+                <td class="text-center">
+                    <button class="btn-action" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}')">
+                        <i class="material-icons" style="font-size:15px">visibility</i>
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+    document.getElementById('badgeExec').textContent = window.execFiltrada.length+' registros';
+    renderizarPag('execucao');
+}
+
+function sortEXEC(col) {
+    if (sortCfg.execucao.col===col) sortCfg.execucao.dir=sortCfg.execucao.dir==='asc'?'desc':'asc';
+    else { sortCfg.execucao.col=col; sortCfg.execucao.dir='asc'; }
+    window.execFiltrada = ordenar(window.execFiltrada, sortCfg.execucao.col, sortCfg.execucao.dir);
+    pag.execucao.atual=1;
+    atualizarTabelaEXEC();
+}
+
+window.aplicarFiltrosEXEC = function() {
+    const ano  = document.getElementById('filtroAnoExec')?.value||'';
+    const inic = document.getElementById('filtroInicExec')?.value||'';
+    const mod  = document.getElementById('filtroModalExec')?.value||'';
+    const org  = document.getElementById('filtroOrgaoExec')?.value||'';
+    const cred = (document.getElementById('filtroCredorExec')?.value||'').toLowerCase().trim();
+    const cnpj = (document.getElementById('filtroCnpjExec')?.value||'').toLowerCase().trim();
+    const proc = (document.getElementById('filtroProcessoExec')?.value||'').toLowerCase().trim();
+    const emp  = (document.getElementById('filtroEmpenhoExec')?.value||'').toLowerCase().trim();
+    window.execFiltrada = ordenar(dadosEmpenho.filter(e=>{
+        if (ano&&e.ano_de_exercicio!==ano) return false;
+        if (inic&&(e.contratoconvenio_entrada||'').trim()!==inic) return false;
+        if (mod&&e.licitacao_descricao_da_modalidade!==mod) return false;
+        if (org&&(e.unidade_orcamentaria_nome||'').trim()!==org) return false;
+        if (cred&&!String(e.razao_social_credor||'').toLowerCase().includes(cred)) return false;
+        if (cnpj&&!String(e.cnpj_cpf_credor_formatado||'').toLowerCase().includes(cnpj)) return false;
+        if (proc&&!String(e.numero_processo_compra_siad||'').toLowerCase().includes(proc)) return false;
+        if (emp&&!String(e.numero_empenho||'').toLowerCase().includes(emp)) return false;
+        return true;
+    }), sortCfg.execucao.col, sortCfg.execucao.dir);
+    pag.execucao.atual=1;
+    pag.execucao.total=Math.ceil(window.execFiltrada.length/pag.execucao.porPag);
+    atualizarTabelaEXEC();
+    atualizarMetricasEXEC(window.execFiltrada);
+    atualizarGraficos(window.execFiltrada);
+};
+
+window.limparFiltrosEXEC = function() {
+    ['filtroAnoExec','filtroInicExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec']
+        .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    window.execFiltrada = ordenar(dadosEmpenho, sortCfg.execucao.col, sortCfg.execucao.dir);
+    pag.execucao.atual=1;
+    pag.execucao.total=Math.ceil(window.execFiltrada.length/pag.execucao.porPag);
+    atualizarTabelaEXEC();
+    atualizarMetricasEXEC(window.execFiltrada);
+    atualizarGraficos(window.execFiltrada);
+};
+
+window.buscarEXEC = function(termo) {
+    const t = (termo||'').toLowerCase().trim();
+    const base = window.execFiltrada||[];
+    if (!t) { atualizarTabelaEXEC(); return; }
+    const f = base.filter(e=>
+        String(e.numero_empenho||'').toLowerCase().includes(t)||
+        String(e.razao_social_credor||'').toLowerCase().includes(t)||
+        String(e.cnpj_cpf_credor_formatado||'').toLowerCase().includes(t)||
+        String(e.numero_processo_compra_siad||'').toLowerCase().includes(t)||
+        String(e.licitacao_descricao_da_modalidade||'').toLowerCase().includes(t)||
+        String(e.contratoconvenio_entrada||'').toLowerCase().includes(t)||
+        String(e.unidade_orcamentaria_nome||'').toLowerCase().includes(t)
+    );
+    document.getElementById('tbodyExecucao').innerHTML = f.slice(0,pag.execucao.porPag).map(e=>{
+        const proc=e.numero_processo_compra_siad||'';
+        const lic=getLicitacaoParaProcesso(proc);
+        let contratoDisplay='<span class="nao-aplica">-</span>';
+        if (lic&&lic['numero_contrato']&&lic['numero_contrato'].trim()&&lic['numero_contrato'].trim()!=='0') {
+            if (lic['contrato_termoaditivo_arquivos']&&lic['contrato_termoaditivo_arquivos'].trim()) contratoDisplay=`<a href="${lic['contrato_termoaditivo_arquivos'].trim()}" target="_blank" class="contrato-link">${lic['numero_contrato'].trim()}</a>`;
+            else contratoDisplay=`<span>${lic['numero_contrato'].trim()}</span>`;
+        }
+        let procDisplay = '-';
+        if (proc) {
+            const editalUrl=(lic&&lic['edital_retificacao_arquivos']&&lic['edital_retificacao_arquivos'].trim())?lic['edital_retificacao_arquivos'].trim():'';
+            const procTxt=proc.substring(0,25)+(proc.length>25?'...':'');
+            if (editalUrl) {
+                procDisplay=`<span style="display:flex;align-items:center;gap:4px;"><a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${procTxt}</a><a href="${editalUrl}" target="_blank" class="contrato-link" title="Ver Edital" style="font-size:11px;">📄</a></span>`;
+            } else {
+                procDisplay=`<a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${procTxt}</a>`;
             }
         }
+        const chaveIncB=(e.contratoconvenio_entrada||'').trim();
+        const inicObjB=dadosIniciativas.find(i=>(i.contratoconvenio_entrada||'').trim()===chaveIncB);
+        const inicCodB=inicObjB?(inicObjB.codigo_iniciativa||chaveIncB):(chaveIncB||'-');
+        const inicNomeB=inicObjB?(inicObjB.iniciativa||''):'';
+        const inicTitleB=inicNomeB?`${inicCodB} - ${inicNomeB}`:inicCodB;
+        const orgaoTxt=e.unidade_orcamentaria_nome||'-';
+        return `<tr>
+            <td>${e.ano_de_exercicio||'-'}</td>
+            <td><span title="${inicTitleB}" style="cursor:default;white-space:nowrap;">${inicCodB}</span></td>
+            <td><a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${e.numero_empenho||'-'}</a></td>
+            <td>${formatarData(e.data_registro_doc_empenho)}</td>
+            <td title="${orgaoTxt}">${orgaoTxt.substring(0,30)}${orgaoTxt.length>30?'...':''}</td>
+            <td title="${e.razao_social_credor||''}">${(e.razao_social_credor||'-').substring(0,30)}${(e.razao_social_credor||'').length>30?'...':''}</td>
+            <td>${e.cnpj_cpf_credor_formatado||'-'}</td>
+            <td>${procDisplay}</td>
+            <td>${contratoDisplay}</td>
+            <td>${(e.licitacao_descricao_da_modalidade||'-').substring(0,25)}${(e.licitacao_descricao_da_modalidade||'').length>25?'...':''}</td>
+            <td class="text-right">${formatarMoeda(e.valor_despesa_empenhada)}</td>
+            <td class="text-right">${formatarMoeda(e.valor_despesa_liquidada)}</td>
+            <td class="text-right">${formatarMoeda(e.valor_pago_total_6_16||e.valor_pago_financeiro)}</td>
+            <td class="text-center"><button class="btn-action" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}')"><i class="material-icons" style="font-size:15px">visibility</i></button></td>
+        </tr>`;
+    }).join('');
+    document.getElementById('badgeExec').textContent = f.length+' registros';
+};
 
-        function showLoading() {
-            document.querySelector('.container').style.opacity = '0.5';
-        }
+// ============================================================
+// 7. MODAL DETALHES EMPENHO
+// ============================================================
+window.verDetalhesEmpenho = function(numEmpenho) {
+    const e = dadosEmpenho.find(x=>x.numero_empenho===numEmpenho);
+    if (!e) return;
+    const proc = e.numero_processo_compra_siad||'';
+    const lic  = getLicitacaoParaProcesso(proc);
 
-        function hideLoading() {
-            document.querySelector('.container').style.opacity = '1';
-        }
+    // Busca iniciativa e órgão via contratoconvenio_entrada do empenho
+    const chaveContrato = (e.contratoconvenio_entrada||'').trim();
+    const inic = dadosIniciativas.find(i=>(i.contratoconvenio_entrada||'').trim()===chaveContrato);
+    const orgao = chaveContrato ? (dadosOrgao[chaveContrato]||null) : null;
+    const inicLabel = inic ? `${inic.codigo_iniciativa||chaveContrato} - ${inic.iniciativa||''}` : (chaveContrato||'-');
 
-        function renderizarIniciativas() {
-            const tbody = document.getElementById('tbody-iniciativas');
-            tbody.innerHTML = '';
-            
-            dadosIniciativas.forEach(iniciativa => {
-                const row = tbody.insertRow();
-                const valor = parseFloat(iniciativa.valor_da_iniciativa || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                row.innerHTML = `
-                    <td style="cursor:pointer; color:#667eea; font-weight:bold;">${iniciativa.codigo_iniciativa || '-'}</td>
-                    <td>${iniciativa.iniciativa || '-'}</td>
-                    <td>${iniciativa.anexo || '-'}</td>
-                    <td>${valor}</td>
-                `;
-                row.onclick = () => abrirExecucao(iniciativa.codigo_iniciativa, iniciativa.iniciativa);
-            });
-        }
+    let contratoDisplay = '<span class="nao-aplica">Não se aplica</span>';
+    if (lic && lic['numero_contrato'] && lic['numero_contrato'].trim() && lic['numero_contrato'].trim()!=='0') {
+        if (lic['contrato_termoaditivo_arquivos']&&lic['contrato_termoaditivo_arquivos'].trim()) {
+            contratoDisplay = `<a href="${lic['contrato_termoaditivo_arquivos'].trim()}" target="_blank" class="contrato-link">${lic['numero_contrato'].trim()}</a>`;
+        } else { contratoDisplay = lic['numero_contrato'].trim(); }
+    }
+    let editalDisplay = '<span class="nao-aplica">Não se aplica</span>';
+    if (lic && lic['edital_retificacao_arquivos']&&lic['edital_retificacao_arquivos'].trim()) {
+        editalDisplay = `<a href="${lic['edital_retificacao_arquivos'].trim()}" target="_blank" class="contrato-link">📄 Ver Edital</a>`;
+    }
 
-        function aplicarFiltrosIniciativas() {
-            const codigoFilter = document.getElementById('filter-codigo').value.toLowerCase();
-            const nomeFilter = document.getElementById('filter-nome').value.toLowerCase();
-            
-            const filtered = dadosIniciativas.filter(init => {
-                const matchCodigo = !codigoFilter || (init.codigo_iniciativa || '').toLowerCase().includes(codigoFilter);
-                const matchNome = !nomeFilter || (init.iniciativa || '').toLowerCase().includes(nomeFilter);
-                return matchCodigo && matchNome;
-            });
-            
-            const tbody = document.getElementById('tbody-iniciativas');
-            tbody.innerHTML = '';
-            filtered.forEach(iniciativa => {
-                const row = tbody.insertRow();
-                const valor = parseFloat(iniciativa.valor_da_iniciativa || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                row.innerHTML = `
-                    <td style="cursor:pointer; color:#667eea; font-weight:bold;">${iniciativa.codigo_iniciativa || '-'}</td>
-                    <td>${iniciativa.iniciativa || '-'}</td>
-                    <td>${iniciativa.anexo || '-'}</td>
-                    <td>${valor}</td>
-                `;
-                row.onclick = () => abrirExecucao(iniciativa.codigo_iniciativa, iniciativa.iniciativa);
-            });
-        }
-
-        function limparFiltrosIniciativas() {
-            document.getElementById('filter-codigo').value = '';
-            document.getElementById('filter-nome').value = '';
-            renderizarIniciativas();
-        }
-
-        function abrirExecucao(codigoIniciativa, nomeIniciativa) {
-            // Filtrar empenhos pela iniciativa (como não temos relação direta, usamos um filtro básico)
-            dadosExecucaoFiltrados = dadosEmpenho.filter(emp => {
-                return emp.ano_de_exercicio && emp.ano_de_exercicio !== '';
-            });
-            
-            // Adicionar iniciativa aos dados para display
-            dadosExecucaoFiltrados = dadosExecucaoFiltrados.map(emp => ({
-                ...emp,
-                iniciativa_nome: nomeIniciativa || 'Iniciativa não mapeada',
-                anexo_iniciativa: 'XII'
-            }));
-            
-            // Inicializar filtros de execução
-            initFiltersExecucao();
-            
-            // Renderizar execução
-            renderizarExecucao();
-            atualizarMetricasExecucao();
-            atualizarGraficos();
-            
-            // Trocar view
-            document.getElementById('view-iniciativas').classList.remove('active');
-            document.getElementById('view-execucao').classList.add('active');
-        }
-
-        function initFilters() {
-            // Preencher selects com dados das iniciativas
-            const codigos = [...new Set(dadosIniciativas.map(i => i.codigo_iniciativa))];
-            const nomes = [...new Set(dadosIniciativas.map(i => i.iniciativa))];
-        }
-
-        function initFiltersExecucao() {
-            const anos = [...new Set(dadosEmpenho.filter(e => e.ano_de_exercicio).map(e => e.ano_de_exercicio))].sort();
-            const modalidades = [...new Set(dadosEmpenho.filter(e => e.licitacao_descricao_da_modalidade).map(e => e.licitacao_descricao_da_modalidade))];
-            const orgaos = ['Secretaria de Estado', 'Outros Órgãos']; // Não temos dado de órgão
-            
-            const selectAno = document.getElementById('filter-ano');
-            selectAno.innerHTML = '<option value="">Todos</option>';
-            anos.forEach(ano => selectAno.innerHTML += `<option value="${ano}">${ano}</option>`);
-            
-            const selectModalidade = document.getElementById('filter-modalidade');
-            selectModalidade.innerHTML = '<option value="">Todas</option>';
-            modalidades.forEach(mod => selectModalidade.innerHTML += `<option value="${mod}">${mod}</option>`);
-            
-            const selectIniciativa = document.getElementById('filter-iniciativa-exec');
-            selectIniciativa.innerHTML = '<option value="">Todas</option>';
-            selectIniciativa.innerHTML += `<option value="selected">Iniciativa selecionada</option>`;
-            
-            const selectOrgao = document.getElementById('filter-orgao');
-            selectOrgao.innerHTML = '<option value="">Todos</option><option value="Secretaria">Secretaria de Estado</option>';
-        }
-
-        function aplicarFiltrosExecucao() {
-            const ano = document.getElementById('filter-ano').value;
-            const modalidade = document.getElementById('filter-modalidade').value;
-            const credor = document.getElementById('filter-credor').value.toLowerCase();
-            const cnpj = document.getElementById('filter-cnpj').value.toLowerCase();
-            const processo = document.getElementById('filter-processo').value.toLowerCase();
-            
-            let filtered = [...dadosExecucaoFiltrados];
-            
-            if (ano) filtered = filtered.filter(e => e.ano_de_exercicio === ano);
-            if (modalidade) filtered = filtered.filter(e => e.licitacao_descricao_da_modalidade === modalidade);
-            if (credor) filtered = filtered.filter(e => (e.razao_social_credor || '').toLowerCase().includes(credor));
-            if (cnpj) filtered = filtered.filter(e => (e.cnpj_cpf_credor_formatado || '').toLowerCase().includes(cnpj));
-            if (processo) filtered = filtered.filter(e => (e.numero_processo_compra_siad || '').toLowerCase().includes(processo));
-            
-            dadosExecucaoFiltrados = filtered;
-            renderizarExecucao();
-            atualizarMetricasExecucao();
-            atualizarGraficos();
-        }
-
-        function limparFiltrosExecucao() {
-            document.getElementById('filter-ano').value = '';
-            document.getElementById('filter-modalidade').value = '';
-            document.getElementById('filter-credor').value = '';
-            document.getElementById('filter-cnpj').value = '';
-            document.getElementById('filter-processo').value = '';
-            dadosExecucaoFiltrados = dadosEmpenho.filter(e => e.ano_de_exercicio && e.ano_de_exercicio !== '');
-            renderizarExecucao();
-            atualizarMetricasExecucao();
-            atualizarGraficos();
-        }
-
-        function renderizarExecucao() {
-            const tbody = document.getElementById('tbody-execucao');
-            tbody.innerHTML = '';
-            
-            const dadosParaExibir = dadosExecucaoFiltrados.slice(0, 100);
-            
-            dadosParaExibir.forEach(emp => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${emp.iniciativa_nome || '-'}</td>
-                    <td>${emp.anexo_iniciativa || '-'}</td>
-                    <td>Secretaria de Estado</td>
-                    <td>${emp.numero_empenho || '-'}</td>
-                    <td>${emp.data_registro_doc_empenho || '-'}</td>
-                    <td>${emp.razao_social_credor || '-'}</td>
-                    <td>${emp.cnpj_cpf_credor_formatado || '-'}</td>
-                    <td>${emp.numero_processo_compra_siad || '-'}</td>
-                    <td>${emp.licitacao_descricao_da_modalidade || '-'}</td>
-                    <td>${formatMoney(emp.valor_despesa_empenhada)}</td>
-                    <td>${formatMoney(emp.valor_despesa_liquidada)}</td>
-                    <td>${formatMoney(emp.valor_pago_financeiro)}</td>
-                    <td>${formatMoney(emp.valor_despesa_liquidada_rp)}</td>
-                    <td>${formatMoney(emp.valor_cancelado_em_restoa_a_pagar_10_11_12_13)}</td>
-                    <td>${formatMoney(emp.valor_empenhado_efetivo_6_14)}</td>
-                    <td>${formatMoney(emp.valor_pago_em_restos_a_pagar_16_17)}</td>
-                    <td>${formatMoney(emp.valor_total_pago_8_18)}</td>
-                `;
-            });
-        }
-
-        function atualizarMetricasExecucao() {
-            let totalEmpenhado = 0, totalLiquidado = 0, totalPago = 0;
-            
-            dadosExecucaoFiltrados.forEach(emp => {
-                totalEmpenhado += parseFloat(emp.valor_despesa_empenhada || 0);
-                totalLiquidado += parseFloat(emp.valor_despesa_liquidada || 0);
-                totalPago += parseFloat(emp.valor_pago_financeiro || 0);
-            });
-            
-            const metricsHtml = `
-                <div class="metric-card">
-                    <h3>💰 Total Empenhado</h3>
-                    <div class="metric-value">${formatMoney(totalEmpenhado)}</div>
+    // Dados da licitação para o modal
+    const licHtml = lic ? `
+        <div class="row mt-2">
+            <div class="col-12"><h6 style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:8px;"><i class="material-icons" style="vertical-align:middle">gavel</i> Dados do Processo de Compra</h6></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-label">Modalidade Licitação</div><div class="info-value">${lic['procedimento_contratacao_detalhamento_1']||'-'}</div>
+                    <div class="info-label mt-2">Situação Processo</div><div class="info-value">${lic['situacao_processo']||'-'}</div>
+                    <div class="info-label mt-2">Situação Item</div><div class="info-value">${lic['situacao_compra_item_processo']||'-'}</div>
+                    <div class="info-label mt-2">Critério Julgamento</div><div class="info-value">${lic['criterio_julgamento']||'-'}</div>
                 </div>
-                <div class="metric-card">
-                    <h3>✅ Total Liquidado</h3>
-                    <div class="metric-value">${formatMoney(totalLiquidado)}</div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-label">Contrato</div><div class="info-value">${contratoDisplay}</div>
+                    <div class="info-label mt-2">Edital</div><div class="info-value">${editalDisplay}</div>
+                    <div class="info-label mt-2">Indicador Contrato</div><div class="info-value">${lic['indicador_termo_de_contrato']||'-'}</div>
+                    <div class="info-label mt-2">Data Licitação</div><div class="info-value">${formatarData(lic['data_licitacao'])}</div>
                 </div>
-                <div class="metric-card">
-                    <h3>💵 Total Pago</h3>
-                    <div class="metric-value">${formatMoney(totalPago)}</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="info-card">
+                    <div class="info-label">Objeto do Processo</div>
+                    <div class="info-value">${lic['objeto_processo']||'-'}</div>
                 </div>
-            `;
-            
-            document.getElementById('metrics-execucao').innerHTML = metricsHtml;
-        }
+            </div>
+        </div>` : '';
 
-        function atualizarGraficos() {
-            // Gráfico de Top Credores
-            const credoresMap = new Map();
-            dadosExecucaoFiltrados.forEach(emp => {
-                const credor = emp.razao_social_credor;
-                const valor = parseFloat(emp.valor_pago_financeiro || 0);
-                if (credor && valor > 0) {
-                    credoresMap.set(credor, (credoresMap.get(credor) || 0) + valor);
-                }
-            });
-            
-            const topCredores = Array.from(credoresMap.entries())
-                .sort((a,b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            const ctxCredores = document.getElementById('chart-credores').getContext('2d');
-            new Chart(ctxCredores, {
-                type: 'bar',
-                data: {
-                    labels: topCredores.map(c => c[0].substring(0, 20) + '...'),
-                    datasets: [{
-                        label: 'Valor Pago (R$)',
-                        data: topCredores.map(c => c[1]),
-                        backgroundColor: 'rgba(102, 126, 234, 0.7)',
-                        borderColor: 'rgba(102, 126, 234, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        tooltip: { callbacks: { label: (ctx) => `R$ ${ctx.raw.toLocaleString('pt-BR')}` } }
-                    }
-                }
-            });
-            
-            // Gráfico de Modalidades
-            const modalidadesMap = new Map();
-            dadosExecucaoFiltrados.forEach(emp => {
-                const modalidade = emp.licitacao_descricao_da_modalidade || 'Não informada';
-                const valor = parseFloat(emp.valor_empenhado_efetivo_6_14 || 0);
-                if (valor > 0) {
-                    modalidadesMap.set(modalidade, (modalidadesMap.get(modalidade) || 0) + valor);
-                }
-            });
-            
-            const modalidadesData = Array.from(modalidadesMap.entries())
-                .sort((a,b) => b[1] - a[1])
-                .slice(0, 6);
-            
-            const ctxModalidades = document.getElementById('chart-modalidades').getContext('2d');
-            new Chart(ctxModalidades, {
-                type: 'pie',
-                data: {
-                    labels: modalidadesData.map(m => m[0]),
-                    datasets: [{
-                        data: modalidadesData.map(m => m[1]),
-                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'],
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${formatMoney(ctx.raw)}` } }
-                    }
-                }
-            });
-        }
+    // Dados do órgão para o modal
+    const orgaoHtml = orgao ? `
+        <div class="row mt-2">
+            <div class="col-12"><h6 style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:8px;"><i class="material-icons" style="vertical-align:middle">account_balance</i> Dados do Órgão (Contrato/Convênio)</h6></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-card primary">
+                    <div class="info-label">Contrato/Convênio de Entrada</div><div class="info-value highlight">${chaveContrato}</div>
+                    <div class="info-label mt-2">Cód. Unidade Orçamentária</div><div class="info-value">${orgao['unidade_orcamentaria_codigo']||'-'}</div>
+                    <div class="info-label mt-2">Nome Unidade Orçamentária</div><div class="info-value">${orgao['unidade_orcamentaria_nome']||'-'}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-label">Valor Empenhado (Órgão)</div><div class="info-value">${formatarMoeda(orgao['valor_despesa_empenhada'])}</div>
+                    <div class="info-label mt-2">Valor Liquidado (Órgão)</div><div class="info-value">${formatarMoeda(orgao['valor_despesa_liquidada'])}</div>
+                    <div class="info-label mt-2">Valor Pago Total (Órgão)</div><div class="info-value">${formatarMoeda(orgao['valor_pago_total_6_16'])}</div>
+                </div>
+            </div>
+        </div>` : '';
 
-        function formatMoney(value) {
-            if (!value || value === '') return 'R$ 0,00';
-            const num = parseFloat(value.toString().replace(',', '.'));
-            if (isNaN(num)) return 'R$ 0,00';
-            return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
+    document.getElementById('modalContent').innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-card primary">
+                    <div class="info-label">Número do Empenho</div><div class="info-value highlight">${e.numero_empenho||'-'}</div>
+                    <div class="info-label mt-2">Data do Empenho</div><div class="info-value">${formatarData(e.data_registro_doc_empenho)}</div>
+                    <div class="info-label mt-2">Ano de Exercício</div><div class="info-value">${e.ano_de_exercicio||'-'}</div>
+                    <div class="info-label mt-2">Iniciativa</div><div class="info-value">${inicLabel}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-label">Órgão / Unidade</div><div class="info-value">${e.unidade_orcamentaria_nome||'-'}</div>
+                    <div class="info-label mt-2">Processo de Compra</div><div class="info-value">${proc||'-'}</div>
+                    <div class="info-label mt-2">Modalidade Licitatória</div><div class="info-value">${e.licitacao_descricao_da_modalidade||'-'}</div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-label">Razão Social do Credor</div><div class="info-value">${e.razao_social_credor||'-'}</div>
+                    <div class="info-label mt-2">CNPJ/CPF</div><div class="info-value">${e.cnpj_cpf_credor_formatado||'-'}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-label">Valor Empenhado</div><div class="info-value highlight">${formatarMoeda(e.valor_despesa_empenhada)}</div>
+                    <div class="info-label mt-2">Valor Liquidado</div><div class="info-value">${formatarMoeda(e.valor_despesa_liquidada)}</div>
+                    <div class="info-label mt-2">Valor Pago Financeiro</div><div class="info-value">${formatarMoeda(e.valor_pago_financeiro)}</div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-label">Liquidado RP</div><div class="info-value">${formatarMoeda(e.valor_despesa_liquidada_rp)}</div>
+                    <div class="info-label mt-2">Cancelado RP</div><div class="info-value">${formatarMoeda(e.valor_cancelado_em_restoa_a_pagar_8_9_10_11)}</div>
+                    <div class="info-label mt-2">Empenhado Efetivo</div><div class="info-value">${formatarMoeda(e.valor_empenhado_efetivo_4_12)}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-label">Pago RP</div><div class="info-value">${formatarMoeda(e.valor_pago_em_restos_a_pagar_14_15)}</div>
+                    <div class="info-label mt-2">Valor Total Pago</div><div class="info-value highlight">${formatarMoeda(e.valor_pago_total_6_16)}</div>
+                </div>
+            </div>
+        </div>
+        ${licHtml}
+        ${orgaoHtml}`;
 
-        function voltarParaIniciativas() {
-            document.getElementById('view-execucao').classList.remove('active');
-            document.getElementById('view-iniciativas').classList.add('active');
-        }
+    new bootstrap.Modal(document.getElementById('detailModal')).show();
+};
 
-        // Iniciar aplicação
-        carregarDados();
-    </script>
+// ============================================================
+// 8. GRÁFICOS
+// ============================================================
+function atualizarGraficos(dados) {
+    // Top credores
+    const credMap = new Map();
+    dados.forEach(e=>{
+        const c=e.razao_social_credor; const v=parseNum(e.valor_pago_financeiro);
+        if(c&&v>0) credMap.set(c,(credMap.get(c)||0)+v);
+    });
+    const topCred = Array.from(credMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const ctxC = document.getElementById('chartCredores')?.getContext('2d');
+    if (ctxC) {
+        if (chartCredores) chartCredores.destroy();
+        chartCredores = new Chart(ctxC, { type:'bar', data:{ labels:topCred.map(c=>c[0].substring(0,20)+'...'), datasets:[{label:'Valor Pago',data:topCred.map(c=>c[1]),backgroundColor:chartPalette[0],borderWidth:0,borderRadius:4}] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>`R$ ${ctx.raw.toLocaleString('pt-BR')}`}} }, scales:{ x:{ticks:{font:{size:9}}}, y:{ticks:{callback:v=>'R$'+Number(v/1e6).toFixed(1)+'M'}} } } });
+    }
+    // Modalidades
+    const modMap = new Map();
+    dados.forEach(e=>{
+        const m=e.licitacao_descricao_da_modalidade||'Não informada';
+        const v=parseNum(e.valor_empenhado_efetivo_4_12||e.valor_despesa_empenhada);
+        if(v>0) modMap.set(m,(modMap.get(m)||0)+v);
+    });
+    const modData = Array.from(modMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,7);
+    const ctxM = document.getElementById('chartModalidades')?.getContext('2d');
+    if (ctxM) {
+        if (chartModalidades) chartModalidades.destroy();
+        chartModalidades = new Chart(ctxM, { type:'pie', data:{ labels:modData.map(m=>m[0]), datasets:[{data:modData.map(m=>m[1]),backgroundColor:chartPalette,borderWidth:0}] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom',labels:{font:{size:9}}}, tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${formatarMoeda(ctx.raw)}`}} } } });
+    }
+}
+
+// ============================================================
+// 9. PAGINAÇÃO
+// ============================================================
+function renderizarPag(tipo) {
+    const isINIC = tipo==='iniciativas';
+    const container = document.getElementById(isINIC?'pagContainerINIC':'pagContainerEXEC');
+    const dados = isINIC ? (window.inicFiltradas||[]) : (window.execFiltrada||[]);
+    const p = isINIC ? pag.iniciativas : pag.execucao;
+    const sfx = isINIC?'INIC':'EXEC';
+    if (!container) return;
+    if (dados.length===0) { container.innerHTML='<div class="pagination-info">Nenhum registro encontrado</div>'; return; }
+    const ini=(p.atual-1)*p.porPag+1, fim=Math.min(p.atual*p.porPag,dados.length);
+    let html = `<div class="pagination-info"><span>Mostrando ${ini.toLocaleString('pt-BR')}–${fim.toLocaleString('pt-BR')} de ${dados.length.toLocaleString('pt-BR')} registros</span>
+        <div class="page-size-selector"><span>Por pág:</span><select id="pSize${sfx}" onchange="alterarPorPag('${tipo}')">
+            <option value="25" ${p.porPag==25?'selected':''}>25</option>
+            <option value="50" ${p.porPag==50?'selected':''}>50</option>
+            <option value="100" ${p.porPag==100?'selected':''}>100</option>
+        </select></div></div>`;
+    html += `<div class="pagination-controls">
+        <button onclick="mudaPag('${tipo}',1)" ${p.atual===1?'disabled':''}><i class="fas fa-angle-double-left"></i></button>
+        <button onclick="mudaPag('${tipo}',${p.atual-1})" ${p.atual===1?'disabled':''}><i class="fas fa-angle-left"></i></button>`;
+    let pi=Math.max(1,p.atual-2), pf=Math.min(p.total,pi+4);
+    if(pi>1){html+=`<button onclick="mudaPag('${tipo}',1)">1</button>`;if(pi>2)html+=`<span style="padding:0 4px">…</span>`;}
+    for(let i=pi;i<=pf;i++) html+=`<button onclick="mudaPag('${tipo}',${i})" class="${i===p.atual?'active':''}">${i}</button>`;
+    if(pf<p.total){if(pf<p.total-1)html+=`<span style="padding:0 4px">…</span>`;html+=`<button onclick="mudaPag('${tipo}',${p.total})">${p.total}</button>`;}
+    html+=`<button onclick="mudaPag('${tipo}',${p.atual+1})" ${p.atual===p.total?'disabled':''}><i class="fas fa-angle-right"></i></button>
+        <button onclick="mudaPag('${tipo}',${p.total})" ${p.atual===p.total?'disabled':''}><i class="fas fa-angle-double-right"></i></button></div>`;
+    html+=`<div class="page-input"><input type="number" id="irPag${sfx}" min="1" max="${p.total}" value="${p.atual}" onkeypress="if(event.key==='Enter')irPag('${tipo}')"><button onclick="irPag('${tipo}')">Ir</button></div>`;
+    container.innerHTML = html;
+}
+
+window.mudaPag = function(tipo,pagina) {
+    const p = tipo==='iniciativas'?pag.iniciativas:pag.execucao;
+    if (pagina<1||pagina>p.total) return;
+    p.atual=pagina;
+    if (tipo==='iniciativas') atualizarTabelaINIC();
+    else atualizarTabelaEXEC();
+};
+window.alterarPorPag = function(tipo) {
+    const sfx=tipo==='iniciativas'?'INIC':'EXEC';
+    const val=parseInt(document.getElementById('pSize'+sfx).value);
+    const p=tipo==='iniciativas'?pag.iniciativas:pag.execucao;
+    const dados=tipo==='iniciativas'?(window.inicFiltradas||[]):(window.execFiltrada||[]);
+    p.porPag=val; p.atual=1; p.total=Math.ceil(dados.length/val);
+    if(tipo==='iniciativas') atualizarTabelaINIC(); else atualizarTabelaEXEC();
+};
+window.irPag = function(tipo) {
+    const sfx=tipo==='iniciativas'?'INIC':'EXEC';
+    const inp=document.getElementById('irPag'+sfx); if(!inp)return;
+    const p=tipo==='iniciativas'?pag.iniciativas:pag.execucao;
+    let pg=parseInt(inp.value); if(isNaN(pg)||pg<1)pg=1; if(pg>p.total)pg=p.total;
+    mudaPag(tipo,pg);
+};
+
+// ============================================================
+// 10. EXPORTAÇÕES
+// ============================================================
+window.exportarIniciativasCSV = function() {
+    const dados = (window.inicFiltradas||[]).map(i=>[i.codigo_iniciativa,i.iniciativa,i.anexo,i.valor_da_iniciativa]);
+    const csv=[['Código','Iniciativa','Anexo','Valor'].join(';'),...dados.map(l=>l.map(c=>`"${c||''}"`).join(';'))].join('\n');
+    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='iniciativas_mariana.csv'; a.click();
+};
+window.exportarIniciativasPDF = function() {
+    const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:'landscape'});
+    doc.autoTable({ head:[['Código','Iniciativa','Anexo','Valor']], body:(window.inicFiltradas||[]).slice(0,100).map(i=>[i.codigo_iniciativa,i.iniciativa,i.anexo,formatarMoeda(i.valor_da_iniciativa)]), headStyles:{fillColor:[32,68,93]}, styles:{fontSize:8}, didDrawPage:()=>{doc.setFontSize(9);doc.text('Iniciativas - Acordo de Mariana',14,10);doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,doc.internal.pageSize.height-5);} });
+    doc.save('iniciativas_mariana.pdf');
+};
+window.exportarExecucaoCSV = function() {
+    const campos=['numero_empenho','data_registro_doc_empenho','ano_de_exercicio','contratoconvenio_entrada','unidade_orcamentaria_nome','razao_social_credor','cnpj_cpf_credor_formatado','numero_processo_compra_siad','licitacao_descricao_da_modalidade','valor_despesa_empenhada','valor_despesa_liquidada','valor_pago_financeiro','valor_pago_total_6_16'];
+    const csv=[campos.join(';'),...(window.execFiltrada||[]).map(e=>campos.map(c=>`"${e[c]||''}"`).join(';'))].join('\n');
+    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='execucao_acordomariana.csv'; a.click();
+};
+window.exportarExecucaoPDF = function() {
+    const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:'landscape'});
+    doc.autoTable({ head:[['Empenho','Data','Ano','Credor','CNPJ/CPF','Proc. Compra','Modalidade','Empenhado','Liquidado','Pago']], body:(window.execFiltrada||[]).slice(0,100).map(e=>[e.numero_empenho,formatarData(e.data_registro_doc_empenho),e.ano_de_exercicio,e.razao_social_credor,e.cnpj_cpf_credor_formatado,e.numero_processo_compra_siad,e.licitacao_descricao_da_modalidade,formatarMoeda(e.valor_despesa_empenhada),formatarMoeda(e.valor_despesa_liquidada),formatarMoeda(e.valor_pago_total_6_16)]), headStyles:{fillColor:[32,68,93]}, styles:{fontSize:7}, didDrawPage:()=>{doc.setFontSize(9);doc.text('Execução Financeira - Acordo de Mariana',14,10);doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,doc.internal.pageSize.height-5);} });
+    doc.save('execucao_acordomariana.pdf');
+};
+window.exportarModalPDF = function() {
+    const content=document.getElementById('modalContent'); if(!content)return;
+    const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:'portrait'});
+    const process=content.querySelector('.info-value.highlight')?.textContent||'Empenho';
+    doc.setFontSize(14); doc.setTextColor(32,68,93); doc.text('Detalhes do Empenho',14,15);
+    doc.setFontSize(10); doc.setTextColor(100,100,100); doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,22);
+    const labels=content.querySelectorAll('.info-label'), values=content.querySelectorAll('.info-value');
+    const rows=[];
+    labels.forEach((lbl,i)=>{ const val=values[i]?values[i].textContent.trim():'-'; rows.push([lbl.textContent.trim(),val]); });
+    doc.autoTable({ head:[['Campo','Valor']], body:rows, startY:28, headStyles:{fillColor:[32,68,93]}, styles:{fontSize:9}, columnStyles:{0:{fontStyle:'bold',cellWidth:55}} });
+    doc.save(`empenho_${process.replace(/\//g,'-')}.pdf`);
+};
+window.exportarModalCSV = function() {
+    const content=document.getElementById('modalContent'); if(!content)return;
+    const labels=content.querySelectorAll('.info-label'), values=content.querySelectorAll('.info-value');
+    const rows=[['Campo','Valor']];
+    labels.forEach((lbl,i)=>{ const val=values[i]?values[i].textContent.trim():'-'; rows.push([lbl.textContent.trim(),val]); });
+    const csv=rows.map(r=>r.map(c=>`"${(c||'').replace(/"/g,'""')}"`).join(';')).join('\n');
+    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='detalhes_empenho.csv'; a.click();
+};
+
+// ============================================================
+// 11. COPIAR LINK / URL
+// ============================================================
+function copiarLinkDireto() {
+    navigator.clipboard.writeText(window.location.href).then(()=>{
+        const t=document.getElementById('toastSucesso');
+        t.style.display='flex'; setTimeout(()=>{t.style.display='none';},3000);
+    }).catch(()=>mostrarToast('Erro ao copiar link.','error'));
+}
+window.copiarLinkDireto = copiarLinkDireto;
+
+function carregarFiltrosDaURL() {
+    const p=new URLSearchParams(window.location.search);
+    const tab=p.get('tab');
+    if(tab){ const el=document.getElementById(`${tab}-tab`); if(el) setTimeout(()=>el.click(),100); }
+}
+
+// ============================================================
+// 12. DOWNLOADS
+// ============================================================
+function renderizarDownloads() {
+    const c=document.getElementById('downloads-content'); if(!c)return;
+    c.innerHTML=`
+    <div class="filter-container">
+        <div style="text-align:center;padding:16px 0 8px;">
+            <i class="material-icons" style="font-size:48px;color:#20445d;">cloud_download</i>
+            <h5 style="margin-top:8px;margin-bottom:4px;font-size:15px;">Portal de Dados Abertos</h5>
+            <p style="color:#6c757d;font-size:13px;margin-bottom:12px;">Acesse os dados completos do Acordo de Mariana - MG</p>
+            <a href="https://dados.mg.gov.br/dataset/portal_mariana" target="_blank" class="btn-pesquisa text-decoration-none">
+                <i class="material-icons">open_in_new</i> Acessar Portal Dados MG
+            </a>
+        </div>
+    </div>
+    <div class="filter-container">
+        <h5 style="font-size:14px;font-weight:700;color:#20445d;margin-bottom:12px;"><i class="material-icons" style="vertical-align:middle;margin-right:4px;">download</i> Download Direto</h5>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+            <div style="background:#f8fafd;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;min-width:160px;">
+                <div style="font-weight:700;color:#20445d;font-size:14px;margin-bottom:8px;">Iniciativas</div>
+                <button class="btn-export" style="width:100%;justify-content:center;" onclick="exportarIniciativasCSV()">
+                    <i class="material-icons">account_balance</i> CSV Iniciativas
+                </button>
+            </div>
+            <div style="background:#f8fafd;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;min-width:160px;">
+                <div style="font-weight:700;color:#20445d;font-size:14px;margin-bottom:8px;">Execução</div>
+                <button class="btn-export" style="width:100%;justify-content:center;" onclick="exportarExecucaoCSV()">
+                    <i class="material-icons">receipt_long</i> CSV Execução
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="filter-container">
+        <h5 style="font-size:14px;font-weight:700;color:#20445d;margin-bottom:12px;"><i class="material-icons" style="vertical-align:middle;margin-right:4px;">info</i> Metadados — Dicionário de Variáveis</h5>
+        <div class="metadata-container mb-3">
+            <div class="metadata-header"><i class="material-icons me-2" style="vertical-align:middle">account_balance</i> Iniciativas</div>
+            <div class="table-responsive">
+                <table class="metadata-table">
+                    <thead><tr><th>Campo</th><th>Descrição</th><th>Tipo</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>codigo_iniciativa</code></td><td>Código único da iniciativa do Acordo de Mariana</td><td>Texto</td></tr>
+                        <tr><td><code>iniciativa</code></td><td>Descrição da iniciativa</td><td>Texto</td></tr>
+                        <tr><td><code>anexo</code></td><td>Anexo do acordo ao qual a iniciativa pertence</td><td>Texto</td></tr>
+                        <tr><td><code>valor_da_iniciativa</code></td><td>Valor total previsto para a iniciativa</td><td>Moeda</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="metadata-container">
+            <div class="metadata-header"><i class="material-icons me-2" style="vertical-align:middle">receipt_long</i> Execução Financeira (Empenho)</div>
+            <div class="table-responsive">
+                <table class="metadata-table">
+                    <thead><tr><th>Campo</th><th>Descrição</th><th>Tipo</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>numero_empenho</code></td><td>Número do documento de empenho</td><td>Texto</td></tr>
+                        <tr><td><code>data_registro_doc_empenho</code></td><td>Data de registro do empenho</td><td>Data</td></tr>
+                        <tr><td><code>ano_de_exercicio</code></td><td>Ano de exercício do empenho</td><td>Número</td></tr>
+                        <tr><td><code>codigo_iniciativa</code></td><td>Código da iniciativa vinculada</td><td>Texto</td></tr>
+                        <tr><td><code>unidade_orcamentaria_nome</code></td><td>Órgão/unidade orçamentária responsável</td><td>Texto</td></tr>
+                        <tr><td><code>razao_social_credor</code></td><td>Razão social do credor/fornecedor</td><td>Texto</td></tr>
+                        <tr><td><code>cnpj_cpf_credor_formatado</code></td><td>CNPJ ou CPF do credor</td><td>Texto</td></tr>
+                        <tr><td><code>numero_processo_compra_siad</code></td><td>Número do processo de compra no SIAD (usado para cruzamento com edital e contrato)</td><td>Texto</td></tr>
+                        <tr><td><code>licitacao_descricao_da_modalidade</code></td><td>Modalidade licitatória utilizada</td><td>Texto</td></tr>
+                        <tr><td><code>valor_despesa_empenhada</code></td><td>Valor empenhado da despesa</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_despesa_liquidada</code></td><td>Valor liquidado da despesa</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_pago_financeiro</code></td><td>Valor pago financeiramente</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_despesa_liquidada_rp</code></td><td>Valor liquidado em restos a pagar</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_cancelado_em_restoa_a_pagar_8_9_10_11</code></td><td>Valor cancelado em restos a pagar</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_empenhado_efetivo_4_12</code></td><td>Valor empenhado efetivo</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_pago_em_restos_a_pagar_14_15</code></td><td>Valor pago em restos a pagar</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_pago_total_6_16</code></td><td>Valor total pago (financeiro + RP)</td><td>Moeda</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="btn-topo" onclick="voltarAoTopo()"><i class="material-icons">arrow_upward</i> Voltar ao topo</button>
+    </div>`;
+    setTimeout(iframeH,300);
+}
+
+// ============================================================
+// 13. IFRAME RESIZE
+// ============================================================
+(function(){
+    function sendH() {
+        const h=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight)+10;
+        try{if(window.parent&&window.parent!==window)window.parent.postMessage({iframeHeight:h,iframeResize:true,type:'resize'},'*');}catch(e){}
+    }
+    if(window.ResizeObserver) new ResizeObserver(sendH).observe(document.body);
+    else { window.addEventListener('resize',sendH); setInterval(sendH,2000); }
+    sendH();
+})();
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', ()=>{
+    carregarDados();
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab=>{
+        tab.addEventListener('shown.bs.tab',()=>setTimeout(iframeH,300));
+    });
+    window.addEventListener('resize',()=>{ clearTimeout(window.rTimer); window.rTimer=setTimeout(iframeH,250); });
+});
+</script>
 </body>
 </html>
