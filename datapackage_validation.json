@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.149,
+  "time": 0.1,
   "errors": [],
   "tasks": [
     {
@@ -24,6 +24,14 @@
             {
               "name": "contratoconvenio_entrada",
               "type": "integer"
+            },
+            {
+              "name": "unidade_orcamentaria_codigo",
+              "type": "integer"
+            },
+            {
+              "name": "unidade_orcamentaria_nome",
+              "type": "string"
             },
             {
               "name": "numero_empenho",
@@ -110,13 +118,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "f55b4278163074cdde5789455c6763b1",
-          "bytes": 39068,
-          "fields": 22,
+          "hash": "ba3e71bdb8c9525760b744eca02046e2",
+          "bytes": 51951,
+          "fields": 24,
           "rows": 204
         }
       },
-      "time": 0.058,
+      "time": 0.041,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -185,7 +193,7 @@
           "rows": 38
         }
       },
-      "time": 0.015,
+      "time": 0.007,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -331,7 +339,7 @@
           "rows": 16
         }
       },
-      "time": 0.028,
+      "time": 0.019,
       "scope": [
         "hash-count-error",
         "byte-count-error",
