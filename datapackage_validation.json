@@ -1,0 +1,364 @@
+{
+  "version": "4.16.6",
+  "time": 0.139,
+  "errors": [],
+  "tasks": [
+    {
+      "resource": {
+        "description": "Insira a descrição/explicação detalhada deste recurso.",
+        "dialect": {
+          "delimiter": ";"
+        },
+        "encoding": "utf-8-sig",
+        "format": "csv",
+        "hashing": "md5",
+        "name": "empenho",
+        "path": "data/empenho.csv",
+        "profile": "tabular-data-resource",
+        "schema": {
+          "fields": [
+            {
+              "name": "ano_de_exercicio",
+              "type": "string"
+            },
+            {
+              "name": "numero_empenho",
+              "type": "string"
+            },
+            {
+              "name": "data_registro_doc_empenho",
+              "type": "date"
+            },
+            {
+              "name": "numero_processo_compra_siad",
+              "type": "string"
+            },
+            {
+              "name": "licitacao_descricao_da_modalidade",
+              "type": "string"
+            },
+            {
+              "name": "cnpj_cpf_credor_formatado",
+              "type": "string"
+            },
+            {
+              "name": "razao_social_credor",
+              "type": "string"
+            },
+            {
+              "name": "valor_despesa_empenhada",
+              "type": "string"
+            },
+            {
+              "name": "valor_despesa_liquidada",
+              "type": "string"
+            },
+            {
+              "name": "valor_pago_financeiro",
+              "type": "string"
+            },
+            {
+              "name": "valor_despesa_liquidada_rp",
+              "type": "any"
+            },
+            {
+              "name": "valor_cancelado_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_restabelecido_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_cancelado_nao_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_restabelecido_nao_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_cancelado_em_restoa_a_pagar_10_11_12_13",
+              "type": "any"
+            },
+            {
+              "name": "valor_empenhado_efetivo_6_14",
+              "type": "string"
+            },
+            {
+              "name": "valor_pago_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_pago_nao_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_pago_em_restos_a_pagar_16_17",
+              "type": "any"
+            },
+            {
+              "name": "valor_total_pago_8_18",
+              "type": "string"
+            }
+          ]
+        },
+        "scheme": "file",
+        "title": "Insira um título humanamente legível para este recurso.",
+        "stats": {
+          "hash": "6e38128b90a53ed72d5044188e7f86d9",
+          "bytes": 38633,
+          "fields": 21,
+          "rows": 205
+        }
+      },
+      "time": 0.052,
+      "scope": [
+        "hash-count-error",
+        "byte-count-error",
+        "field-count-error",
+        "row-count-error",
+        "blank-header",
+        "extra-label",
+        "missing-label",
+        "blank-label",
+        "duplicate-label",
+        "incorrect-label",
+        "blank-row",
+        "primary-key-error",
+        "foreign-key-error",
+        "extra-cell",
+        "missing-cell",
+        "type-error",
+        "constraint-error",
+        "unique-error"
+      ],
+      "partial": false,
+      "errors": [],
+      "stats": {
+        "errors": 0
+      },
+      "valid": true
+    },
+    {
+      "resource": {
+        "description": "Insira a descrição/explicação detalhada deste recurso.",
+        "dialect": {
+          "delimiter": ";"
+        },
+        "encoding": "utf-8-sig",
+        "format": "csv",
+        "hashing": "md5",
+        "name": "iniciativa",
+        "path": "data/iniciativa.csv",
+        "profile": "tabular-data-resource",
+        "schema": {
+          "fields": [
+            {
+              "name": "codigo_iniciativa",
+              "type": "integer"
+            },
+            {
+              "name": "iniciativa",
+              "type": "string"
+            },
+            {
+              "name": "anexo",
+              "type": "string"
+            },
+            {
+              "name": "valor_da_iniciativa",
+              "type": "string"
+            }
+          ]
+        },
+        "scheme": "file",
+        "title": "Insira um título humanamente legível para este recurso.",
+        "stats": {
+          "hash": "928075365334a6525699001520fb2f05",
+          "bytes": 7959,
+          "fields": 4,
+          "rows": 38
+        }
+      },
+      "time": 0.01,
+      "scope": [
+        "hash-count-error",
+        "byte-count-error",
+        "field-count-error",
+        "row-count-error",
+        "blank-header",
+        "extra-label",
+        "missing-label",
+        "blank-label",
+        "duplicate-label",
+        "incorrect-label",
+        "blank-row",
+        "primary-key-error",
+        "foreign-key-error",
+        "extra-cell",
+        "missing-cell",
+        "type-error",
+        "constraint-error",
+        "unique-error"
+      ],
+      "partial": false,
+      "errors": [
+        {
+          "cell": "Total Geral",
+          "fieldName": "codigo_iniciativa",
+          "fieldNumber": 1,
+          "fieldPosition": 1,
+          "cells": [
+            "Total Geral",
+            "",
+            "",
+            "6984499471,351777"
+          ],
+          "rowNumber": 38,
+          "rowPosition": 39,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"Total Geral\" in row \"39\" and field \"codigo_iniciativa\" at position \"1\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        }
+      ],
+      "stats": {
+        "errors": 1
+      },
+      "valid": false
+    },
+    {
+      "resource": {
+        "description": "Insira a descrição/explicação detalhada deste recurso.",
+        "dialect": {
+          "delimiter": ";"
+        },
+        "encoding": "utf-8-sig",
+        "format": "csv",
+        "hashing": "md5",
+        "name": "orgao",
+        "path": "data/orgao.csv",
+        "profile": "tabular-data-resource",
+        "schema": {
+          "fields": [
+            {
+              "name": "contratoconvenio_entrada",
+              "type": "integer"
+            },
+            {
+              "name": "unidade_orcamentaria_codigo",
+              "type": "integer"
+            },
+            {
+              "name": "unidade_orcamentaria_nome",
+              "type": "string"
+            },
+            {
+              "name": "valor_despesa_empenhada",
+              "type": "string"
+            },
+            {
+              "name": "valor_despesa_liquidada",
+              "type": "string"
+            },
+            {
+              "name": "valor_pago_financeiro",
+              "type": "string"
+            },
+            {
+              "name": "valor_despesa_liquidada_1",
+              "type": "any"
+            },
+            {
+              "name": "valor_cancelado_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_restabelecido_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_cancelado_nao_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_restabelecido_nao_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_cancelado_em_restoa_a_pagar_8_9_10_11",
+              "type": "any"
+            },
+            {
+              "name": "valor_empenhado_efetivo_4_12",
+              "type": "string"
+            },
+            {
+              "name": "valor_pago_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_pago_nao_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_pago_em_restos_a_pagar_14_15",
+              "type": "any"
+            },
+            {
+              "name": "valor_pago_total_6_16",
+              "type": "string"
+            }
+          ]
+        },
+        "scheme": "file",
+        "title": "Insira um título humanamente legível para este recurso.",
+        "stats": {
+          "hash": "a7e70635550b298e85ef478bbb67c90c",
+          "bytes": 3038,
+          "fields": 17,
+          "rows": 16
+        }
+      },
+      "time": 0.028,
+      "scope": [
+        "hash-count-error",
+        "byte-count-error",
+        "field-count-error",
+        "row-count-error",
+        "blank-header",
+        "extra-label",
+        "missing-label",
+        "blank-label",
+        "duplicate-label",
+        "incorrect-label",
+        "blank-row",
+        "primary-key-error",
+        "foreign-key-error",
+        "extra-cell",
+        "missing-cell",
+        "type-error",
+        "constraint-error",
+        "unique-error"
+      ],
+      "partial": false,
+      "errors": [],
+      "stats": {
+        "errors": 0
+      },
+      "valid": true
+    }
+  ],
+  "stats": {
+    "errors": 1,
+    "tasks": 3
+  },
+  "valid": false
+}
