@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Acordo de Mariana</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        /* View transitions */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Cards for metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .metric-unit {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Filters */
+        .filters {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 10px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .filter-group select, .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+            cursor: pointer;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        /* Back button */
+        .back-button {
+            margin-bottom: 20px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ Dashboard do Acordo de Mariana</h1>
+        <div class="subtitle">Monitoramento da Execução Financeira por Iniciativa</div>
+
+        <!-- View 1: Iniciativas -->
+        <div id="view-iniciativas" class="view active">
+            <div class="filters">
+                <div class="filter-group">
+                    <label>🔍 Filtro por Código da Iniciativa</label>
+                    <input type="text" id="filter-codigo" placeholder="Digite o código...">
+                </div>
+                <div class="filter-group">
+                    <label>📋 Filtro por Nome da Iniciativa</label>
+                    <input type="text" id="filter-nome" placeholder="Digite o nome...">
+                </div>
+                <button onclick="aplicarFiltrosIniciativas()">Aplicar Filtros</button>
+                <button onclick="limparFiltrosIniciativas()">Limpar</button>
+            </div>
+            <div class="table-container">
+                <table id="tabela-iniciativas">
+                    <thead>
+                        <tr>
+                            <th>Código Iniciativa</th>
+                            <th>Iniciativa</th>
+                            <th>Anexo</th>
+                            <th>Valor da Iniciativa (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-iniciativas"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- View 2: Execução -->
+        <div id="view-execucao" class="view">
+            <div class="back-button">
+                <button onclick="voltarParaIniciativas()">← Voltar para Iniciativas</button>
+            </div>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>📅 Ano</label>
+                    <select id="filter-ano"></select>
+                </div>
+                <div class="filter-group">
+                    <label>📋 Iniciativa</label>
+                    <select id="filter-iniciativa-exec"></select>
+                </div>
+                <div class="filter-group">
+                    <label>🏢 Órgão</label>
+                    <select id="filter-orgao"></select>
+                </div>
+                <div class="filter-group">
+                    <label>🏢 Razão Social Credor</label>
+                    <input type="text" id="filter-credor" placeholder="Digite...">
+                </div>
+                <div class="filter-group">
+                    <label>🆔 CNPJ/CPF Credor</label>
+                    <input type="text" id="filter-cnpj" placeholder="Digite...">
+                </div>
+                <div class="filter-group">
+                    <label>📜 Modalidade Licitatória</label>
+                    <select id="filter-modalidade"></select>
+                </div>
+                <div class="filter-group">
+                    <label>📄 Processo de Compra</label>
+                    <input type="text" id="filter-processo" placeholder="Digite...">
+                </div>
+                <button onclick="aplicarFiltrosExecucao()">Aplicar Filtros</button>
+                <button onclick="limparFiltrosExecucao()">Limpar</button>
+            </div>
+            
+            <!-- Metrics Cards para Execução -->
+            <div class="metrics-grid" id="metrics-execucao"></div>
+            
+            <div class="table-container">
+                <table id="tabela-execucao">
+                    <thead>
+                        <tr>
+                            <th>Iniciativa</th><th>Anexo</th><th>Órgão</th><th>Empenho</th>
+                            <th>Data Empenho</th><th>Razão Social</th><th>CNPJ/CPF</th>
+                            <th>Processo Compra</th><th>Modalidade</th><th>Valor Empenhado</th>
+                            <th>Liquidado</th><th>Pago</th><th>Liquidado RP</th>
+                            <th>Cancelado RP</th><th>Empenhado Efetivo</th><th>Pago RP</th><th>Valor Pago</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-execucao"></tbody>
+                </table>
+            </div>
+            
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>📊 Top 10 Credores por Valor Pago</h3>
+                    <canvas id="chart-credores"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>🍩 Distribuição por Modalidade Licitatória</h3>
+                    <canvas id="chart-modalidades"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let dadosIniciativas = [];
+        let dadosEmpenho = [];
+        let dadosExecucaoFiltrados = [];
+
+        // Carregar dados
+        async function carregarDados() {
+            showLoading();
+            try {
+                // Carregar iniciativa.csv
+                const iniciativaResponse = await fetch('https://raw.githubusercontent.com/transparencia-mg/portal_mariana/refs/heads/main/dataset/data/iniciativa.csv');
+                const iniciativaText = await iniciativaResponse.text();
+                const iniciativaParsed = Papa.parse(iniciativaText, { header: true, delimiter: ';' });
+                dadosIniciativas = iniciativaParsed.data.filter(row => row.codigo_iniciativa && row.codigo_iniciativa !== 'Total Geral');
+                
+                // Carregar empenho.csv
+                const empenhoResponse = await fetch('https://raw.githubusercontent.com/transparencia-mg/portal_mariana/refs/heads/main/dataset/data/empenho.csv');
+                const empenhoText = await empenhoResponse.text();
+                const empenhoParsed = Papa.parse(empenhoText, { header: true, delimiter: ';' });
+                dadosEmpenho = empenhoParsed.data;
+                
+                renderizarIniciativas();
+                initFilters();
+                hideLoading();
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                alert('Erro ao carregar dados. Verifique se os arquivos estão acessíveis.');
+                hideLoading();
+            }
+        }
+
+        function showLoading() {
+            document.querySelector('.container').style.opacity = '0.5';
+        }
+
+        function hideLoading() {
+            document.querySelector('.container').style.opacity = '1';
+        }
+
+        function renderizarIniciativas() {
+            const tbody = document.getElementById('tbody-iniciativas');
+            tbody.innerHTML = '';
+            
+            dadosIniciativas.forEach(iniciativa => {
+                const row = tbody.insertRow();
+                const valor = parseFloat(iniciativa.valor_da_iniciativa || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                row.innerHTML = `
+                    <td style="cursor:pointer; color:#667eea; font-weight:bold;">${iniciativa.codigo_iniciativa || '-'}</td>
+                    <td>${iniciativa.iniciativa || '-'}</td>
+                    <td>${iniciativa.anexo || '-'}</td>
+                    <td>${valor}</td>
+                `;
+                row.onclick = () => abrirExecucao(iniciativa.codigo_iniciativa, iniciativa.iniciativa);
+            });
+        }
+
+        function aplicarFiltrosIniciativas() {
+            const codigoFilter = document.getElementById('filter-codigo').value.toLowerCase();
+            const nomeFilter = document.getElementById('filter-nome').value.toLowerCase();
+            
+            const filtered = dadosIniciativas.filter(init => {
+                const matchCodigo = !codigoFilter || (init.codigo_iniciativa || '').toLowerCase().includes(codigoFilter);
+                const matchNome = !nomeFilter || (init.iniciativa || '').toLowerCase().includes(nomeFilter);
+                return matchCodigo && matchNome;
+            });
+            
+            const tbody = document.getElementById('tbody-iniciativas');
+            tbody.innerHTML = '';
+            filtered.forEach(iniciativa => {
+                const row = tbody.insertRow();
+                const valor = parseFloat(iniciativa.valor_da_iniciativa || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                row.innerHTML = `
+                    <td style="cursor:pointer; color:#667eea; font-weight:bold;">${iniciativa.codigo_iniciativa || '-'}</td>
+                    <td>${iniciativa.iniciativa || '-'}</td>
+                    <td>${iniciativa.anexo || '-'}</td>
+                    <td>${valor}</td>
+                `;
+                row.onclick = () => abrirExecucao(iniciativa.codigo_iniciativa, iniciativa.iniciativa);
+            });
+        }
+
+        function limparFiltrosIniciativas() {
+            document.getElementById('filter-codigo').value = '';
+            document.getElementById('filter-nome').value = '';
+            renderizarIniciativas();
+        }
+
+        function abrirExecucao(codigoIniciativa, nomeIniciativa) {
+            // Filtrar empenhos pela iniciativa (como não temos relação direta, usamos um filtro básico)
+            dadosExecucaoFiltrados = dadosEmpenho.filter(emp => {
+                return emp.ano_de_exercicio && emp.ano_de_exercicio !== '';
+            });
+            
+            // Adicionar iniciativa aos dados para display
+            dadosExecucaoFiltrados = dadosExecucaoFiltrados.map(emp => ({
+                ...emp,
+                iniciativa_nome: nomeIniciativa || 'Iniciativa não mapeada',
+                anexo_iniciativa: 'XII'
+            }));
+            
+            // Inicializar filtros de execução
+            initFiltersExecucao();
+            
+            // Renderizar execução
+            renderizarExecucao();
+            atualizarMetricasExecucao();
+            atualizarGraficos();
+            
+            // Trocar view
+            document.getElementById('view-iniciativas').classList.remove('active');
+            document.getElementById('view-execucao').classList.add('active');
+        }
+
+        function initFilters() {
+            // Preencher selects com dados das iniciativas
+            const codigos = [...new Set(dadosIniciativas.map(i => i.codigo_iniciativa))];
+            const nomes = [...new Set(dadosIniciativas.map(i => i.iniciativa))];
+        }
+
+        function initFiltersExecucao() {
+            const anos = [...new Set(dadosEmpenho.filter(e => e.ano_de_exercicio).map(e => e.ano_de_exercicio))].sort();
+            const modalidades = [...new Set(dadosEmpenho.filter(e => e.licitacao_descricao_da_modalidade).map(e => e.licitacao_descricao_da_modalidade))];
+            const orgaos = ['Secretaria de Estado', 'Outros Órgãos']; // Não temos dado de órgão
+            
+            const selectAno = document.getElementById('filter-ano');
+            selectAno.innerHTML = '<option value="">Todos</option>';
+            anos.forEach(ano => selectAno.innerHTML += `<option value="${ano}">${ano}</option>`);
+            
+            const selectModalidade = document.getElementById('filter-modalidade');
+            selectModalidade.innerHTML = '<option value="">Todas</option>';
+            modalidades.forEach(mod => selectModalidade.innerHTML += `<option value="${mod}">${mod}</option>`);
+            
+            const selectIniciativa = document.getElementById('filter-iniciativa-exec');
+            selectIniciativa.innerHTML = '<option value="">Todas</option>';
+            selectIniciativa.innerHTML += `<option value="selected">Iniciativa selecionada</option>`;
+            
+            const selectOrgao = document.getElementById('filter-orgao');
+            selectOrgao.innerHTML = '<option value="">Todos</option><option value="Secretaria">Secretaria de Estado</option>';
+        }
+
+        function aplicarFiltrosExecucao() {
+            const ano = document.getElementById('filter-ano').value;
+            const modalidade = document.getElementById('filter-modalidade').value;
+            const credor = document.getElementById('filter-credor').value.toLowerCase();
+            const cnpj = document.getElementById('filter-cnpj').value.toLowerCase();
+            const processo = document.getElementById('filter-processo').value.toLowerCase();
+            
+            let filtered = [...dadosExecucaoFiltrados];
+            
+            if (ano) filtered = filtered.filter(e => e.ano_de_exercicio === ano);
+            if (modalidade) filtered = filtered.filter(e => e.licitacao_descricao_da_modalidade === modalidade);
+            if (credor) filtered = filtered.filter(e => (e.razao_social_credor || '').toLowerCase().includes(credor));
+            if (cnpj) filtered = filtered.filter(e => (e.cnpj_cpf_credor_formatado || '').toLowerCase().includes(cnpj));
+            if (processo) filtered = filtered.filter(e => (e.numero_processo_compra_siad || '').toLowerCase().includes(processo));
+            
+            dadosExecucaoFiltrados = filtered;
+            renderizarExecucao();
+            atualizarMetricasExecucao();
+            atualizarGraficos();
+        }
+
+        function limparFiltrosExecucao() {
+            document.getElementById('filter-ano').value = '';
+            document.getElementById('filter-modalidade').value = '';
+            document.getElementById('filter-credor').value = '';
+            document.getElementById('filter-cnpj').value = '';
+            document.getElementById('filter-processo').value = '';
+            dadosExecucaoFiltrados = dadosEmpenho.filter(e => e.ano_de_exercicio && e.ano_de_exercicio !== '');
+            renderizarExecucao();
+            atualizarMetricasExecucao();
+            atualizarGraficos();
+        }
+
+        function renderizarExecucao() {
+            const tbody = document.getElementById('tbody-execucao');
+            tbody.innerHTML = '';
+            
+            const dadosParaExibir = dadosExecucaoFiltrados.slice(0, 100);
+            
+            dadosParaExibir.forEach(emp => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${emp.iniciativa_nome || '-'}</td>
+                    <td>${emp.anexo_iniciativa || '-'}</td>
+                    <td>Secretaria de Estado</td>
+                    <td>${emp.numero_empenho || '-'}</td>
+                    <td>${emp.data_registro_doc_empenho || '-'}</td>
+                    <td>${emp.razao_social_credor || '-'}</td>
+                    <td>${emp.cnpj_cpf_credor_formatado || '-'}</td>
+                    <td>${emp.numero_processo_compra_siad || '-'}</td>
+                    <td>${emp.licitacao_descricao_da_modalidade || '-'}</td>
+                    <td>${formatMoney(emp.valor_despesa_empenhada)}</td>
+                    <td>${formatMoney(emp.valor_despesa_liquidada)}</td>
+                    <td>${formatMoney(emp.valor_pago_financeiro)}</td>
+                    <td>${formatMoney(emp.valor_despesa_liquidada_rp)}</td>
+                    <td>${formatMoney(emp.valor_cancelado_em_restoa_a_pagar_10_11_12_13)}</td>
+                    <td>${formatMoney(emp.valor_empenhado_efetivo_6_14)}</td>
+                    <td>${formatMoney(emp.valor_pago_em_restos_a_pagar_16_17)}</td>
+                    <td>${formatMoney(emp.valor_total_pago_8_18)}</td>
+                `;
+            });
+        }
+
+        function atualizarMetricasExecucao() {
+            let totalEmpenhado = 0, totalLiquidado = 0, totalPago = 0;
+            
+            dadosExecucaoFiltrados.forEach(emp => {
+                totalEmpenhado += parseFloat(emp.valor_despesa_empenhada || 0);
+                totalLiquidado += parseFloat(emp.valor_despesa_liquidada || 0);
+                totalPago += parseFloat(emp.valor_pago_financeiro || 0);
+            });
+            
+            const metricsHtml = `
+                <div class="metric-card">
+                    <h3>💰 Total Empenhado</h3>
+                    <div class="metric-value">${formatMoney(totalEmpenhado)}</div>
+                </div>
+                <div class="metric-card">
+                    <h3>✅ Total Liquidado</h3>
+                    <div class="metric-value">${formatMoney(totalLiquidado)}</div>
+                </div>
+                <div class="metric-card">
+                    <h3>💵 Total Pago</h3>
+                    <div class="metric-value">${formatMoney(totalPago)}</div>
+                </div>
+            `;
+            
+            document.getElementById('metrics-execucao').innerHTML = metricsHtml;
+        }
+
+        function atualizarGraficos() {
+            // Gráfico de Top Credores
+            const credoresMap = new Map();
+            dadosExecucaoFiltrados.forEach(emp => {
+                const credor = emp.razao_social_credor;
+                const valor = parseFloat(emp.valor_pago_financeiro || 0);
+                if (credor && valor > 0) {
+                    credoresMap.set(credor, (credoresMap.get(credor) || 0) + valor);
+                }
+            });
+            
+            const topCredores = Array.from(credoresMap.entries())
+                .sort((a,b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            const ctxCredores = document.getElementById('chart-credores').getContext('2d');
+            new Chart(ctxCredores, {
+                type: 'bar',
+                data: {
+                    labels: topCredores.map(c => c[0].substring(0, 20) + '...'),
+                    datasets: [{
+                        label: 'Valor Pago (R$)',
+                        data: topCredores.map(c => c[1]),
+                        backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { callbacks: { label: (ctx) => `R$ ${ctx.raw.toLocaleString('pt-BR')}` } }
+                    }
+                }
+            });
+            
+            // Gráfico de Modalidades
+            const modalidadesMap = new Map();
+            dadosExecucaoFiltrados.forEach(emp => {
+                const modalidade = emp.licitacao_descricao_da_modalidade || 'Não informada';
+                const valor = parseFloat(emp.valor_empenhado_efetivo_6_14 || 0);
+                if (valor > 0) {
+                    modalidadesMap.set(modalidade, (modalidadesMap.get(modalidade) || 0) + valor);
+                }
+            });
+            
+            const modalidadesData = Array.from(modalidadesMap.entries())
+                .sort((a,b) => b[1] - a[1])
+                .slice(0, 6);
+            
+            const ctxModalidades = document.getElementById('chart-modalidades').getContext('2d');
+            new Chart(ctxModalidades, {
+                type: 'pie',
+                data: {
+                    labels: modalidadesData.map(m => m[0]),
+                    datasets: [{
+                        data: modalidadesData.map(m => m[1]),
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${formatMoney(ctx.raw)}` } }
+                    }
+                }
+            });
+        }
+
+        function formatMoney(value) {
+            if (!value || value === '') return 'R$ 0,00';
+            const num = parseFloat(value.toString().replace(',', '.'));
+            if (isNaN(num)) return 'R$ 0,00';
+            return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function voltarParaIniciativas() {
+            document.getElementById('view-execucao').classList.remove('active');
+            document.getElementById('view-iniciativas').classList.add('active');
+        }
+
+        // Iniciar aplicação
+        carregarDados();
+    </script>
+</body>
+</html>
