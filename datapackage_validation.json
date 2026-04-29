@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.134,
+  "time": 0.149,
   "errors": [],
   "tasks": [
     {
@@ -19,11 +19,15 @@
           "fields": [
             {
               "name": "ano_de_exercicio",
-              "type": "string"
+              "type": "integer"
+            },
+            {
+              "name": "contratoconvenio_entrada",
+              "type": "integer"
             },
             {
               "name": "numero_empenho",
-              "type": "string"
+              "type": "integer"
             },
             {
               "name": "data_registro_doc_empenho",
@@ -58,7 +62,7 @@
               "type": "string"
             },
             {
-              "name": "valor_despesa_liquidada_rp",
+              "name": "valor_despesa_liquidada_1",
               "type": "any"
             },
             {
@@ -106,13 +110,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "a81d4fe82be3c140d58e7a6a4b9dffac",
-          "bytes": 37709,
-          "fields": 21,
+          "hash": "f55b4278163074cdde5789455c6763b1",
+          "bytes": 39068,
+          "fields": 22,
           "rows": 204
         }
       },
-      "time": 0.051,
+      "time": 0.058,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -134,54 +138,11 @@
         "unique-error"
       ],
       "partial": false,
-      "errors": [
-        {
-          "label": "valor_despesa_liquidada_1",
-          "fieldName": "valor_despesa_liquidada_rp",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "labels": [
-            "ano_de_exercicio",
-            "numero_empenho",
-            "data_registro_doc_empenho",
-            "numero_processo_compra_siad",
-            "licitacao_descricao_da_modalidade",
-            "cnpj_cpf_credor_formatado",
-            "razao_social_credor",
-            "valor_despesa_empenhada",
-            "valor_despesa_liquidada",
-            "valor_pago_financeiro",
-            "valor_despesa_liquidada_1",
-            "valor_cancelado_processado",
-            "valor_restabelecido_processado",
-            "valor_cancelado_nao_processado",
-            "valor_restabelecido_nao_processado",
-            "valor_cancelado_em_restoa_a_pagar_10_11_12_13",
-            "valor_empenhado_efetivo_6_14",
-            "valor_pago_processado",
-            "valor_pago_nao_processado",
-            "valor_pago_em_restos_a_pagar_16_17",
-            "valor_total_pago_8_18"
-          ],
-          "rowPositions": [
-            1
-          ],
-          "code": "incorrect-label",
-          "name": "Incorrect Label",
-          "tags": [
-            "#table",
-            "#header",
-            "#label"
-          ],
-          "note": "",
-          "message": "Label \"valor_despesa_liquidada_1\" in field valor_despesa_liquidada_rp at position \"11\" does not match the field name in the schema",
-          "description": "One of the data source header does not match the field name defined in the schema."
-        }
-      ],
+      "errors": [],
       "stats": {
-        "errors": 1
+        "errors": 0
       },
-      "valid": false
+      "valid": true
     },
     {
       "resource": {
@@ -224,7 +185,7 @@
           "rows": 38
         }
       },
-      "time": 0.01,
+      "time": 0.015,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -370,7 +331,7 @@
           "rows": 16
         }
       },
-      "time": 0.027,
+      "time": 0.028,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -400,7 +361,7 @@
     }
   ],
   "stats": {
-    "errors": 2,
+    "errors": 1,
     "tasks": 3
   },
   "valid": false
