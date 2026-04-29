@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.139,
+  "time": 0.134,
   "errors": [],
   "tasks": [
     {
@@ -106,13 +106,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "6e38128b90a53ed72d5044188e7f86d9",
-          "bytes": 38633,
+          "hash": "a81d4fe82be3c140d58e7a6a4b9dffac",
+          "bytes": 37709,
           "fields": 21,
-          "rows": 205
+          "rows": 204
         }
       },
-      "time": 0.052,
+      "time": 0.051,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -134,11 +134,54 @@
         "unique-error"
       ],
       "partial": false,
-      "errors": [],
+      "errors": [
+        {
+          "label": "valor_despesa_liquidada_1",
+          "fieldName": "valor_despesa_liquidada_rp",
+          "fieldNumber": 11,
+          "fieldPosition": 11,
+          "labels": [
+            "ano_de_exercicio",
+            "numero_empenho",
+            "data_registro_doc_empenho",
+            "numero_processo_compra_siad",
+            "licitacao_descricao_da_modalidade",
+            "cnpj_cpf_credor_formatado",
+            "razao_social_credor",
+            "valor_despesa_empenhada",
+            "valor_despesa_liquidada",
+            "valor_pago_financeiro",
+            "valor_despesa_liquidada_1",
+            "valor_cancelado_processado",
+            "valor_restabelecido_processado",
+            "valor_cancelado_nao_processado",
+            "valor_restabelecido_nao_processado",
+            "valor_cancelado_em_restoa_a_pagar_10_11_12_13",
+            "valor_empenhado_efetivo_6_14",
+            "valor_pago_processado",
+            "valor_pago_nao_processado",
+            "valor_pago_em_restos_a_pagar_16_17",
+            "valor_total_pago_8_18"
+          ],
+          "rowPositions": [
+            1
+          ],
+          "code": "incorrect-label",
+          "name": "Incorrect Label",
+          "tags": [
+            "#table",
+            "#header",
+            "#label"
+          ],
+          "note": "",
+          "message": "Label \"valor_despesa_liquidada_1\" in field valor_despesa_liquidada_rp at position \"11\" does not match the field name in the schema",
+          "description": "One of the data source header does not match the field name defined in the schema."
+        }
+      ],
       "stats": {
-        "errors": 0
+        "errors": 1
       },
-      "valid": true
+      "valid": false
     },
     {
       "resource": {
@@ -327,7 +370,7 @@
           "rows": 16
         }
       },
-      "time": 0.028,
+      "time": 0.027,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -357,7 +400,7 @@
     }
   ],
   "stats": {
-    "errors": 1,
+    "errors": 2,
     "tasks": 3
   },
   "valid": false
