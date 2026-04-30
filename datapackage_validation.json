@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.1,
+  "time": 0.15,
   "errors": [],
   "tasks": [
     {
@@ -47,6 +47,30 @@
             },
             {
               "name": "licitacao_descricao_da_modalidade",
+              "type": "string"
+            },
+            {
+              "name": "elemento_despesa_codigo",
+              "type": "integer"
+            },
+            {
+              "name": "elemento_despesa_descricao",
+              "type": "string"
+            },
+            {
+              "name": "elemento_item_despesa_codigo",
+              "type": "integer"
+            },
+            {
+              "name": "elemento_item_despesa_descricao",
+              "type": "string"
+            },
+            {
+              "name": "fonte_recurso_codigo",
+              "type": "integer"
+            },
+            {
+              "name": "fonte_recurso_descricao",
               "type": "string"
             },
             {
@@ -118,13 +142,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "ba3e71bdb8c9525760b744eca02046e2",
-          "bytes": 51951,
-          "fields": 24,
-          "rows": 204
+          "hash": "f8de54cf64af1e4cfd5e9c18806d13d4",
+          "bytes": 82198,
+          "fields": 30,
+          "rows": 210
         }
       },
-      "time": 0.041,
+      "time": 0.053,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -193,7 +217,7 @@
           "rows": 38
         }
       },
-      "time": 0.007,
+      "time": 0.011,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -339,7 +363,7 @@
           "rows": 16
         }
       },
-      "time": 0.019,
+      "time": 0.027,
       "scope": [
         "hash-count-error",
         "byte-count-error",
