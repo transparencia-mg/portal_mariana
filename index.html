@@ -287,7 +287,7 @@
             <div class="modal-footer" style="gap:8px;">
                 <button class="btn-export" onclick="exportarModalPDF()"><i class="material-icons">print</i> PDF</button>
                 <button class="btn-export" onclick="exportarModalCSV()"><i class="material-icons">description</i> CSV</button>
-                <button class="btn-export" onclick="copiarLinkDireto()"><i class="material-icons">link</i> Copiar Link</button>
+                <button class="btn-export" onclick="copiarLinkContexto('execucao')"><i class="material-icons">link</i> Copiar Link</button>
                 <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">
                     <i class="material-icons">close</i> Fechar
                 </button>
@@ -543,11 +543,10 @@ function renderizarIniciativas() {
         <div class="table-fixed-header-container">
             <table class="table" id="tabelaIniciativas">
                 <thead><tr>
-                    <th class="sortable-header" onclick="sortINIC('codigo_iniciativa')">Iniciativa <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortINIC('codigo_iniciativa')">Código <i class="material-icons">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortINIC('iniciativa')">Iniciativa <i class="material-icons">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortINIC('anexo')">Anexo <i class="material-icons">unfold_more</i></th>
                     <th class="sortable-header text-right" onclick="sortINIC('valor_da_iniciativa')">Valor da Iniciativa <i class="material-icons">unfold_more</i></th>
-                    <th class="text-center">Ações</th>
                 </tr></thead>
                 <tbody id="tbodyIniciativas"></tbody>
             </table>
@@ -575,11 +574,6 @@ function atualizarTabelaINIC() {
             <td>${i.iniciativa||'-'}</td>
             <td>${i.anexo||'-'}</td>
             <td class="text-right">${formatarMoeda(i.valor_da_iniciativa)}</td>
-            <td class="text-center">
-                <button class="btn-action" title="Ver execução" onclick="irParaExecucao('${esc(i.codigo_iniciativa)}','${esc(i.iniciativa)}')">
-                    <i class="material-icons" style="font-size:15px">open_in_new</i>
-                </button>
-            </td>
         </tr>`).join('');
     document.getElementById('badgeINIC').textContent = window.inicFiltradas.length+' iniciativas';
     renderizarPag('iniciativas');
@@ -631,7 +625,6 @@ window.buscarINIC = function(termo) {
         <td><a href="#" class="iniciativa-codigo" onclick="irParaExecucao('${esc(i.codigo_iniciativa)}','${esc(i.iniciativa)}');return false;">${i.codigo_iniciativa||'-'}</a></td>
         <td>${i.iniciativa||'-'}</td><td>${i.anexo||'-'}</td>
         <td class="text-right">${formatarMoeda(i.valor_da_iniciativa)}</td>
-        <td class="text-center"><button class="btn-action" onclick="irParaExecucao('${esc(i.codigo_iniciativa)}','${esc(i.iniciativa)}')"><i class="material-icons" style="font-size:15px">open_in_new</i></button></td>
     </tr>`).join('');
     document.getElementById('badgeINIC').textContent = f.length+' iniciativas';
 };
@@ -644,15 +637,19 @@ window.irParaExecucao = function(codigoIniciativa, nome) {
     setTimeout(()=>{
         const sel = document.getElementById('filtroInicExec');
         if (sel) {
-            const iObj = dadosIniciativas.find(i=>i.codigo_iniciativa===codigoIniciativa);
-            const chave = iObj ? (iObj.codigo_iniciativa||'').trim() : '';
-            if (chave) { sel.value = chave; }
-            else {
-                for (let opt of sel.options) { if (opt.value===codigoIniciativa||opt.text.startsWith(codigoIniciativa)) { sel.value=opt.value; break; } }
+            // Tenta match exato pelo valor do option
+            let found = false;
+            for (let opt of sel.options) {
+                if (opt.value === codigoIniciativa) { sel.value = opt.value; found = true; break; }
+            }
+            if (!found) {
+                for (let opt of sel.options) {
+                    if (opt.value.startsWith(codigoIniciativa) || opt.text.startsWith(codigoIniciativa)) { sel.value = opt.value; found = true; break; }
+                }
             }
         }
         aplicarFiltrosEXEC();
-    }, 400);
+    }, 500);
 };
 
 // Chamada a partir da célula de iniciativa na tabela execução
@@ -674,40 +671,38 @@ window.irParaExecucaoDeEmpenho = function(contratoconvenioEntrada) {
 // Configuração de colunas opcionais para execução
 const EXEC_COLS_CONFIG = [
     // fixas (sempre visíveis, não entram no seletor)
-    { key:'ano',                   label:'Ano',                    fixed:true  },
-    { key:'iniciativa_display',                 label:'Iniciativa',             fixed:true  },
-    { key:'no_empenho',                     label:'Empenho',                fixed:true  },
-    { key:'data_empenho',          label:'Data',                   fixed:true  },
-    { key:'nome_orgao',          label:'Órgão',                  fixed:true  },
-    { key:'credor',                label:'Credor',                 fixed:true  },
-    { key:'cnpj_cpf_credor',          label:'CNPJ/CPF',               fixed:true  },
-    { key:'no_processo_compra',        label:'Proc. Compra',           fixed:true  },
-    { key:'contrato_display',                   label:'Contrato',               fixed:true  },
-    { key:'modalidade_licitacao',  label:'Modalidade',             fixed:true  },
-    { key:'cod_elemento_despesa',            label:'Cód. Elemento Desp.',    fixed:true  },
-    { key:'nome_elemento_despesa',         label:'Nome Elemento Desp.',    fixed:true  },
-    { key:'valor_empenhado_efetivo',       label:'Vl. Empenhado Efetivo',  fixed:true  },
-    { key:'valor_total_pag',              label:'Vl. Total Pago',         fixed:true  },
-    // opcionais (entram no seletor)
-    { key:'anexo_display',                      label:'Anexo',                  fixed:false, defaultVisible:true  },
-    { key:'codigo_orgao',        label:'Cód. UO',                fixed:false, defaultVisible:false },
-    { key:'valor_empenhado',            label:'Empenhado',              fixed:false, defaultVisible:true  },
-    { key:'valor_liquidado',            label:'Liquidado',              fixed:false, defaultVisible:true  },
-    { key:'valor_pago_financeiro',              label:'Pago Financeiro',        fixed:false, defaultVisible:true  },
-    { key:'valor_liquidado_rp',          label:'Vl. Liquidado RP',       fixed:false, defaultVisible:false },
-    { key:'valor_cancelado_rp', label:'Cancelado RP',fixed:false, defaultVisible:false },
-    { key:'valor_pago_processado',              label:'Pago Processado',        fixed:false, defaultVisible:false },
-    { key:'valor_pago_nao_processado',          label:'Pago Não Processado',    fixed:false, defaultVisible:false },
-    { key:'valor_pago_rp', label:'Pago RP',               fixed:false, defaultVisible:false },
-    { key:'valor_cancelado_processado',         label:'Cancelado Processado',   fixed:false, defaultVisible:false },
-    { key:'valor_restabelecido_processado',     label:'Restabelecido Proc.',    fixed:false, defaultVisible:false },
-    { key:'valor_cancelado_nao_processado',     label:'Cancelado Não Proc.',    fixed:false, defaultVisible:false },
-    { key:'valor_restabelecido_nao_processado', label:'Restabelecido Não Proc.',fixed:false, defaultVisible:false },
-    { key:'codigo_fonte_recurso',               label:'Cód. Fonte Recurso',     fixed:false, defaultVisible:false },
-    { key:'nome_fonte_recurso',            label:'Nome Fonte Recurso',     fixed:false, defaultVisible:false },
-    { key:'codigo_item_despesa',       label:'Cód. Item Despesa',      fixed:false, defaultVisible:false },
-    { key:'nome_item_despesa',    label:'Nome Item Despesa',      fixed:false, defaultVisible:false },
-    { key:'codigo_iniciativa',           label:'Contrato/Convênio',      fixed:false, defaultVisible:false },
+    // fixas (sempre visíveis, não entram no seletor)
+    { key:'iniciativa_display',      label:'Iniciativa',             fixed:true  },
+    { key:'no_empenho',              label:'Empenho',                fixed:true  },
+    { key:'data_empenho',            label:'Data',                   fixed:true  },
+    { key:'nome_orgao',              label:'Órgão',                  fixed:true  },
+    { key:'credor',                  label:'Credor',                 fixed:true  },
+    { key:'cnpj_cpf_credor',         label:'CNPJ/CPF',               fixed:true  },
+    // Valores — ordem: Empenhado, Liquidado, Pago Financeiro, Empenhado Efetivo, Total Pago
+    { key:'valor_empenhado',         label:'Vl. Empenhado',          fixed:true  },
+    { key:'valor_liquidado',         label:'Vl. Liquidado',          fixed:true  },
+    { key:'valor_pago_financeiro',   label:'Vl. Pago Financeiro',    fixed:true  },
+    { key:'valor_empenhado_efetivo', label:'Vl. Empenhado Efetivo',  fixed:true  },
+    { key:'valor_total_pag',         label:'Vl. Total Pago',         fixed:true  },
+    // opcionais de valores
+    { key:'valor_liquidado_rp',      label:'Vl. Liquidado RP',       fixed:false, defaultVisible:false },
+    { key:'valor_cancelado_rp',      label:'Vl. Cancelado RP',       fixed:false, defaultVisible:false },
+    { key:'valor_pago_rp',           label:'Vl. Pago RP',            fixed:false, defaultVisible:false },
+    { key:'valor_pago_processado',   label:'Vl. Pago Processado',    fixed:false, defaultVisible:false },
+    { key:'valor_pago_nao_processado',label:'Vl. Pago Não Proc.',    fixed:false, defaultVisible:false },
+    // opcionais de classificação
+    { key:'anexo_display',           label:'Anexo',                  fixed:false, defaultVisible:true  },
+    { key:'ano',                     label:'Ano',                    fixed:false, defaultVisible:false },
+    { key:'no_processo_compra',      label:'Proc. Compra',           fixed:false, defaultVisible:true  },
+    { key:'contrato_display',        label:'Contrato',               fixed:false, defaultVisible:true  },
+    { key:'modalidade_licitacao',    label:'Modalidade',             fixed:false, defaultVisible:true  },
+    { key:'nome_elemento_despesa',   label:'Elemento Despesa',       fixed:false, defaultVisible:true  },
+    { key:'cod_elemento_despesa',    label:'Cód. Elemento Despesa',  fixed:false, defaultVisible:false },
+    { key:'nome_item_despesa',       label:'Item Despesa',           fixed:false, defaultVisible:false },
+    { key:'codigo_item_despesa',     label:'Cód. Item Despesa',      fixed:false, defaultVisible:false },
+    { key:'nome_fonte_recurso',      label:'Fonte de Recurso',       fixed:false, defaultVisible:false },
+    { key:'codigo_fonte_recurso',    label:'Cód. Fonte de Recurso',  fixed:false, defaultVisible:false },
+    { key:'codigo_orgao',            label:'Cód. Órgão',             fixed:false, defaultVisible:false },
 ];
 
 // Estado das colunas visíveis (opcionais)
@@ -923,19 +918,7 @@ function reconstruirCabecalhoEXEC() {
 function getColunasVisiveis() {
     const fixed = EXEC_COLS_CONFIG.filter(c=>c.fixed);
     const optional = EXEC_COLS_CONFIG.filter(c=>!c.fixed && execColsVisiveis[c.key]);
-    // Inserir "Anexo" logo após "Iniciativa" se visível
-    const result = [];
-    for (const col of fixed) {
-        result.push(col);
-        if (col.key==='iniciativa_display') {
-            const anx = optional.find(c=>c.key==='anexo_display');
-            if (anx) result.push(anx);
-        }
-    }
-    // Restante das opcionais (que não são anexo) após as fixas
-    const restOpt = optional.filter(c=>c.key!=='anexo_display');
-    result.push(...restOpt);
-    return result;
+    return [...fixed, ...optional];
 }
 
 window.abrirSeletorColunas = function() {
@@ -1005,9 +988,12 @@ function buildRowEXEC(e) {
 
     const cellMap = {
         'ano': `<td>${e.ano||'-'}</td>`,
+        'codigo_iniciativa': `<td>${e.codigo_iniciativa||'-'}</td>`,
         'iniciativa_display': `<td>${inicDisplay}</td>`,
+        'anexo_display': `<td>${anexoDisplay}</td>`,
         'no_empenho': `<td><a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.no_empenho||'')}');return false;">${e.no_empenho||'-'}</a></td>`,
         'data_empenho': `<td>${formatarData(e.data_empenho)}</td>`,
+        'codigo_orgao': `<td>${e.codigo_orgao||'-'}</td>`,
         'nome_orgao': `<td title="${e.nome_orgao||''}">${(e.nome_orgao||'-').substring(0,30)}${(e.nome_orgao||'').length>30?'...':''}</td>`,
         'credor': `<td title="${e.credor||''}">${(e.credor||'-').substring(0,30)}${(e.credor||'').length>30?'...':''}</td>`,
         'cnpj_cpf_credor': `<td>${e.cnpj_cpf_credor||'-'}</td>`,
@@ -1016,27 +1002,18 @@ function buildRowEXEC(e) {
         'modalidade_licitacao': `<td>${(e.modalidade_licitacao||'-').substring(0,25)}${(e.modalidade_licitacao||'').length>25?'...':''}</td>`,
         'cod_elemento_despesa': `<td>${codElem}</td>`,
         'nome_elemento_despesa': `<td>${nomeElem.substring(0,30)}${nomeElem.length>30?'...':''}</td>`,
-        'valor_empenhado_efetivo': `<td class="text-right">${formatarMoeda(e.valor_empenhado_efetivo)}</td>`,
-        'valor_total_pag': `<td class="text-right">${formatarMoeda(e.valor_total_pag||e.valor_pago_financeiro)}</td>`,
-        'anexo_display': `<td>${anexoDisplay}</td>`,
-        'codigo_orgao': `<td>${e.codigo_orgao||'-'}</td>`,
+        'codigo_fonte_recurso': `<td>${codFonte}</td>`,
+        'nome_fonte_recurso': `<td>${nomeFonte.substring(0,25)}${nomeFonte.length>25?'...':''}</td>`,
+        'codigo_item_despesa': `<td>${codItem}</td>`,
+        'nome_item_despesa': `<td>${nomeItem.substring(0,25)}${nomeItem.length>25?'...':''}</td>`,
         'valor_empenhado': `<td class="text-right">${formatarMoeda(e.valor_empenhado)}</td>`,
         'valor_liquidado': `<td class="text-right">${formatarMoeda(e.valor_liquidado)}</td>`,
         'valor_pago_financeiro': `<td class="text-right">${formatarMoeda(e.valor_pago_financeiro)}</td>`,
         'valor_liquidado_rp': `<td class="text-right">${formatarMoeda(e.valor_liquidado_rp)}</td>`,
         'valor_cancelado_rp': `<td class="text-right">${formatarMoeda(e.valor_cancelado_rp)}</td>`,
-        'valor_pago_processado': `<td class="text-right">${formatarMoeda(e.valor_pago_processado)}</td>`,
-        'valor_pago_nao_processado': `<td class="text-right">${formatarMoeda(e.valor_pago_nao_processado)}</td>`,
+        'valor_empenhado_efetivo': `<td class="text-right">${formatarMoeda(e.valor_empenhado_efetivo)}</td>`,
         'valor_pago_rp': `<td class="text-right">${formatarMoeda(e.valor_pago_rp)}</td>`,
-        'valor_cancelado_processado': `<td class="text-right">${formatarMoeda(e.valor_cancelado_processado)}</td>`,
-        'valor_restabelecido_processado': `<td class="text-right">${formatarMoeda(e.valor_restabelecido_processado)}</td>`,
-        'valor_cancelado_nao_processado': `<td class="text-right">${formatarMoeda(e.valor_cancelado_nao_processado)}</td>`,
-        'valor_restabelecido_nao_processado': `<td class="text-right">${formatarMoeda(e.valor_restabelecido_nao_processado)}</td>`,
-        'codigo_fonte_recurso': `<td>${codFonte}</td>`,
-        'nome_fonte_recurso': `<td>${nomeFonte.substring(0,25)}${nomeFonte.length>25?'...':''}</td>`,
-        'codigo_item_despesa': `<td>${codItem}</td>`,
-        'nome_item_despesa': `<td>${nomeItem.substring(0,25)}${nomeItem.length>25?'...':''}</td>`,
-        'codigo_iniciativa': `<td>${e.codigo_iniciativa||'-'}</td>`,
+        'valor_pago_total': `<td class="text-right">${formatarMoeda(e.valor_pago_total)}</td>`,
     };
     const colsVis = getColunasVisiveis();
     const cells = colsVis.map(col=>cellMap[col.key]||`<td>-</td>`).join('');
@@ -1469,18 +1446,88 @@ window.exportarModalCSV = function() {
 // ============================================================
 // 11. COPIAR LINK / URL
 // ============================================================
-function copiarLinkDireto() {
-    navigator.clipboard.writeText(window.location.href).then(()=>{
-        const t=document.getElementById('toastSucesso');
-        t.style.display='flex'; setTimeout(()=>{t.style.display='none';},3000);
-    }).catch(()=>mostrarToast('Erro ao copiar link.','error'));
-}
+function copiarLinkDireto() { copiarLinkContexto(); }
 window.copiarLinkDireto = copiarLinkDireto;
 
+function copiarLinkContexto(tabOverride) {
+    const url = new URL(window.location.href);
+    // Detectar aba ativa
+    let tabAtiva = tabOverride || null;
+    if (!tabAtiva) {
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+            if (tab.classList.contains('active')) tabAtiva = tab.id.replace('-tab','');
+        });
+    }
+    if (tabAtiva) url.searchParams.set('tab', tabAtiva);
+
+    // Se modal de empenho estiver aberto, incluir o empenho no link
+    const modal = document.getElementById('detailModal');
+    const modalAberto = modal && modal.classList.contains('show');
+    if (modalAberto) {
+        const highlight = document.querySelector('#modalContent .info-value.highlight');
+        if (highlight) url.searchParams.set('empenho', highlight.textContent.trim());
+    }
+
+    // Incluir filtros ativos da aba de execução
+    if (tabAtiva === 'execucao') {
+        const filtros = ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'];
+        filtros.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.value) url.searchParams.set(id, el.value);
+        });
+    }
+    if (tabAtiva === 'execucao-orgao') {
+        const filtros = ['filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao'];
+        filtros.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.value) url.searchParams.set(id, el.value);
+        });
+    }
+    if (tabAtiva === 'iniciativas') {
+        const filtros = ['filtroCodigoINIC','filtroNomeINIC','filtroAnexoINIC'];
+        filtros.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.value) url.searchParams.set(id, el.value);
+        });
+    }
+
+    navigator.clipboard.writeText(url.toString()).then(()=>{
+        const t = document.getElementById('toastSucesso');
+        t.style.display = 'flex'; setTimeout(()=>{ t.style.display='none'; }, 3000);
+    }).catch(()=>mostrarToast('Erro ao copiar link.','error'));
+}
+window.copiarLinkContexto = copiarLinkContexto;
+
 function carregarFiltrosDaURL() {
-    const p=new URLSearchParams(window.location.search);
-    const tab=p.get('tab');
-    if(tab){ const el=document.getElementById(`${tab}-tab`); if(el) setTimeout(()=>el.click(),100); }
+    const p = new URLSearchParams(window.location.search);
+    const tab = p.get('tab');
+    if (tab) {
+        const el = document.getElementById(`${tab}-tab`);
+        if (el) setTimeout(()=>el.click(), 100);
+    }
+    // Restaurar filtros de execução
+    setTimeout(()=>{
+        ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].forEach(id=>{
+            const v = p.get(id); const el = document.getElementById(id);
+            if (v && el) { el.value = v; }
+        });
+        if (['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].some(id=>p.get(id))) aplicarFiltrosEXEC();
+        // Restaurar filtros execucao-orgao
+        ['filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao'].forEach(id=>{
+            const v = p.get(id); const el = document.getElementById(id);
+            if (v && el) { el.value = v; }
+        });
+        if (['filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao'].some(id=>p.get(id))) calcularTabelaOrgao();
+        // Restaurar filtros iniciativas
+        ['filtroCodigoINIC','filtroNomeINIC','filtroAnexoINIC'].forEach(id=>{
+            const v = p.get(id); const el = document.getElementById(id);
+            if (v && el) { el.value = v; }
+        });
+        if (['filtroCodigoINIC','filtroNomeINIC','filtroAnexoINIC'].some(id=>p.get(id))) aplicarFiltrosINIC();
+        // Abrir modal de empenho se especificado
+        const empenho = p.get('empenho');
+        if (empenho) setTimeout(()=>window.verDetalhesEmpenho(empenho), 600);
+    }, 600);
 }
 
 // ============================================================
@@ -1512,11 +1559,11 @@ function renderizarExecucaoOrgao() {
                 </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Cód. UO</label>
+                <label class="filter-label">Cód. Órgão</label>
                 <input type="text" class="form-control" id="filtroCodigoUOOrgao" placeholder="Digite...">
             </div>
             <div class="filter-group" style="flex:2">
-                <label class="filter-label">Nome UO</label>
+                <label class="filter-label">Nome Órgão</label>
                 <input type="text" class="form-control" id="filtroNomeUOOrgao" placeholder="Digite...">
             </div>
         </div>
@@ -1529,8 +1576,11 @@ function renderizarExecucaoOrgao() {
     <div class="toolbar">
         <div class="toolbar-left">
             <button class="btn-export" onclick="exportarOrgaoCSV()"><i class="material-icons">description</i> CSV</button>
+            <button class="btn-export" onclick="exportarOrgaoPDF()"><i class="material-icons">print</i> PDF</button>
+            <button class="btn-export" onclick="copiarLinkContexto('execucao-orgao')"><i class="material-icons">link</i> Copiar Link</button>
         </div>
-        <div class="toolbar-right">
+        <div class="toolbar-right" style="display:flex;align-items:center;gap:8px;">
+            <input type="text" id="buscaORGAO" maxlength="30" placeholder="Buscar registros..." class="form-control" style="height:32px;font-size:12px;width:220px;padding:4px 10px;" oninput="buscarORGAO(this.value)">
             <span class="table-badge" id="badgeOrgao">-</span>
         </div>
     </div>
@@ -1541,8 +1591,8 @@ function renderizarExecucaoOrgao() {
                 <thead><tr>
                     <th class="sortable-header" onclick="sortORGAO('iniciativa_label')">Iniciativa <i class="material-icons">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortORGAO('anexo')">Anexo <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortORGAO('codigo_orgao')">Cód. UO <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortORGAO('nome_orgao')">Nome UO <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortORGAO('codigo_orgao')">Cód. Órgão <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortORGAO('nome_orgao')">Nome Órgão <i class="material-icons">unfold_more</i></th>
                     <th class="sortable-header text-right" onclick="sortORGAO('valor_empenhado')">Empenhado <i class="material-icons">unfold_more</i></th>
                     <th class="sortable-header text-right" onclick="sortORGAO('valor_liquidado')">Liquidado <i class="material-icons">unfold_more</i></th>
                     <th class="sortable-header text-right" onclick="sortORGAO('valor_pago_financeiro')">Pago Financeiro <i class="material-icons">unfold_more</i></th>
@@ -1584,13 +1634,14 @@ function calcularTabelaOrgao() {
         return true;
     });
 
-    // Enriquecer com label da iniciativa (de dadosIniciativas)
+    // Enriquecer com label da iniciativa e anexo da iniciativa (de dadosIniciativas)
     base = base.map(r=>{
         const chave=(r.codigo_iniciativa||'').trim();
         const iObj=dadosIniciativas.find(i=>(i.codigo_iniciativa||'').trim()===chave);
         return {...r,
             iniciativa_label: iObj?(iObj.iniciativa||chave):chave,
             codigo_iniciativa_label: iObj?(iObj.codigo_iniciativa||chave):chave,
+            anexo_iniciativa: iObj?(iObj.anexo||r.anexo||'-'):(r.anexo||'-'),
         };
     });
 
@@ -1628,7 +1679,7 @@ function atualizarTabelaOrgao() {
                 : `<span>${inicCod}</span>`;
             return `<tr>
             <td>${inicLink}</td>
-            <td>${(r.anexo||'-')}</td>
+            <td>${(r.anexo_iniciativa||r.anexo||'-')}</td>
             <td>${r.codigo_orgao||'-'}</td>
             <td title="${r.nome_orgao||''}">${(r.nome_orgao||'-').substring(0,40)}${(r.nome_orgao||'').length>40?'...':''}</td>
             <td class="text-right">${formatarMoeda(r.valor_empenhado)}</td>
@@ -1691,14 +1742,68 @@ window.sortORGAO = function(col) {
     pagOrgao.atual=1; atualizarTabelaOrgao();
 }
 window.exportarOrgaoCSV = function() {
-    const campos=['codigo_iniciativa_label','iniciativa_label','anexo','codigo_orgao','nome_orgao',
+    const campos=['codigo_iniciativa_label','iniciativa_label','anexo_iniciativa','codigo_orgao','nome_orgao',
         'valor_empenhado','valor_liquidado','valor_pago_financeiro',
         'valor_cancelado_rp','valor_empenhado_efetivo',
         'valor_pago_rp','valor_pago_total'];
-    const headers=['Código Iniciativa','Iniciativa','Anexo','Cód. UO','Nome UO',
+    const headers=['Código Iniciativa','Iniciativa','Anexo','Cód. Órgão','Nome Órgão',
         'Empenhado','Liquidado','Pago Financeiro','Cancelado RP','Empenhado Efetivo','Pago RP','Total Pago'];
     const csv=[headers.join(';'),...(window.orgaoFiltrada||[]).map(r=>campos.map(c=>`"${r[c]||''}"`).join(';'))].join('\n');
     const blob=new Blob(['\uFEFF'+csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='execucao_por_orgao.csv'; a.click();
+};
+
+window.exportarOrgaoPDF = function() {
+    const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:'landscape'});
+    doc.autoTable({
+        head:[['Iniciativa','Anexo','Cód. Órgão','Nome Órgão','Empenhado','Liquidado','Pago Financeiro','Emp. Efetivo','Total Pago']],
+        body:(window.orgaoFiltrada||[]).slice(0,100).map(r=>[
+            r.codigo_iniciativa_label||'-', r.anexo_iniciativa||r.anexo||'-',
+            r.codigo_orgao||'-', (r.nome_orgao||'-').substring(0,30),
+            formatarMoeda(r.valor_empenhado), formatarMoeda(r.valor_liquidado),
+            formatarMoeda(r.valor_pago_financeiro), formatarMoeda(r.valor_empenhado_efetivo),
+            formatarMoeda(r.valor_pago_total)
+        ]),
+        headStyles:{fillColor:[32,68,93]}, styles:{fontSize:7},
+        didDrawPage:()=>{doc.setFontSize(9);doc.text('Execução por Órgão - Acordo de Mariana',14,10);doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,doc.internal.pageSize.height-5);}
+    });
+    doc.save('execucao_por_orgao.pdf');
+};
+
+window.buscarORGAO = function(termo) {
+    const t = (termo||'').toLowerCase().trim();
+    if (!t) { atualizarTabelaOrgao(); return; }
+    const base = window.orgaoFiltrada || [];
+    const f = base.filter(r=>
+        String(r.codigo_iniciativa_label||'').toLowerCase().includes(t)||
+        String(r.iniciativa_label||'').toLowerCase().includes(t)||
+        String(r.nome_orgao||'').toLowerCase().includes(t)||
+        String(r.codigo_orgao||'').toLowerCase().includes(t)||
+        String(r.anexo_iniciativa||r.anexo||'').toLowerCase().includes(t)
+    );
+    const tbody = document.getElementById('tbodyOrgao');
+    if (!tbody) return;
+    tbody.innerHTML = f.slice(0,pagOrgao.porPag).map(r=>{
+        const chave=(r.codigo_iniciativa||'').trim();
+        const inicLabel = r.iniciativa_label||chave||'-';
+        const inicCod = r.codigo_iniciativa_label||chave||'-';
+        const inicLink = chave
+            ? `<a href="#" class="proc-link" title="${inicLabel}" onclick="irParaExecucaoDeEmpenho('${esc(chave)}');return false;">${inicCod}</a>`
+            : `<span>${inicCod}</span>`;
+        return `<tr>
+        <td>${inicLink}</td>
+        <td>${(r.anexo_iniciativa||r.anexo||'-')}</td>
+        <td>${r.codigo_orgao||'-'}</td>
+        <td title="${r.nome_orgao||''}">${(r.nome_orgao||'-').substring(0,40)}${(r.nome_orgao||'').length>40?'...':''}</td>
+        <td class="text-right">${formatarMoeda(r.valor_empenhado)}</td>
+        <td class="text-right">${formatarMoeda(r.valor_liquidado)}</td>
+        <td class="text-right">${formatarMoeda(r.valor_pago_financeiro)}</td>
+        <td class="text-right">${formatarMoeda(r.valor_cancelado_rp)}</td>
+        <td class="text-right">${formatarMoeda(r.valor_empenhado_efetivo)}</td>
+        <td class="text-right">${formatarMoeda(r.valor_pago_rp)}</td>
+        <td class="text-right">${formatarMoeda(r.valor_pago_total)}</td>
+    </tr>`;
+    }).join('');
+    document.getElementById('badgeOrgao').textContent = f.length+' registros';
 };
 function renderizarDownloads() {
     const c=document.getElementById('downloads-content'); if(!c)return;
@@ -1752,10 +1857,10 @@ function renderizarDownloads() {
                 <table class="metadata-table">
                     <thead><tr><th>Campo</th><th>Descrição</th><th>Tipo</th></tr></thead>
                     <tbody>
-                        <tr><td><code>no_empenho</code></td><td>Número do documento de empenho</td><td>Texto</td></tr>
-                        <tr><td><code>data_empenho</code></td><td>Data de registro do empenho</td><td>Data</td></tr>
                         <tr><td><code>ano</code></td><td>Ano de exercício do empenho</td><td>Número</td></tr>
                         <tr><td><code>codigo_iniciativa</code></td><td>Código do contrato/convênio de entrada (vincula à iniciativa)</td><td>Texto</td></tr>
+                        <tr><td><code>no_empenho</code></td><td>Número do documento de empenho</td><td>Texto</td></tr>
+                        <tr><td><code>data_empenho</code></td><td>Data de registro do empenho</td><td>Data</td></tr>
                         <tr><td><code>codigo_orgao</code></td><td>Código da unidade orçamentária responsável</td><td>Texto</td></tr>
                         <tr><td><code>nome_orgao</code></td><td>Nome da unidade orçamentária responsável</td><td>Texto</td></tr>
                         <tr><td><code>credor</code></td><td>Razão social do credor/fornecedor</td><td>Texto</td></tr>
@@ -1774,8 +1879,6 @@ function renderizarDownloads() {
                         <tr><td><code>valor_liquidado_rp</code></td><td>Valor liquidado em restos a pagar</td><td>Moeda</td></tr>
                         <tr><td><code>valor_cancelado_rp</code></td><td>Valor cancelado em restos a pagar</td><td>Moeda</td></tr>
                         <tr><td><code>valor_empenhado_efetivo</code></td><td>Valor empenhado efetivo</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_pago_processado</code></td><td>Valor pago processado</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_pago_nao_processado</code></td><td>Valor pago não processado</td><td>Moeda</td></tr>
                         <tr><td><code>valor_pago_rp</code></td><td>Valor pago em restos a pagar</td><td>Moeda</td></tr>
                         <tr><td><code>valor_total_pag</code></td><td>Valor total pago (financeiro + RP)</td><td>Moeda</td></tr>
                     </tbody>
