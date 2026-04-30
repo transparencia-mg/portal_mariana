@@ -145,6 +145,10 @@
         .info-label { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600; margin-bottom: 4px; }
         .info-value { font-size: 13px; font-weight: 500; color: #1e293b; word-break: break-word; }
         .info-value.highlight { font-size: 16px; color: var(--accent-red); font-weight: 700; }
+        /* Modal em iframe: fixar posição para não causar scroll drifting */
+        .modal { position: fixed !important; }
+        .modal-dialog { margin: 20px auto !important; }
+        .modal-body { max-height: 65vh; overflow-y: auto !important; overflow-x: hidden; }
 
         /* PAGINAÇÃO */
         .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: white; border-top: 1px solid #dee2e6; width: 100%; flex-wrap: wrap; gap: 10px; border-radius: 0 0 8px 8px; }
@@ -391,13 +395,25 @@ function mostrarToast(msg, tipo) {
 }
 
 function iframeH() {
+    // Não envia resize enquanto modal estiver aberto (evita scroll drift)
+    const modalAberto = document.querySelector('.modal.show');
+    if (modalAberto) return;
     const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)+10;
     try { if(window.parent&&window.parent!==window) window.parent.postMessage({iframeHeight:h,type:'resize'},'*'); } catch(e){}
 }
 
 function voltarAoTopo() {
-    if(window.parent&&window.parent!==window) window.parent.scrollTo({top:0,behavior:'smooth'});
-    window.scrollTo({top:0,behavior:'smooth'});
+    // Se estiver dentro de um iframe, manda mensagem para o pai rolar ao topo
+    if (window.parent && window.parent !== window) {
+        try {
+            window.parent.postMessage({ type: 'scrollToTop', scrollTop: true }, '*');
+            window.parent.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch(e) {}
+    }
+    // Rola o próprio documento também (caso não esteja em iframe ou como fallback)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
 }
 
 // ============================================================
@@ -507,7 +523,10 @@ function renderizarIniciativas() {
         <div class="filters-row">
             <div class="filter-group">
                 <label class="filter-label">Código da Iniciativa</label>
-                <input type="text" class="form-control" id="filtroCodigoINIC" placeholder="Digite o código...">
+                <select class="form-select modern-select" id="filtroCodigoINIC">
+                    <option value="">Todos</option>
+                    ${[...new Set(dadosIniciativas.map(i=>i.codigo_iniciativa).filter(Boolean))].sort().map(c=>`<option value="${c}">${c}</option>`).join('')}
+                </select>
             </div>
             <div class="filter-group" style="flex:3;min-width:250px;">
                 <label class="filter-label">Nome da Iniciativa</label>
@@ -590,11 +609,11 @@ function sortINIC(col) {
 }
 
 window.aplicarFiltrosINIC = function() {
-    const cod  = (document.getElementById('filtroCodigoINIC')?.value||'').toLowerCase().trim();
+    const cod  = (document.getElementById('filtroCodigoINIC')?.value||'').trim();
     const nome = (document.getElementById('filtroNomeINIC')?.value||'').toLowerCase().trim();
     const anx  = document.getElementById('filtroAnexoINIC')?.value||'';
     window.inicFiltradas = ordenar(dadosIniciativas.filter(i=>{
-        if (cod&&!String(i.codigo_iniciativa||'').toLowerCase().includes(cod)) return false;
+        if (cod&&String(i.codigo_iniciativa||'').trim()!==cod) return false;
         if (nome&&!String(i.iniciativa||'').toLowerCase().includes(nome)) return false;
         if (anx&&i.anexo!==anx) return false;
         return true;
@@ -633,23 +652,33 @@ window.buscarINIC = function(termo) {
 // 5. IR PARA EXECUÇÃO
 // ============================================================
 window.irParaExecucao = function(codigoIniciativa, nome) {
+    // Navega para aba execução
     document.getElementById('execucao-tab').click();
-    setTimeout(()=>{
+    // Aguarda a aba renderizar completamente antes de setar o filtro
+    function tentarSetarFiltro(tentativas) {
         const sel = document.getElementById('filtroInicExec');
-        if (sel) {
-            // Tenta match exato pelo valor do option
-            let found = false;
+        if (!sel) {
+            if (tentativas > 0) setTimeout(()=>tentarSetarFiltro(tentativas-1), 200);
+            return;
+        }
+        // Limpa filtros antes de aplicar o novo
+        sel.value = '';
+        // Tenta match exato pelo valor do option
+        let found = false;
+        for (let opt of sel.options) {
+            if (opt.value === codigoIniciativa) { sel.value = opt.value; found = true; break; }
+        }
+        if (!found) {
             for (let opt of sel.options) {
-                if (opt.value === codigoIniciativa) { sel.value = opt.value; found = true; break; }
-            }
-            if (!found) {
-                for (let opt of sel.options) {
-                    if (opt.value.startsWith(codigoIniciativa) || opt.text.startsWith(codigoIniciativa)) { sel.value = opt.value; found = true; break; }
-                }
+                if (opt.value.startsWith(codigoIniciativa) || opt.text.startsWith(codigoIniciativa)) { sel.value = opt.value; found = true; break; }
             }
         }
+        // Limpa outros filtros para mostrar APENAS a iniciativa selecionada
+        ['filtroAnoExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec']
+            .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
         aplicarFiltrosEXEC();
-    }, 500);
+    }
+    setTimeout(()=>tentarSetarFiltro(10), 400);
 };
 
 // Chamada a partir da célula de iniciativa na tabela execução
@@ -1450,7 +1479,22 @@ function copiarLinkDireto() { copiarLinkContexto(); }
 window.copiarLinkDireto = copiarLinkDireto;
 
 function copiarLinkContexto(tabOverride) {
-    const url = new URL(window.location.href);
+    // Usa a URL real da página (mesmo dentro de iframe)
+    let baseUrl = window.location.href;
+    // Se estiver em iframe, tenta pegar a URL do pai
+    if (window.parent && window.parent !== window) {
+        try { baseUrl = window.parent.location.href; } catch(e) {
+            // Cross-origin: usa a própria URL como base
+            baseUrl = window.location.href;
+        }
+    }
+    const url = new URL(baseUrl);
+    // Remove params antigos para reconstruir
+    ['tab','empenho','filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec',
+     'filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec',
+     'filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao',
+     'filtroCodigoINIC','filtroNomeINIC','filtroAnexoINIC'].forEach(k=>url.searchParams.delete(k));
+
     // Detectar aba ativa
     let tabAtiva = tabOverride || null;
     if (!tabAtiva) {
@@ -1491,10 +1535,44 @@ function copiarLinkContexto(tabOverride) {
         });
     }
 
-    navigator.clipboard.writeText(url.toString()).then(()=>{
+    const linkFinal = url.toString();
+
+    function mostrarToastSucesso() {
         const t = document.getElementById('toastSucesso');
         t.style.display = 'flex'; setTimeout(()=>{ t.style.display='none'; }, 3000);
-    }).catch(()=>mostrarToast('Erro ao copiar link.','error'));
+    }
+
+    // Tenta clipboard da API; se falhar (iframe cross-origin), usa postMessage para o pai copiar
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(linkFinal).then(()=>{
+            mostrarToastSucesso();
+        }).catch(()=>{
+            // Fallback via postMessage para o iframe pai
+            if (window.parent && window.parent !== window) {
+                try { window.parent.postMessage({ type: 'copyToClipboard', text: linkFinal }, '*'); } catch(e) {}
+            }
+            // Fallback via textarea
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = linkFinal; ta.style.position='fixed'; ta.style.opacity='0';
+                document.body.appendChild(ta); ta.focus(); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta);
+            } catch(e2) {}
+            mostrarToastSucesso();
+        });
+    } else {
+        // Fallback para navegadores sem suporte à Clipboard API
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = linkFinal; ta.style.position='fixed'; ta.style.opacity='0';
+            document.body.appendChild(ta); ta.focus(); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+        } catch(e) {}
+        if (window.parent && window.parent !== window) {
+            try { window.parent.postMessage({ type: 'copyToClipboard', text: linkFinal }, '*'); } catch(e) {}
+        }
+        mostrarToastSucesso();
+    }
 }
 window.copiarLinkContexto = copiarLinkContexto;
 
@@ -1833,6 +1911,12 @@ function renderizarDownloads() {
                     <i class="material-icons">receipt_long</i> CSV Execução
                 </button>
             </div>
+            <div style="background:#f8fafd;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;min-width:160px;">
+                <div style="font-weight:700;color:#20445d;font-size:14px;margin-bottom:8px;">Órgão</div>
+                <button class="btn-export" style="width:100%;justify-content:center;" onclick="exportarOrgaoCSV()">
+                    <i class="material-icons">business</i> CSV Órgão
+                </button>
+            </div>
         </div>
     </div>
     <div class="filter-container">
@@ -1847,6 +1931,27 @@ function renderizarDownloads() {
                         <tr><td><code>iniciativa</code></td><td>Descrição da iniciativa</td><td>Texto</td></tr>
                         <tr><td><code>anexo</code></td><td>Anexo do acordo ao qual a iniciativa pertence</td><td>Texto</td></tr>
                         <tr><td><code>valor_da_iniciativa</code></td><td>Valor total previsto para a iniciativa</td><td>Moeda</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="metadata-container mb-3">
+            <div class="metadata-header"><i class="material-icons me-2" style="vertical-align:middle">business</i> Órgão (Execução por Unidade Orçamentária)</div>
+            <div class="table-responsive">
+                <table class="metadata-table">
+                    <thead><tr><th>Campo</th><th>Descrição</th><th>Tipo</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>codigo_iniciativa</code></td><td>Código da iniciativa vinculada ao órgão</td><td>Texto</td></tr>
+                        <tr><td><code>anexo</code></td><td>Anexo do acordo ao qual a iniciativa pertence</td><td>Texto</td></tr>
+                        <tr><td><code>codigo_orgao</code></td><td>Código da unidade orçamentária responsável</td><td>Texto</td></tr>
+                        <tr><td><code>nome_orgao</code></td><td>Nome da unidade orçamentária responsável</td><td>Texto</td></tr>
+                        <tr><td><code>valor_empenhado</code></td><td>Valor empenhado pelo órgão</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_liquidado</code></td><td>Valor liquidado pelo órgão</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_pago_financeiro</code></td><td>Valor pago financeiramente pelo órgão</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_cancelado_rp</code></td><td>Valor cancelado em restos a pagar</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_empenhado_efetivo</code></td><td>Valor empenhado efetivo pelo órgão</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_pago_rp</code></td><td>Valor pago em restos a pagar</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_pago_total</code></td><td>Valor total pago pelo órgão (financeiro + RP)</td><td>Moeda</td></tr>
                     </tbody>
                 </table>
             </div>
