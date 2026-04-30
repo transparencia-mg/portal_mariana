@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.134,
+  "time": 0.139,
   "errors": [],
   "tasks": [
     {
@@ -142,13 +142,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "0da9846116133aaf799c5063ee0e8840",
-          "bytes": 81962,
+          "hash": "9afecab93e309d49f07e13dda1310802",
+          "bytes": 81969,
           "fields": 30,
           "rows": 210
         }
       },
-      "time": 0.047,
+      "time": 0.046,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -170,11 +170,63 @@
         "unique-error"
       ],
       "partial": false,
-      "errors": [],
+      "errors": [
+        {
+          "label": "codigo_iniciativa",
+          "fieldName": "iniciativa",
+          "fieldNumber": 2,
+          "fieldPosition": 2,
+          "labels": [
+            "ano",
+            "codigo_iniciativa",
+            "codigo_orgao",
+            "nome_orgao",
+            "no_empenho",
+            "data_empenho",
+            "no_processo_compra",
+            "modalidade_licitacao",
+            "cod_elemento_despesa",
+            "nome_elemento_despesa",
+            "codigo_item_despesa",
+            "nome_item_despesa",
+            "codigo_fonte_recurso",
+            "nome_fonte_recurso",
+            "cnpj_cpf_credor",
+            "credor",
+            "valor_empenhado",
+            "valor_liquidado",
+            "valor_pago_financeiro",
+            "valor_liquidado_rp",
+            "valor_cancelado_processado",
+            "valor_restabelecido_processado",
+            "valor_cancelado_nao_processado",
+            "valor_restabelecido_nao_processado",
+            "valor_cancelado_rp",
+            "valor_empenhado_efetivo",
+            "valor_pago_processado",
+            "valor_pago_nao_processado",
+            "valor_pago_rp",
+            "valor_total_pago"
+          ],
+          "rowPositions": [
+            1
+          ],
+          "code": "incorrect-label",
+          "name": "Incorrect Label",
+          "tags": [
+            "#table",
+            "#header",
+            "#label"
+          ],
+          "note": "",
+          "message": "Label \"codigo_iniciativa\" in field iniciativa at position \"2\" does not match the field name in the schema",
+          "description": "One of the data source header does not match the field name defined in the schema."
+        }
+      ],
       "stats": {
-        "errors": 0
+        "errors": 1
       },
-      "valid": true
+      "valid": false
     },
     {
       "resource": {
@@ -357,8 +409,8 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "d0043054611f657f29a493353ee6093d",
-          "bytes": 2914,
+          "hash": "65a7bdcef33217f675b73a619f922a41",
+          "bytes": 2921,
           "fields": 17,
           "rows": 16
         }
@@ -385,15 +437,54 @@
         "unique-error"
       ],
       "partial": false,
-      "errors": [],
+      "errors": [
+        {
+          "label": "codigo_iniciativa",
+          "fieldName": "iniciativa",
+          "fieldNumber": 1,
+          "fieldPosition": 1,
+          "labels": [
+            "codigo_iniciativa",
+            "codigo_orgao",
+            "nome_orgao",
+            "valor_empenhado",
+            "valor_liquidado",
+            "valor_pago_financeiro",
+            "valor_liquidado_rp",
+            "valor_cancelado_processado",
+            "valor_restabelecido_processado",
+            "valor_cancelado_nao_processado",
+            "valor_restabelecido_nao_processado",
+            "valor_cancelado_rp",
+            "valor_empenhado_efetivo",
+            "valor_pago_processado",
+            "valor_pago_nao_processado",
+            "valor_pago_rp",
+            "valor_pago_total"
+          ],
+          "rowPositions": [
+            1
+          ],
+          "code": "incorrect-label",
+          "name": "Incorrect Label",
+          "tags": [
+            "#table",
+            "#header",
+            "#label"
+          ],
+          "note": "",
+          "message": "Label \"codigo_iniciativa\" in field iniciativa at position \"1\" does not match the field name in the schema",
+          "description": "One of the data source header does not match the field name defined in the schema."
+        }
+      ],
       "stats": {
-        "errors": 0
+        "errors": 1
       },
-      "valid": true
+      "valid": false
     }
   ],
   "stats": {
-    "errors": 1,
+    "errors": 3,
     "tasks": 3
   },
   "valid": false
