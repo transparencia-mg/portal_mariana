@@ -230,8 +230,13 @@
                     </button>
                 </li>
                 <li class="nav-item">
+                    <button class="nav-link" id="execucao-orgao-tab" data-bs-toggle="tab" data-bs-target="#tab-execucao-orgao">
+                        <i class="material-icons">domain</i>Execução por Órgão
+                    </button>
+                </li>
+                <li class="nav-item">
                     <button class="nav-link" id="execucao-tab" data-bs-toggle="tab" data-bs-target="#tab-execucao">
-                        <i class="material-icons">receipt_long</i>Consulta Execução
+                        <i class="material-icons">receipt_long</i>Execução por Empenho
                     </button>
                 </li>
                 <li class="nav-item">
@@ -254,6 +259,9 @@
         <div class="tab-content" id="dashboardTabsContent">
             <div class="tab-pane fade show active" id="tab-iniciativas" role="tabpanel">
                 <div id="iniciativas-content"></div>
+            </div>
+            <div class="tab-pane fade" id="tab-execucao-orgao" role="tabpanel">
+                <div id="execucao-orgao-content"></div>
             </div>
             <div class="tab-pane fade" id="tab-execucao" role="tabpanel">
                 <div id="execucao-content"></div>
@@ -314,7 +322,8 @@ const LICITACOES_BASE = 'https://raw.githubusercontent.com/transparencia-mg/port
 
 let dadosIniciativas = [];
 let dadosEmpenho = [];
-let dadosOrgao = {}; // mapa: contratoconvenio_entrada -> dados do órgão
+let dadosOrgao = []; // array direto do orgao.csv
+let dadosOrgaoMap = {}; // mapa: codigo_iniciativa -> dados do órgão (para modal)
 let dadosLicitacoes = {}; // mapa: numero_processo_formatado -> dados da licitação
 
 let empenhoFiltradoTabela = [];
@@ -322,16 +331,14 @@ let iniciativasFiltradas  = [];
 
 let sortCfg = {
     iniciativas: { col: 'codigo_iniciativa', dir: 'asc' },
-    execucao:    { col: 'data_registro_doc_empenho', dir: 'desc' }
+    execucao:    { col: 'data_empenho', dir: 'desc' }
 };
 let pag = {
     iniciativas: { atual: 1, porPag: 50, total: 1 },
     execucao:    { atual: 1, porPag: 50, total: 1 }
 };
 
-let chartCredores = null;
-let chartModalidades = null;
-const chartPalette = ['#1a3a5c','#2c5f8a','#3a7cb8','#5a9fd4','#7ab8e0','#9dd1ec','#d4a017','#c0392b','#27ae60','#8e44ad'];
+const chartPalette = ['#1a3a5c','#2c5f8a','#3a7cb8','#5a9fd4','#7ab8e0','#9dd1ec','#d4a017','#c0392b','#27ae60','#8e44ad','#e67e22','#16a085'];
 
 // ============================================================
 // 2. UTILITÁRIOS
@@ -405,15 +412,16 @@ async function carregarDados() {
         const p1 = Papa.parse(t1,{header:true,delimiter:';'});
         dadosIniciativas = p1.data.filter(r=>r.codigo_iniciativa&&r.codigo_iniciativa!=='Total Geral'&&r.codigo_iniciativa.trim()!=='');
 
-        // Órgão (referência: contratoconvenio_entrada)
+        // Órgão (referência: codigo_iniciativa)
         mostrarLoading(true,'Carregando órgãos...');
         const r0 = await fetch(GITHUB_BASE+'orgao.csv');
         const t0 = await r0.text();
         const p0 = Papa.parse(t0,{header:true,delimiter:';'});
-        dadosOrgao = {};
-        p0.data.forEach(r=>{
-            const chave = (r.contratoconvenio_entrada||'').trim();
-            if (chave) dadosOrgao[chave] = r;
+        dadosOrgao = p0.data.filter(r=>(r.codigo_iniciativa||'').trim()!==''||(r.codigo_orgao||'').trim()!=='');
+        dadosOrgaoMap = {};
+        dadosOrgao.forEach(r=>{
+            const chave = (r.codigo_iniciativa||'').trim();
+            if (chave) dadosOrgaoMap[chave] = r;
         });
 
         mostrarLoading(true,'Carregando empenhos...');
@@ -421,7 +429,7 @@ async function carregarDados() {
         const r2 = await fetch(GITHUB_BASE+'empenho.csv');
         const t2 = await r2.text();
         const p2 = Papa.parse(t2,{header:true,delimiter:';'});
-        dadosEmpenho = p2.data.filter(r=>r.numero_empenho&&r.numero_empenho.trim()!=='');
+        dadosEmpenho = p2.data.filter(r=>r.no_empenho&&r.no_empenho.trim()!=='');
 
         // Tentar carregar licitações dos anos disponíveis para cruzamento de processo de compra
         mostrarLoading(true,'Carregando dados de compras (edital/contrato)...');
@@ -458,6 +466,7 @@ async function carregarDados() {
         iniciativasFiltradas  = [...dadosIniciativas];
 
         renderizarIniciativas();
+        renderizarExecucaoOrgao();
         renderizarExecucao();
         renderizarDownloads();
         setupDataAtualizacao();
@@ -513,7 +522,7 @@ function renderizarIniciativas() {
             </div>
         </div>
         <div class="botoes-abaixo">
-            <button class="btn-pesquisa" onclick="aplicarFiltrosINIC()"><i class="material-icons">search</i> Pesquisar</button>
+            <button class="btn-pesquisa" onclick="aplicarFiltrosINIC()"><i class="material-icons">refresh</i> Atualizar Filtros</button>
             <button class="btn-secondary-custom" onclick="limparFiltrosINIC()"><i class="material-icons">clear</i> Limpar Filtros</button>
         </div>
     </div>
@@ -534,7 +543,7 @@ function renderizarIniciativas() {
         <div class="table-fixed-header-container">
             <table class="table" id="tabelaIniciativas">
                 <thead><tr>
-                    <th class="sortable-header" onclick="sortINIC('codigo_iniciativa')">Código <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortINIC('codigo_iniciativa')">Iniciativa <i class="material-icons">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortINIC('iniciativa')">Iniciativa <i class="material-icons">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortINIC('anexo')">Anexo <i class="material-icons">unfold_more</i></th>
                     <th class="sortable-header text-right" onclick="sortINIC('valor_da_iniciativa')">Valor da Iniciativa <i class="material-icons">unfold_more</i></th>
@@ -635,29 +644,89 @@ window.irParaExecucao = function(codigoIniciativa, nome) {
     setTimeout(()=>{
         const sel = document.getElementById('filtroInicExec');
         if (sel) {
-            // Busca contratoconvenio_entrada da iniciativa para usar como chave no filtro
             const iObj = dadosIniciativas.find(i=>i.codigo_iniciativa===codigoIniciativa);
-            const chave = iObj ? (iObj.contratoconvenio_entrada||'').trim() : '';
-            if (chave) sel.value = chave;
+            const chave = iObj ? (iObj.codigo_iniciativa||'').trim() : '';
+            if (chave) { sel.value = chave; }
+            else {
+                for (let opt of sel.options) { if (opt.value===codigoIniciativa||opt.text.startsWith(codigoIniciativa)) { sel.value=opt.value; break; } }
+            }
         }
         aplicarFiltrosEXEC();
-    }, 300);
+    }, 400);
+};
+
+// Chamada a partir da célula de iniciativa na tabela execução
+window.irParaExecucaoDeEmpenho = function(contratoconvenioEntrada) {
+    document.getElementById('execucao-tab').click();
+    setTimeout(()=>{
+        const sel = document.getElementById('filtroInicExec');
+        if (sel) {
+            sel.value = contratoconvenioEntrada;
+        }
+        aplicarFiltrosEXEC();
+    }, 400);
 };
 
 // ============================================================
 // 6. EXECUÇÃO (EMPENHOS)
 // ============================================================
+
+// Configuração de colunas opcionais para execução
+const EXEC_COLS_CONFIG = [
+    // fixas (sempre visíveis, não entram no seletor)
+    { key:'ano',                   label:'Ano',                    fixed:true  },
+    { key:'iniciativa_display',                 label:'Iniciativa',             fixed:true  },
+    { key:'no_empenho',                     label:'Empenho',                fixed:true  },
+    { key:'data_empenho',          label:'Data',                   fixed:true  },
+    { key:'nome_orgao',          label:'Órgão',                  fixed:true  },
+    { key:'credor',                label:'Credor',                 fixed:true  },
+    { key:'cnpj_cpf_credor',          label:'CNPJ/CPF',               fixed:true  },
+    { key:'no_processo_compra',        label:'Proc. Compra',           fixed:true  },
+    { key:'contrato_display',                   label:'Contrato',               fixed:true  },
+    { key:'modalidade_licitacao',  label:'Modalidade',             fixed:true  },
+    { key:'cod_elemento_despesa',            label:'Cód. Elemento Desp.',    fixed:true  },
+    { key:'nome_elemento_despesa',         label:'Nome Elemento Desp.',    fixed:true  },
+    { key:'valor_empenhado_efetivo',       label:'Vl. Empenhado Efetivo',  fixed:true  },
+    { key:'valor_total_pag',              label:'Vl. Total Pago',         fixed:true  },
+    // opcionais (entram no seletor)
+    { key:'anexo_display',                      label:'Anexo',                  fixed:false, defaultVisible:true  },
+    { key:'codigo_orgao',        label:'Cód. UO',                fixed:false, defaultVisible:false },
+    { key:'valor_empenhado',            label:'Empenhado',              fixed:false, defaultVisible:true  },
+    { key:'valor_liquidado',            label:'Liquidado',              fixed:false, defaultVisible:true  },
+    { key:'valor_pago_financeiro',              label:'Pago Financeiro',        fixed:false, defaultVisible:true  },
+    { key:'valor_liquidado_rp',          label:'Vl. Liquidado RP',       fixed:false, defaultVisible:false },
+    { key:'valor_cancelado_rp', label:'Cancelado RP',fixed:false, defaultVisible:false },
+    { key:'valor_pago_processado',              label:'Pago Processado',        fixed:false, defaultVisible:false },
+    { key:'valor_pago_nao_processado',          label:'Pago Não Processado',    fixed:false, defaultVisible:false },
+    { key:'valor_pago_rp', label:'Pago RP',               fixed:false, defaultVisible:false },
+    { key:'valor_cancelado_processado',         label:'Cancelado Processado',   fixed:false, defaultVisible:false },
+    { key:'valor_restabelecido_processado',     label:'Restabelecido Proc.',    fixed:false, defaultVisible:false },
+    { key:'valor_cancelado_nao_processado',     label:'Cancelado Não Proc.',    fixed:false, defaultVisible:false },
+    { key:'valor_restabelecido_nao_processado', label:'Restabelecido Não Proc.',fixed:false, defaultVisible:false },
+    { key:'codigo_fonte_recurso',               label:'Cód. Fonte Recurso',     fixed:false, defaultVisible:false },
+    { key:'nome_fonte_recurso',            label:'Nome Fonte Recurso',     fixed:false, defaultVisible:false },
+    { key:'codigo_item_despesa',       label:'Cód. Item Despesa',      fixed:false, defaultVisible:false },
+    { key:'nome_item_despesa',    label:'Nome Item Despesa',      fixed:false, defaultVisible:false },
+    { key:'codigo_iniciativa',           label:'Contrato/Convênio',      fixed:false, defaultVisible:false },
+];
+
+// Estado das colunas visíveis (opcionais)
+let execColsVisiveis = {};
+EXEC_COLS_CONFIG.filter(c=>!c.fixed).forEach(c=>{ execColsVisiveis[c.key] = c.defaultVisible!==false; });
+
 function renderizarExecucao() {
     const c = document.getElementById('execucao-content');
     if (!c) return;
 
-    const anos       = [...new Set(dadosEmpenho.map(e=>e.ano_de_exercicio).filter(Boolean))].sort((a,b)=>b-a);
-    // Iniciativas presentes nos empenhos via contratoconvenio_entrada → iniciativa.csv
-    const chavesNoEmpenho = [...new Set(dadosEmpenho.map(e=>(e.contratoconvenio_entrada||'').trim()).filter(Boolean))].sort();
-    const modalidades= [...new Set(dadosEmpenho.map(e=>e.licitacao_descricao_da_modalidade).filter(Boolean))].sort();
-    const orgaos     = [...new Set(dadosEmpenho.map(e=>(e.unidade_orcamentaria_nome||'').trim()).filter(Boolean))].sort();
+    const anos       = [...new Set(dadosEmpenho.map(e=>e.ano).filter(Boolean))].sort((a,b)=>b-a);
+    const chavesNoEmpenho = [...new Set(dadosEmpenho.map(e=>(e.codigo_iniciativa||'').trim()).filter(Boolean))].sort();
+    const modalidades= [...new Set(dadosEmpenho.map(e=>e.modalidade_licitacao).filter(Boolean))].sort();
+    const orgaos     = [...new Set(dadosEmpenho.map(e=>(e.nome_orgao||'').trim()).filter(Boolean))].sort();
+    const anexos     = [...new Set(dadosEmpenho.map(e=>{
+        const iObj=dadosIniciativas.find(i=>(i.codigo_iniciativa||'').trim()===(e.codigo_iniciativa||'').trim());
+        return iObj?iObj.anexo:'';
+    }).filter(Boolean))].sort();
 
-    // Métricas iniciais
     const metInicial = calcMetricas(empenhoFiltradoTabela);
 
     c.innerHTML = `
@@ -676,10 +745,17 @@ function renderizarExecucao() {
                 <select class="form-select modern-select" id="filtroInicExec">
                     <option value="">Todas</option>
                     ${chavesNoEmpenho.map(chave=>{
-                        const iObj=dadosIniciativas.find(i=>(i.contratoconvenio_entrada||'').trim()===chave);
+                        const iObj=dadosIniciativas.find(i=>(i.codigo_iniciativa||'').trim()===chave);
                         const label=iObj?`${iObj.codigo_iniciativa||chave} - ${(iObj.iniciativa||'').substring(0,50)}`:chave;
                         return `<option value="${chave}">${label}</option>`;
                     }).join('')}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Anexo</label>
+                <select class="form-select modern-select" id="filtroAnexoExec">
+                    <option value="">Todos</option>
+                    ${anexos.map(a=>`<option value="${a}">${a}</option>`).join('')}
                 </select>
             </div>
             <div class="filter-group">
@@ -714,7 +790,7 @@ function renderizarExecucao() {
             </div>
         </div>
         <div class="botoes-abaixo">
-            <button class="btn-pesquisa" onclick="aplicarFiltrosEXEC()"><i class="material-icons">search</i> Pesquisar</button>
+            <button class="btn-pesquisa" onclick="aplicarFiltrosEXEC()"><i class="material-icons">refresh</i> Atualizar Filtros</button>
             <button class="btn-secondary-custom" onclick="limparFiltrosEXEC()"><i class="material-icons">clear</i> Limpar Filtros</button>
         </div>
     </div>
@@ -743,8 +819,8 @@ function renderizarExecucao() {
     <div class="row g-3 mb-4">
         <div class="col-md-6">
             <div class="chart-container">
-                <div class="chart-header"><h4 class="chart-title">Top 10 Credores por Valor Pago</h4></div>
-                <div class="chart-wrapper"><canvas id="chartCredores"></canvas></div>
+                <div class="chart-header"><h4 class="chart-title">Valor Gasto por Iniciativa</h4></div>
+                <div class="chart-wrapper"><canvas id="chartIniciativas"></canvas></div>
             </div>
         </div>
         <div class="col-md-6">
@@ -761,6 +837,7 @@ function renderizarExecucao() {
             <button class="btn-export" onclick="exportarExecucaoCSV()"><i class="material-icons">description</i> CSV</button>
             <button class="btn-export" onclick="exportarExecucaoPDF()"><i class="material-icons">print</i> PDF</button>
             <button class="btn-export" onclick="copiarLinkDireto()"><i class="material-icons">link</i> Copiar Link</button>
+            <button class="btn-export" onclick="abrirSeletorColunas()" id="btnSeletorColunas"><i class="material-icons">view_column</i> Colunas</button>
         </div>
         <div class="toolbar-right" style="display:flex;align-items:center;gap:8px;">
             <input type="text" id="buscaEXEC" maxlength="30" placeholder="Buscar registros..." class="form-control" style="height:32px;font-size:12px;width:220px;padding:4px 10px;" oninput="buscarEXEC(this.value)">
@@ -772,22 +849,7 @@ function renderizarExecucao() {
     <div class="table-container">
         <div class="table-fixed-header-container">
             <table class="table" id="tabelaExecucao">
-                <thead><tr>
-                    <th class="sortable-header" onclick="sortEXEC('ano_de_exercicio')">Ano <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortEXEC('contratoconvenio_entrada')">Iniciativa <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortEXEC('numero_empenho')">Empenho <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortEXEC('data_registro_doc_empenho')">Data <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortEXEC('unidade_orcamentaria_nome')">Órgão <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortEXEC('razao_social_credor')">Credor <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortEXEC('cnpj_cpf_credor_formatado')">CNPJ/CPF <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortEXEC('numero_processo_compra_siad')">Proc. Compra <i class="material-icons">unfold_more</i></th>
-                    <th>Contrato</th>
-                    <th class="sortable-header" onclick="sortEXEC('licitacao_descricao_da_modalidade')">Modalidade <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortEXEC('valor_despesa_empenhada')">Empenhado <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortEXEC('valor_despesa_liquidada')">Liquidado <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortEXEC('valor_pago_total_6_16')">Pago <i class="material-icons">unfold_more</i></th>
-                    <th class="text-center">Ações</th>
-                </tr></thead>
+                <thead id="theadExecucao"><tr></tr></thead>
                 <tbody id="tbodyExecucao"></tbody>
             </table>
         </div>
@@ -797,6 +859,29 @@ function renderizarExecucao() {
         <button class="btn-topo" onclick="voltarAoTopo()"><i class="material-icons">arrow_upward</i> Voltar ao topo</button>
     </div>`;
 
+    // Modal seletor de colunas
+    if (!document.getElementById('modalSeletorColunas')) {
+        const mDiv = document.createElement('div');
+        mDiv.innerHTML = `
+        <div class="modal fade" id="modalSeletorColunas" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content modal-creative">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="material-icons">view_column</i> Adicionar / Remover Colunas</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="seletorColunasBody"></div>
+                    <div class="modal-footer">
+                        <button class="btn-pesquisa" onclick="aplicarSeletorColunas()"><i class="material-icons">check</i> Aplicar</button>
+                        <button class="btn-secondary-custom" data-bs-dismiss="modal"><i class="material-icons">close</i> Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(mDiv.firstElementChild);
+    }
+
+    reconstruirCabecalhoEXEC();
     window.execFiltrada = ordenar(empenhoFiltradoTabela, sortCfg.execucao.col, sortCfg.execucao.dir);
     pag.execucao.atual=1;
     pag.execucao.total=Math.ceil(window.execFiltrada.length/pag.execucao.porPag);
@@ -807,10 +892,155 @@ function renderizarExecucao() {
 function calcMetricas(dados) {
     return {
         qtdEmpenhos: dados.length,
-        empenhado: dados.reduce((s,e)=>s+parseNum(e.valor_despesa_empenhada),0),
-        liquidado: dados.reduce((s,e)=>s+parseNum(e.valor_despesa_liquidada),0),
-        pago: dados.reduce((s,e)=>s+parseNum(e.valor_pago_total_6_16||e.valor_pago_financeiro),0)
+        empenhado: dados.reduce((s,e)=>s+parseNum(e.valor_empenhado),0),
+        liquidado: dados.reduce((s,e)=>s+parseNum(e.valor_liquidado),0),
+        pago: dados.reduce((s,e)=>s+parseNum(e.valor_total_pag||e.valor_pago_financeiro),0)
     };
+}
+
+function getIniciativaParaEmpenho(e) {
+    const chave=(e.codigo_iniciativa||'').trim();
+    return dadosIniciativas.find(i=>(i.codigo_iniciativa||'').trim()===chave)||null;
+}
+
+function reconstruirCabecalhoEXEC() {
+    const tr = document.querySelector('#theadExecucao tr');
+    if (!tr) return;
+    const colsVisiveis = getColunasVisiveis();
+    tr.innerHTML = colsVisiveis.map(col=>{
+        const numKeys=['valor_empenhado','valor_liquidado','valor_pago_financeiro','valor_total_pag',
+            'valor_liquidado_rp','valor_cancelado_rp','valor_empenhado_efetivo',
+            'valor_pago_rp','valor_pago_processado','valor_pago_nao_processado',
+            'valor_cancelado_processado','valor_restabelecido_processado','valor_cancelado_nao_processado','valor_restabelecido_nao_processado'];
+        const cls = numKeys.includes(col.key)?'sortable-header text-right':'sortable-header';
+        if (col.key==='contrato_display'||col.key==='iniciativa_display'||col.key==='anexo_display') {
+            return `<th>${col.label}</th>`;
+        }
+        return `<th class="${cls}" onclick="sortEXEC('${col.key}')">${col.label} <i class="material-icons">unfold_more</i></th>`;
+    }).join('') + '<th class="text-center">Ações</th>';
+}
+
+function getColunasVisiveis() {
+    const fixed = EXEC_COLS_CONFIG.filter(c=>c.fixed);
+    const optional = EXEC_COLS_CONFIG.filter(c=>!c.fixed && execColsVisiveis[c.key]);
+    // Inserir "Anexo" logo após "Iniciativa" se visível
+    const result = [];
+    for (const col of fixed) {
+        result.push(col);
+        if (col.key==='iniciativa_display') {
+            const anx = optional.find(c=>c.key==='anexo_display');
+            if (anx) result.push(anx);
+        }
+    }
+    // Restante das opcionais (que não são anexo) após as fixas
+    const restOpt = optional.filter(c=>c.key!=='anexo_display');
+    result.push(...restOpt);
+    return result;
+}
+
+window.abrirSeletorColunas = function() {
+    const body = document.getElementById('seletorColunasBody');
+    if (!body) return;
+    const opcoes = EXEC_COLS_CONFIG.filter(c=>!c.fixed);
+    body.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 0;">` +
+        opcoes.map(col=>`
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:6px 8px;background:#f8fafd;border-radius:6px;border:1px solid #e2e8f0;">
+            <input type="checkbox" id="chkCol_${col.key}" ${execColsVisiveis[col.key]?'checked':''} style="width:15px;height:15px;accent-color:#20445d;">
+            <span>${col.label}</span>
+        </label>`).join('') + `</div>`;
+    new bootstrap.Modal(document.getElementById('modalSeletorColunas')).show();
+};
+
+window.aplicarSeletorColunas = function() {
+    EXEC_COLS_CONFIG.filter(c=>!c.fixed).forEach(col=>{
+        const chk = document.getElementById('chkCol_'+col.key);
+        if (chk) execColsVisiveis[col.key] = chk.checked;
+    });
+    reconstruirCabecalhoEXEC();
+    atualizarTabelaEXEC();
+    bootstrap.Modal.getInstance(document.getElementById('modalSeletorColunas'))?.hide();
+};
+
+function buildRowEXEC(e) {
+    const proc = e.no_processo_compra||'';
+    const lic  = getLicitacaoParaProcesso(proc);
+    // Contrato
+    let contratoDisplay = '<span class="nao-aplica">-</span>';
+    if (lic && lic['numero_contrato'] && lic['numero_contrato'].trim()&&lic['numero_contrato'].trim()!=='0') {
+        if (lic['contrato_termoaditivo_arquivos']&&lic['contrato_termoaditivo_arquivos'].trim()) {
+            contratoDisplay = `<a href="${lic['contrato_termoaditivo_arquivos'].trim()}" target="_blank" class="contrato-link">${lic['numero_contrato'].trim()}</a>`;
+        } else {
+            contratoDisplay = `<span class="contrato-link" style="cursor:default">${lic['numero_contrato'].trim()}</span>`;
+        }
+    }
+    // Proc. Compra — clicável para edital
+    let procDisplay = '-';
+    if (proc) {
+        const editalUrl = (lic&&lic['edital_retificacao_arquivos']&&lic['edital_retificacao_arquivos'].trim()) ? lic['edital_retificacao_arquivos'].trim() : '';
+        const procTxt = proc.substring(0,25)+(proc.length>25?'...':'');
+        if (editalUrl) {
+            procDisplay = `<a href="${editalUrl}" target="_blank" class="proc-link" title="Ver Edital">${procTxt}</a>`;
+        } else {
+            procDisplay = `<a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.no_empenho||'')}');return false;">${procTxt}</a>`;
+        }
+    }
+    // Iniciativa — clicável leva para consulta execução filtrada
+    const inic = getIniciativaParaEmpenho(e);
+    const inicCod = inic?(inic.codigo_iniciativa||e.codigo_iniciativa||'-'):(e.codigo_iniciativa||'-');
+    const inicNome = inic?(inic.iniciativa||''):'';
+    const inicTitle = inicNome?`${inicCod} - ${inicNome}`:inicCod;
+    const chaveInic = (e.codigo_iniciativa||'').trim();
+    const inicDisplay = chaveInic
+        ? `<a href="#" class="proc-link" title="${inicTitle}" onclick="irParaExecucaoDeEmpenho('${esc(chaveInic)}');return false;">${inicCod}</a>`
+        : `<span title="${inicTitle}">${inicCod}</span>`;
+    // Anexo — buscado de dadosIniciativas (iniciativa.csv)
+    const anexoDisplay = inic?(inic.anexo||'-'):'-';
+    // Elemento e item despesa (novos nomes de coluna)
+    const codElem = e.cod_elemento_despesa||'-';
+    const nomeElem = e.nome_elemento_despesa||'-';
+    const codFonte = e.codigo_fonte_recurso||'-';
+    const nomeFonte = e.nome_fonte_recurso||'-';
+    const codItem = e.codigo_item_despesa||'-';
+    const nomeItem = e.nome_item_despesa||'-';
+
+    const cellMap = {
+        'ano': `<td>${e.ano||'-'}</td>`,
+        'iniciativa_display': `<td>${inicDisplay}</td>`,
+        'no_empenho': `<td><a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.no_empenho||'')}');return false;">${e.no_empenho||'-'}</a></td>`,
+        'data_empenho': `<td>${formatarData(e.data_empenho)}</td>`,
+        'nome_orgao': `<td title="${e.nome_orgao||''}">${(e.nome_orgao||'-').substring(0,30)}${(e.nome_orgao||'').length>30?'...':''}</td>`,
+        'credor': `<td title="${e.credor||''}">${(e.credor||'-').substring(0,30)}${(e.credor||'').length>30?'...':''}</td>`,
+        'cnpj_cpf_credor': `<td>${e.cnpj_cpf_credor||'-'}</td>`,
+        'no_processo_compra': `<td>${procDisplay}</td>`,
+        'contrato_display': `<td>${contratoDisplay}</td>`,
+        'modalidade_licitacao': `<td>${(e.modalidade_licitacao||'-').substring(0,25)}${(e.modalidade_licitacao||'').length>25?'...':''}</td>`,
+        'cod_elemento_despesa': `<td>${codElem}</td>`,
+        'nome_elemento_despesa': `<td>${nomeElem.substring(0,30)}${nomeElem.length>30?'...':''}</td>`,
+        'valor_empenhado_efetivo': `<td class="text-right">${formatarMoeda(e.valor_empenhado_efetivo)}</td>`,
+        'valor_total_pag': `<td class="text-right">${formatarMoeda(e.valor_total_pag||e.valor_pago_financeiro)}</td>`,
+        'anexo_display': `<td>${anexoDisplay}</td>`,
+        'codigo_orgao': `<td>${e.codigo_orgao||'-'}</td>`,
+        'valor_empenhado': `<td class="text-right">${formatarMoeda(e.valor_empenhado)}</td>`,
+        'valor_liquidado': `<td class="text-right">${formatarMoeda(e.valor_liquidado)}</td>`,
+        'valor_pago_financeiro': `<td class="text-right">${formatarMoeda(e.valor_pago_financeiro)}</td>`,
+        'valor_liquidado_rp': `<td class="text-right">${formatarMoeda(e.valor_liquidado_rp)}</td>`,
+        'valor_cancelado_rp': `<td class="text-right">${formatarMoeda(e.valor_cancelado_rp)}</td>`,
+        'valor_pago_processado': `<td class="text-right">${formatarMoeda(e.valor_pago_processado)}</td>`,
+        'valor_pago_nao_processado': `<td class="text-right">${formatarMoeda(e.valor_pago_nao_processado)}</td>`,
+        'valor_pago_rp': `<td class="text-right">${formatarMoeda(e.valor_pago_rp)}</td>`,
+        'valor_cancelado_processado': `<td class="text-right">${formatarMoeda(e.valor_cancelado_processado)}</td>`,
+        'valor_restabelecido_processado': `<td class="text-right">${formatarMoeda(e.valor_restabelecido_processado)}</td>`,
+        'valor_cancelado_nao_processado': `<td class="text-right">${formatarMoeda(e.valor_cancelado_nao_processado)}</td>`,
+        'valor_restabelecido_nao_processado': `<td class="text-right">${formatarMoeda(e.valor_restabelecido_nao_processado)}</td>`,
+        'codigo_fonte_recurso': `<td>${codFonte}</td>`,
+        'nome_fonte_recurso': `<td>${nomeFonte.substring(0,25)}${nomeFonte.length>25?'...':''}</td>`,
+        'codigo_item_despesa': `<td>${codItem}</td>`,
+        'nome_item_despesa': `<td>${nomeItem.substring(0,25)}${nomeItem.length>25?'...':''}</td>`,
+        'codigo_iniciativa': `<td>${e.codigo_iniciativa||'-'}</td>`,
+    };
+    const colsVis = getColunasVisiveis();
+    const cells = colsVis.map(col=>cellMap[col.key]||`<td>-</td>`).join('');
+    return `<tr>${cells}<td class="text-center"><button class="btn-action" onclick="verDetalhesEmpenho('${esc(e.no_empenho||'')}')"><i class="material-icons" style="font-size:15px">visibility</i></button></td></tr>`;
 }
 
 function atualizarMetricasEXEC(dados) {
@@ -831,66 +1061,13 @@ function atualizarTabelaEXEC() {
     const ini=(pag.execucao.atual-1)*pag.execucao.porPag;
     const fim=Math.min(ini+pag.execucao.porPag, window.execFiltrada.length);
     const rows = window.execFiltrada.slice(ini,fim);
+    const nCols = getColunasVisiveis().length + 1;
     document.getElementById('tbodyExecucao').innerHTML = rows.length===0
-        ? '<tr><td colspan="14" class="text-center py-4">Nenhum registro encontrado</td></tr>'
-        : rows.map(e=>{
-            const proc = e.numero_processo_compra_siad||'';
-            const lic  = getLicitacaoParaProcesso(proc);
-            // Contrato
-            let contratoDisplay = '<span class="nao-aplica">-</span>';
-            if (lic && lic['numero_contrato'] && lic['numero_contrato'].trim()&&lic['numero_contrato'].trim()!=='0') {
-                if (lic['contrato_termoaditivo_arquivos']&&lic['contrato_termoaditivo_arquivos'].trim()) {
-                    contratoDisplay = `<a href="${lic['contrato_termoaditivo_arquivos'].trim()}" target="_blank" class="contrato-link">${lic['numero_contrato'].trim()}</a>`;
-                } else {
-                    contratoDisplay = `<span class="contrato-link" style="cursor:default">${lic['numero_contrato'].trim()}</span>`;
-                }
-            }
-            // Proc. Compra com link do edital embutido
-            let procDisplay = '-';
-            if (proc) {
-                const editalUrl = (lic&&lic['edital_retificacao_arquivos']&&lic['edital_retificacao_arquivos'].trim()) ? lic['edital_retificacao_arquivos'].trim() : '';
-                const procTxt = proc.substring(0,25)+(proc.length>25?'...':'');
-                if (editalUrl) {
-                    procDisplay = `<span style="display:flex;align-items:center;gap:4px;">
-                        <a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${procTxt}</a>
-                        <a href="${editalUrl}" target="_blank" class="contrato-link" title="Ver Edital" style="font-size:11px;">📄</a>
-                    </span>`;
-                } else {
-                    procDisplay = `<a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${procTxt}</a>`;
-                }
-            }
-            // Iniciativa via contratoconvenio_entrada
-            const chaveInc = (e.contratoconvenio_entrada||'').trim();
-            const inicObj = dadosIniciativas.find(i=>(i.contratoconvenio_entrada||'').trim()===chaveInc);
-            const inicCod = inicObj ? (inicObj.codigo_iniciativa||chaveInc) : (chaveInc||'-');
-            const inicNome = inicObj ? (inicObj.iniciativa||'') : '';
-            const inicTitle = inicNome ? `${inicCod} - ${inicNome}` : inicCod;
-            const inicDisplay = `<span title="${inicTitle}" style="cursor:default;white-space:nowrap;">${inicCod}</span>`;
-            // Órgão
-            const orgaoTxt = e.unidade_orcamentaria_nome||'-';
-            return `<tr>
-                <td>${e.ano_de_exercicio||'-'}</td>
-                <td>${inicDisplay}</td>
-                <td><a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${e.numero_empenho||'-'}</a></td>
-                <td>${formatarData(e.data_registro_doc_empenho)}</td>
-                <td title="${orgaoTxt}">${orgaoTxt.substring(0,30)}${orgaoTxt.length>30?'...':''}</td>
-                <td title="${e.razao_social_credor||''}">${(e.razao_social_credor||'-').substring(0,30)}${(e.razao_social_credor||'').length>30?'...':''}</td>
-                <td>${e.cnpj_cpf_credor_formatado||'-'}</td>
-                <td>${procDisplay}</td>
-                <td>${contratoDisplay}</td>
-                <td>${(e.licitacao_descricao_da_modalidade||'-').substring(0,25)}${(e.licitacao_descricao_da_modalidade||'').length>25?'...':''}</td>
-                <td class="text-right">${formatarMoeda(e.valor_despesa_empenhada)}</td>
-                <td class="text-right">${formatarMoeda(e.valor_despesa_liquidada)}</td>
-                <td class="text-right">${formatarMoeda(e.valor_pago_total_6_16||e.valor_pago_financeiro)}</td>
-                <td class="text-center">
-                    <button class="btn-action" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}')">
-                        <i class="material-icons" style="font-size:15px">visibility</i>
-                    </button>
-                </td>
-            </tr>`;
-        }).join('');
+        ? `<tr><td colspan="${nCols}" class="text-center py-4">Nenhum registro encontrado</td></tr>`
+        : rows.map(e=>buildRowEXEC(e)).join('');
     document.getElementById('badgeExec').textContent = window.execFiltrada.length+' registros';
     renderizarPag('execucao');
+    atualizarMetricasEXEC(window.execFiltrada);
 }
 
 function sortEXEC(col) {
@@ -904,6 +1081,7 @@ function sortEXEC(col) {
 window.aplicarFiltrosEXEC = function() {
     const ano  = document.getElementById('filtroAnoExec')?.value||'';
     const inic = document.getElementById('filtroInicExec')?.value||'';
+    const anx  = document.getElementById('filtroAnexoExec')?.value||'';
     const mod  = document.getElementById('filtroModalExec')?.value||'';
     const org  = document.getElementById('filtroOrgaoExec')?.value||'';
     const cred = (document.getElementById('filtroCredorExec')?.value||'').toLowerCase().trim();
@@ -911,88 +1089,54 @@ window.aplicarFiltrosEXEC = function() {
     const proc = (document.getElementById('filtroProcessoExec')?.value||'').toLowerCase().trim();
     const emp  = (document.getElementById('filtroEmpenhoExec')?.value||'').toLowerCase().trim();
     window.execFiltrada = ordenar(dadosEmpenho.filter(e=>{
-        if (ano&&e.ano_de_exercicio!==ano) return false;
-        if (inic&&(e.contratoconvenio_entrada||'').trim()!==inic) return false;
-        if (mod&&e.licitacao_descricao_da_modalidade!==mod) return false;
-        if (org&&(e.unidade_orcamentaria_nome||'').trim()!==org) return false;
-        if (cred&&!String(e.razao_social_credor||'').toLowerCase().includes(cred)) return false;
-        if (cnpj&&!String(e.cnpj_cpf_credor_formatado||'').toLowerCase().includes(cnpj)) return false;
-        if (proc&&!String(e.numero_processo_compra_siad||'').toLowerCase().includes(proc)) return false;
-        if (emp&&!String(e.numero_empenho||'').toLowerCase().includes(emp)) return false;
+        if (ano&&e.ano!==ano) return false;
+        if (inic&&(e.codigo_iniciativa||'').trim()!==inic) return false;
+        if (anx) {
+            const iObj=getIniciativaParaEmpenho(e);
+            if (!(iObj&&iObj.anexo===anx)) return false;
+        }
+        if (mod&&e.modalidade_licitacao!==mod) return false;
+        if (org&&(e.nome_orgao||'').trim()!==org) return false;
+        if (cred&&!String(e.credor||'').toLowerCase().includes(cred)) return false;
+        if (cnpj&&!String(e.cnpj_cpf_credor||'').toLowerCase().includes(cnpj)) return false;
+        if (proc&&!String(e.no_processo_compra||'').toLowerCase().includes(proc)) return false;
+        if (emp&&!String(e.no_empenho||'').toLowerCase().includes(emp)) return false;
         return true;
     }), sortCfg.execucao.col, sortCfg.execucao.dir);
     pag.execucao.atual=1;
     pag.execucao.total=Math.ceil(window.execFiltrada.length/pag.execucao.porPag);
     atualizarTabelaEXEC();
-    atualizarMetricasEXEC(window.execFiltrada);
     atualizarGraficos(window.execFiltrada);
 };
 
 window.limparFiltrosEXEC = function() {
-    ['filtroAnoExec','filtroInicExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec']
+    ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec']
         .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     window.execFiltrada = ordenar(dadosEmpenho, sortCfg.execucao.col, sortCfg.execucao.dir);
     pag.execucao.atual=1;
     pag.execucao.total=Math.ceil(window.execFiltrada.length/pag.execucao.porPag);
     atualizarTabelaEXEC();
-    atualizarMetricasEXEC(window.execFiltrada);
     atualizarGraficos(window.execFiltrada);
 };
 
 window.buscarEXEC = function(termo) {
     const t = (termo||'').toLowerCase().trim();
-    const base = window.execFiltrada||[];
     if (!t) { atualizarTabelaEXEC(); return; }
-    const f = base.filter(e=>
-        String(e.numero_empenho||'').toLowerCase().includes(t)||
-        String(e.razao_social_credor||'').toLowerCase().includes(t)||
-        String(e.cnpj_cpf_credor_formatado||'').toLowerCase().includes(t)||
-        String(e.numero_processo_compra_siad||'').toLowerCase().includes(t)||
-        String(e.licitacao_descricao_da_modalidade||'').toLowerCase().includes(t)||
-        String(e.contratoconvenio_entrada||'').toLowerCase().includes(t)||
-        String(e.unidade_orcamentaria_nome||'').toLowerCase().includes(t)
-    );
-    document.getElementById('tbodyExecucao').innerHTML = f.slice(0,pag.execucao.porPag).map(e=>{
-        const proc=e.numero_processo_compra_siad||'';
-        const lic=getLicitacaoParaProcesso(proc);
-        let contratoDisplay='<span class="nao-aplica">-</span>';
-        if (lic&&lic['numero_contrato']&&lic['numero_contrato'].trim()&&lic['numero_contrato'].trim()!=='0') {
-            if (lic['contrato_termoaditivo_arquivos']&&lic['contrato_termoaditivo_arquivos'].trim()) contratoDisplay=`<a href="${lic['contrato_termoaditivo_arquivos'].trim()}" target="_blank" class="contrato-link">${lic['numero_contrato'].trim()}</a>`;
-            else contratoDisplay=`<span>${lic['numero_contrato'].trim()}</span>`;
-        }
-        let procDisplay = '-';
-        if (proc) {
-            const editalUrl=(lic&&lic['edital_retificacao_arquivos']&&lic['edital_retificacao_arquivos'].trim())?lic['edital_retificacao_arquivos'].trim():'';
-            const procTxt=proc.substring(0,25)+(proc.length>25?'...':'');
-            if (editalUrl) {
-                procDisplay=`<span style="display:flex;align-items:center;gap:4px;"><a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${procTxt}</a><a href="${editalUrl}" target="_blank" class="contrato-link" title="Ver Edital" style="font-size:11px;">📄</a></span>`;
-            } else {
-                procDisplay=`<a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${procTxt}</a>`;
-            }
-        }
-        const chaveIncB=(e.contratoconvenio_entrada||'').trim();
-        const inicObjB=dadosIniciativas.find(i=>(i.contratoconvenio_entrada||'').trim()===chaveIncB);
-        const inicCodB=inicObjB?(inicObjB.codigo_iniciativa||chaveIncB):(chaveIncB||'-');
-        const inicNomeB=inicObjB?(inicObjB.iniciativa||''):'';
-        const inicTitleB=inicNomeB?`${inicCodB} - ${inicNomeB}`:inicCodB;
-        const orgaoTxt=e.unidade_orcamentaria_nome||'-';
-        return `<tr>
-            <td>${e.ano_de_exercicio||'-'}</td>
-            <td><span title="${inicTitleB}" style="cursor:default;white-space:nowrap;">${inicCodB}</span></td>
-            <td><a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}');return false;">${e.numero_empenho||'-'}</a></td>
-            <td>${formatarData(e.data_registro_doc_empenho)}</td>
-            <td title="${orgaoTxt}">${orgaoTxt.substring(0,30)}${orgaoTxt.length>30?'...':''}</td>
-            <td title="${e.razao_social_credor||''}">${(e.razao_social_credor||'-').substring(0,30)}${(e.razao_social_credor||'').length>30?'...':''}</td>
-            <td>${e.cnpj_cpf_credor_formatado||'-'}</td>
-            <td>${procDisplay}</td>
-            <td>${contratoDisplay}</td>
-            <td>${(e.licitacao_descricao_da_modalidade||'-').substring(0,25)}${(e.licitacao_descricao_da_modalidade||'').length>25?'...':''}</td>
-            <td class="text-right">${formatarMoeda(e.valor_despesa_empenhada)}</td>
-            <td class="text-right">${formatarMoeda(e.valor_despesa_liquidada)}</td>
-            <td class="text-right">${formatarMoeda(e.valor_pago_total_6_16||e.valor_pago_financeiro)}</td>
-            <td class="text-center"><button class="btn-action" onclick="verDetalhesEmpenho('${esc(e.numero_empenho||'')}')"><i class="material-icons" style="font-size:15px">visibility</i></button></td>
-        </tr>`;
-    }).join('');
+    const base = window.execFiltrada||[];
+    const f = base.filter(e=>{
+        const inic=getIniciativaParaEmpenho(e);
+        return String(e.no_empenho||'').toLowerCase().includes(t)||
+            String(e.credor||'').toLowerCase().includes(t)||
+            String(e.cnpj_cpf_credor||'').toLowerCase().includes(t)||
+            String(e.no_processo_compra||'').toLowerCase().includes(t)||
+            String(e.modalidade_licitacao||'').toLowerCase().includes(t)||
+            String(e.codigo_iniciativa||'').toLowerCase().includes(t)||
+            String(e.nome_orgao||'').toLowerCase().includes(t)||
+            (inic&&String(inic.codigo_iniciativa||'').toLowerCase().includes(t))||
+            (inic&&String(inic.iniciativa||'').toLowerCase().includes(t));
+    });
+    const nCols = getColunasVisiveis().length + 1;
+    document.getElementById('tbodyExecucao').innerHTML = f.slice(0,pag.execucao.porPag).map(e=>buildRowEXEC(e)).join('');
     document.getElementById('badgeExec').textContent = f.length+' registros';
 };
 
@@ -1000,16 +1144,18 @@ window.buscarEXEC = function(termo) {
 // 7. MODAL DETALHES EMPENHO
 // ============================================================
 window.verDetalhesEmpenho = function(numEmpenho) {
-    const e = dadosEmpenho.find(x=>x.numero_empenho===numEmpenho);
+    const e = dadosEmpenho.find(x=>x.no_empenho===numEmpenho);
     if (!e) return;
-    const proc = e.numero_processo_compra_siad||'';
+    const proc = e.no_processo_compra||'';
     const lic  = getLicitacaoParaProcesso(proc);
 
-    // Busca iniciativa e órgão via contratoconvenio_entrada do empenho
-    const chaveContrato = (e.contratoconvenio_entrada||'').trim();
-    const inic = dadosIniciativas.find(i=>(i.contratoconvenio_entrada||'').trim()===chaveContrato);
-    const orgao = chaveContrato ? (dadosOrgao[chaveContrato]||null) : null;
+    const chaveContrato = (e.codigo_iniciativa||'').trim();
+    const inic = dadosIniciativas.find(i=>(i.codigo_iniciativa||'').trim()===chaveContrato);
+    // Só busca órgão se houver codigo_iniciativa e o empenho tiver contrato vinculado
+    const orgao = (chaveContrato && lic && lic['numero_contrato'] && lic['numero_contrato'].trim() && lic['numero_contrato'].trim()!=='0')
+        ? (dadosOrgaoMap[chaveContrato]||null) : null;
     const inicLabel = inic ? `${inic.codigo_iniciativa||chaveContrato} - ${inic.iniciativa||''}` : (chaveContrato||'-');
+    const anexoLabel = inic ? (inic.anexo||'-') : '-';
 
     let contratoDisplay = '<span class="nao-aplica">Não se aplica</span>';
     if (lic && lic['numero_contrato'] && lic['numero_contrato'].trim() && lic['numero_contrato'].trim()!=='0') {
@@ -1017,31 +1163,34 @@ window.verDetalhesEmpenho = function(numEmpenho) {
             contratoDisplay = `<a href="${lic['contrato_termoaditivo_arquivos'].trim()}" target="_blank" class="contrato-link">${lic['numero_contrato'].trim()}</a>`;
         } else { contratoDisplay = lic['numero_contrato'].trim(); }
     }
-    let editalDisplay = '<span class="nao-aplica">Não se aplica</span>';
+    let editalDisplay = '<span class="nao-aplica">Não disponível</span>';
     if (lic && lic['edital_retificacao_arquivos']&&lic['edital_retificacao_arquivos'].trim()) {
-        editalDisplay = `<a href="${lic['edital_retificacao_arquivos'].trim()}" target="_blank" class="contrato-link">📄 Ver Edital</a>`;
+        editalDisplay = `<a href="${lic['edital_retificacao_arquivos'].trim()}" target="_blank" class="contrato-link">Ver Edital</a>`;
     }
 
-    // Dados da licitação para o modal
     const licHtml = lic ? `
-        <div class="row mt-2">
-            <div class="col-12"><h6 style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:8px;"><i class="material-icons" style="vertical-align:middle">gavel</i> Dados do Processo de Compra</h6></div>
+        <div class="row mt-3">
+            <div class="col-12"><h6 style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #e2e8f0;"><i class="material-icons" style="vertical-align:middle">gavel</i> Processo de Compra / Licitação</h6></div>
         </div>
         <div class="row">
             <div class="col-md-6">
                 <div class="info-card">
-                    <div class="info-label">Modalidade Licitação</div><div class="info-value">${lic['procedimento_contratacao_detalhamento_1']||'-'}</div>
+                    <div class="info-label">Número do Processo</div><div class="info-value">${proc||'-'}</div>
+                    <div class="info-label mt-2">Modalidade</div><div class="info-value">${lic['procedimento_contratacao_detalhamento_1']||lic['modalidade_licitacao']||'-'}</div>
                     <div class="info-label mt-2">Situação Processo</div><div class="info-value">${lic['situacao_processo']||'-'}</div>
                     <div class="info-label mt-2">Situação Item</div><div class="info-value">${lic['situacao_compra_item_processo']||'-'}</div>
-                    <div class="info-label mt-2">Critério Julgamento</div><div class="info-value">${lic['criterio_julgamento']||'-'}</div>
+                    <div class="info-label mt-2">Critério de Julgamento</div><div class="info-value">${lic['criterio_julgamento']||'-'}</div>
+                    <div class="info-label mt-2">Data da Licitação</div><div class="info-value">${formatarData(lic['data_licitacao'])}</div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="info-card">
                     <div class="info-label">Contrato</div><div class="info-value">${contratoDisplay}</div>
                     <div class="info-label mt-2">Edital</div><div class="info-value">${editalDisplay}</div>
-                    <div class="info-label mt-2">Indicador Contrato</div><div class="info-value">${lic['indicador_termo_de_contrato']||'-'}</div>
-                    <div class="info-label mt-2">Data Licitação</div><div class="info-value">${formatarData(lic['data_licitacao'])}</div>
+                    <div class="info-label mt-2">Indicador de Contrato</div><div class="info-value">${lic['indicador_termo_de_contrato']||'-'}</div>
+                    <div class="info-label mt-2">Valor Licitado</div><div class="info-value">${lic['valor_licitado']?formatarMoeda(lic['valor_licitado']):'-'}</div>
+                    <div class="info-label mt-2">Valor Contratado</div><div class="info-value">${lic['valor_contratado']?formatarMoeda(lic['valor_contratado']):'-'}</div>
+                    <div class="info-label mt-2">Número de Itens</div><div class="info-value">${lic['quantidade_item_processo']||'-'}</div>
                 </div>
             </div>
         </div>
@@ -1054,73 +1203,116 @@ window.verDetalhesEmpenho = function(numEmpenho) {
             </div>
         </div>` : '';
 
-    // Dados do órgão para o modal
     const orgaoHtml = orgao ? `
-        <div class="row mt-2">
-            <div class="col-12"><h6 style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:8px;"><i class="material-icons" style="vertical-align:middle">account_balance</i> Dados do Órgão (Contrato/Convênio)</h6></div>
+        <div class="row mt-3">
+            <div class="col-12"><h6 style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #e2e8f0;"><i class="material-icons" style="vertical-align:middle">account_balance</i> Dados do Órgão (Contrato Vinculado)</h6></div>
         </div>
         <div class="row">
             <div class="col-md-6">
                 <div class="info-card primary">
                     <div class="info-label">Contrato/Convênio de Entrada</div><div class="info-value highlight">${chaveContrato}</div>
-                    <div class="info-label mt-2">Cód. Unidade Orçamentária</div><div class="info-value">${orgao['unidade_orcamentaria_codigo']||'-'}</div>
-                    <div class="info-label mt-2">Nome Unidade Orçamentária</div><div class="info-value">${orgao['unidade_orcamentaria_nome']||'-'}</div>
+                    <div class="info-label mt-2">Cód. Unidade Orçamentária</div><div class="info-value">${orgao['codigo_orgao']||'-'}</div>
+                    <div class="info-label mt-2">Nome Unidade Orçamentária</div><div class="info-value">${orgao['nome_orgao']||'-'}</div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="info-card">
-                    <div class="info-label">Valor Empenhado (Órgão)</div><div class="info-value">${formatarMoeda(orgao['valor_despesa_empenhada'])}</div>
-                    <div class="info-label mt-2">Valor Liquidado (Órgão)</div><div class="info-value">${formatarMoeda(orgao['valor_despesa_liquidada'])}</div>
-                    <div class="info-label mt-2">Valor Pago Total (Órgão)</div><div class="info-value">${formatarMoeda(orgao['valor_pago_total_6_16'])}</div>
+                    <div class="info-label">Valor Empenhado (Órgão)</div><div class="info-value">${formatarMoeda(orgao['valor_empenhado'])}</div>
+                    <div class="info-label mt-2">Valor Liquidado (Órgão)</div><div class="info-value">${formatarMoeda(orgao['valor_liquidado'])}</div>
+                    <div class="info-label mt-2">Valor Pago Total (Órgão)</div><div class="info-value">${formatarMoeda(orgao['valor_pago_total'])}</div>
                 </div>
             </div>
         </div>` : '';
 
+    // Elemento e Item despesa
+    const codElem = e.cod_elemento_despesa||'-';
+    const nomeElem = e.nome_elemento_despesa||'-';
+    const codFonte = e.codigo_fonte_recurso||'-';
+    const nomeFonte = e.nome_fonte_recurso||'-';
+    const codItem = e.codigo_item_despesa||'-';
+    const nomeItem = e.nome_item_despesa||'-';
+
     document.getElementById('modalContent').innerHTML = `
+        <div class="row">
+            <div class="col-12"><h6 style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #e2e8f0;"><i class="material-icons" style="vertical-align:middle">receipt_long</i> Identificação do Empenho</h6></div>
+        </div>
         <div class="row">
             <div class="col-md-6">
                 <div class="info-card primary">
-                    <div class="info-label">Número do Empenho</div><div class="info-value highlight">${e.numero_empenho||'-'}</div>
-                    <div class="info-label mt-2">Data do Empenho</div><div class="info-value">${formatarData(e.data_registro_doc_empenho)}</div>
-                    <div class="info-label mt-2">Ano de Exercício</div><div class="info-value">${e.ano_de_exercicio||'-'}</div>
+                    <div class="info-label">Número do Empenho</div><div class="info-value highlight">${e.no_empenho||'-'}</div>
+                    <div class="info-label mt-2">Data do Empenho</div><div class="info-value">${formatarData(e.data_empenho)}</div>
+                    <div class="info-label mt-2">Ano de Exercício</div><div class="info-value">${e.ano||'-'}</div>
+                    <div class="info-label mt-2">Anexo</div><div class="info-value">${anexoLabel}</div>
                     <div class="info-label mt-2">Iniciativa</div><div class="info-value">${inicLabel}</div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="info-card">
-                    <div class="info-label">Órgão / Unidade</div><div class="info-value">${e.unidade_orcamentaria_nome||'-'}</div>
-                    <div class="info-label mt-2">Processo de Compra</div><div class="info-value">${proc||'-'}</div>
-                    <div class="info-label mt-2">Modalidade Licitatória</div><div class="info-value">${e.licitacao_descricao_da_modalidade||'-'}</div>
+                    <div class="info-label">Órgão / Unidade</div><div class="info-value">${e.nome_orgao||'-'}</div>
+                    <div class="info-label mt-2">Modalidade Licitatória</div><div class="info-value">${e.modalidade_licitacao||'-'}</div>
+                    <div class="info-label mt-2">Número de Itens</div><div class="info-value">${e.quantidade_item_empenho||'-'}</div>
+                    <div class="info-label mt-2">Descrição</div><div class="info-value">${e.descricao_empenho||e.objeto_empenho||'-'}</div>
                 </div>
             </div>
         </div>
         <div class="row mt-2">
+            <div class="col-12"><h6 style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #e2e8f0;"><i class="material-icons" style="vertical-align:middle">person</i> Credor</h6></div>
+        </div>
+        <div class="row">
             <div class="col-md-6">
                 <div class="info-card">
-                    <div class="info-label">Razão Social do Credor</div><div class="info-value">${e.razao_social_credor||'-'}</div>
-                    <div class="info-label mt-2">CNPJ/CPF</div><div class="info-value">${e.cnpj_cpf_credor_formatado||'-'}</div>
+                    <div class="info-label">Razão Social</div><div class="info-value">${e.credor||'-'}</div>
+                    <div class="info-label mt-2">CNPJ/CPF</div><div class="info-value">${e.cnpj_cpf_credor||'-'}</div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="info-card">
-                    <div class="info-label">Valor Empenhado</div><div class="info-value highlight">${formatarMoeda(e.valor_despesa_empenhada)}</div>
-                    <div class="info-label mt-2">Valor Liquidado</div><div class="info-value">${formatarMoeda(e.valor_despesa_liquidada)}</div>
+                    <div class="info-label">Endereço</div><div class="info-value">${e.endereco_credor||'-'}</div>
+                    <div class="info-label mt-2">Município</div><div class="info-value">${e.municipio_credor||'-'}</div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-12"><h6 style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #e2e8f0;"><i class="material-icons" style="vertical-align:middle">account_tree</i> Classificação Orçamentária</h6></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="info-card">
+                    <div class="info-label">Cód. Fonte de Recurso</div><div class="info-value">${codFonte}</div>
+                    <div class="info-label mt-2">Fonte de Recurso</div><div class="info-value">${nomeFonte}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card">
+                    <div class="info-label">Cód. Elemento Despesa</div><div class="info-value">${codElem}</div>
+                    <div class="info-label mt-2">Elemento de Despesa</div><div class="info-value">${nomeElem}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card">
+                    <div class="info-label">Cód. Item Despesa</div><div class="info-value">${codItem}</div>
+                    <div class="info-label mt-2">Item de Despesa</div><div class="info-value">${nomeItem}</div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-12"><h6 style="font-size:13px;font-weight:700;color:#1a3a5c;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #e2e8f0;"><i class="material-icons" style="vertical-align:middle">attach_money</i> Valores Financeiros</h6></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-label">Valor Empenhado</div><div class="info-value highlight">${formatarMoeda(e.valor_empenhado)}</div>
+                    <div class="info-label mt-2">Valor Empenhado Efetivo</div><div class="info-value">${formatarMoeda(e.valor_empenhado_efetivo)}</div>
+                    <div class="info-label mt-2">Valor Liquidado</div><div class="info-value">${formatarMoeda(e.valor_liquidado)}</div>
                     <div class="info-label mt-2">Valor Pago Financeiro</div><div class="info-value">${formatarMoeda(e.valor_pago_financeiro)}</div>
                 </div>
             </div>
-        </div>
-        <div class="row mt-2">
             <div class="col-md-6">
                 <div class="info-card">
-                    <div class="info-label">Liquidado RP</div><div class="info-value">${formatarMoeda(e.valor_despesa_liquidada_rp)}</div>
-                    <div class="info-label mt-2">Cancelado RP</div><div class="info-value">${formatarMoeda(e.valor_cancelado_em_restoa_a_pagar_8_9_10_11)}</div>
-                    <div class="info-label mt-2">Empenhado Efetivo</div><div class="info-value">${formatarMoeda(e.valor_empenhado_efetivo_4_12)}</div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="info-card">
-                    <div class="info-label">Pago RP</div><div class="info-value">${formatarMoeda(e.valor_pago_em_restos_a_pagar_14_15)}</div>
-                    <div class="info-label mt-2">Valor Total Pago</div><div class="info-value highlight">${formatarMoeda(e.valor_pago_total_6_16)}</div>
+                    <div class="info-label">Liquidado RP</div><div class="info-value">${formatarMoeda(e.valor_liquidado_rp)}</div>
+                    <div class="info-label mt-2">Cancelado RP</div><div class="info-value">${formatarMoeda(e.valor_cancelado_rp)}</div>
+                    <div class="info-label mt-2">Pago RP</div><div class="info-value">${formatarMoeda(e.valor_pago_rp)}</div>
+                    <div class="info-label mt-2">Valor Total Pago</div><div class="info-value highlight">${formatarMoeda(e.valor_total_pag)}</div>
                 </div>
             </div>
         </div>
@@ -1129,28 +1321,43 @@ window.verDetalhesEmpenho = function(numEmpenho) {
 
     new bootstrap.Modal(document.getElementById('detailModal')).show();
 };
-
 // ============================================================
 // 8. GRÁFICOS
 // ============================================================
+let chartIniciativas = null;
+let chartModalidades = null;
+
 function atualizarGraficos(dados) {
-    // Top credores
-    const credMap = new Map();
+    // Gráfico de Iniciativas por Valor Total Pago
+    const inicMap = new Map();
     dados.forEach(e=>{
-        const c=e.razao_social_credor; const v=parseNum(e.valor_pago_financeiro);
-        if(c&&v>0) credMap.set(c,(credMap.get(c)||0)+v);
+        const inic=getIniciativaParaEmpenho(e);
+        const label=inic?(inic.codigo_iniciativa||e.codigo_iniciativa||'Sem Iniciativa'):(e.codigo_iniciativa||'Sem Iniciativa');
+        const v=parseNum(e.valor_total_pag||e.valor_pago_financeiro);
+        inicMap.set(label,(inicMap.get(label)||0)+v);
     });
-    const topCred = Array.from(credMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    const ctxC = document.getElementById('chartCredores')?.getContext('2d');
-    if (ctxC) {
-        if (chartCredores) chartCredores.destroy();
-        chartCredores = new Chart(ctxC, { type:'bar', data:{ labels:topCred.map(c=>c[0].substring(0,20)+'...'), datasets:[{label:'Valor Pago',data:topCred.map(c=>c[1]),backgroundColor:chartPalette[0],borderWidth:0,borderRadius:4}] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>`R$ ${ctx.raw.toLocaleString('pt-BR')}`}} }, scales:{ x:{ticks:{font:{size:9}}}, y:{ticks:{callback:v=>'R$'+Number(v/1e6).toFixed(1)+'M'}} } } });
+    const topInic = Array.from(inicMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,12);
+    const ctxI = document.getElementById('chartIniciativas')?.getContext('2d');
+    if (ctxI) {
+        if (chartIniciativas) chartIniciativas.destroy();
+        chartIniciativas = new Chart(ctxI, {
+            type:'bar',
+            data:{
+                labels: topInic.map(c=>c[0]),
+                datasets:[{label:'Valor Total Pago',data:topInic.map(c=>c[1]),backgroundColor:chartPalette,borderWidth:0,borderRadius:4}]
+            },
+            options:{
+                responsive:true, maintainAspectRatio:false,
+                plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>`${formatarMoeda(ctx.raw)}`}} },
+                scales:{ x:{ticks:{font:{size:9}}}, y:{ticks:{callback:v=>'R$'+Number(v/1e6).toFixed(1)+'M'}} }
+            }
+        });
     }
-    // Modalidades
+    // Gráfico de Modalidades
     const modMap = new Map();
     dados.forEach(e=>{
-        const m=e.licitacao_descricao_da_modalidade||'Não informada';
-        const v=parseNum(e.valor_empenhado_efetivo_4_12||e.valor_despesa_empenhada);
+        const m=e.modalidade_licitacao||'Não informada';
+        const v=parseNum(e.valor_empenhado_efetivo||e.valor_empenhado);
         if(v>0) modMap.set(m,(modMap.get(m)||0)+v);
     });
     const modData = Array.from(modMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,7);
@@ -1229,13 +1436,13 @@ window.exportarIniciativasPDF = function() {
     doc.save('iniciativas_mariana.pdf');
 };
 window.exportarExecucaoCSV = function() {
-    const campos=['numero_empenho','data_registro_doc_empenho','ano_de_exercicio','contratoconvenio_entrada','unidade_orcamentaria_nome','razao_social_credor','cnpj_cpf_credor_formatado','numero_processo_compra_siad','licitacao_descricao_da_modalidade','valor_despesa_empenhada','valor_despesa_liquidada','valor_pago_financeiro','valor_pago_total_6_16'];
+    const campos=['no_empenho','data_empenho','ano','codigo_iniciativa','nome_orgao','credor','cnpj_cpf_credor','no_processo_compra','modalidade_licitacao','valor_empenhado','valor_liquidado','valor_pago_financeiro','valor_total_pag'];
     const csv=[campos.join(';'),...(window.execFiltrada||[]).map(e=>campos.map(c=>`"${e[c]||''}"`).join(';'))].join('\n');
     const blob=new Blob(['\uFEFF'+csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='execucao_acordomariana.csv'; a.click();
 };
 window.exportarExecucaoPDF = function() {
     const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:'landscape'});
-    doc.autoTable({ head:[['Empenho','Data','Ano','Credor','CNPJ/CPF','Proc. Compra','Modalidade','Empenhado','Liquidado','Pago']], body:(window.execFiltrada||[]).slice(0,100).map(e=>[e.numero_empenho,formatarData(e.data_registro_doc_empenho),e.ano_de_exercicio,e.razao_social_credor,e.cnpj_cpf_credor_formatado,e.numero_processo_compra_siad,e.licitacao_descricao_da_modalidade,formatarMoeda(e.valor_despesa_empenhada),formatarMoeda(e.valor_despesa_liquidada),formatarMoeda(e.valor_pago_total_6_16)]), headStyles:{fillColor:[32,68,93]}, styles:{fontSize:7}, didDrawPage:()=>{doc.setFontSize(9);doc.text('Execução Financeira - Acordo de Mariana',14,10);doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,doc.internal.pageSize.height-5);} });
+    doc.autoTable({ head:[['Empenho','Data','Ano','Credor','CNPJ/CPF','Proc. Compra','Modalidade','Empenhado','Liquidado','Pago']], body:(window.execFiltrada||[]).slice(0,100).map(e=>[e.no_empenho,formatarData(e.data_empenho),e.ano,e.credor,e.cnpj_cpf_credor,e.no_processo_compra,e.modalidade_licitacao,formatarMoeda(e.valor_empenhado),formatarMoeda(e.valor_liquidado),formatarMoeda(e.valor_total_pag)]), headStyles:{fillColor:[32,68,93]}, styles:{fontSize:7}, didDrawPage:()=>{doc.setFontSize(9);doc.text('Execução Financeira - Acordo de Mariana',14,10);doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,doc.internal.pageSize.height-5);} });
     doc.save('execucao_acordomariana.pdf');
 };
 window.exportarModalPDF = function() {
@@ -1277,8 +1484,222 @@ function carregarFiltrosDaURL() {
 }
 
 // ============================================================
-// 12. DOWNLOADS
+// 12. EXECUÇÃO POR ÓRGÃO
 // ============================================================
+function renderizarExecucaoOrgao() {
+    const c = document.getElementById('execucao-orgao-content');
+    if (!c) return;
+
+    // Filtros baseados no próprio orgao.csv
+    const anexos = [...new Set(dadosOrgao.map(r=>(r.anexo||'').trim()).filter(Boolean))].sort();
+    const iniciativasOpts = dadosIniciativas; // para filtro por iniciativa
+
+    c.innerHTML = `
+    <div class="filter-container">
+        <div class="filters-row">
+            <div class="filter-group">
+                <label class="filter-label">Anexo</label>
+                <select class="form-select modern-select" id="filtroAnexoOrgao">
+                    <option value="">Todos</option>
+                    ${anexos.map(a=>`<option value="${a}">${a}</option>`).join('')}
+                </select>
+            </div>
+            <div class="filter-group" style="flex:2">
+                <label class="filter-label">Iniciativa</label>
+                <select class="form-select modern-select" id="filtroInicOrgao">
+                    <option value="">Todas</option>
+                    ${iniciativasOpts.map(i=>`<option value="${esc(i.codigo_iniciativa||i.codigo_iniciativa)}">${i.codigo_iniciativa} - ${(i.iniciativa||'').substring(0,60)}</option>`).join('')}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Cód. UO</label>
+                <input type="text" class="form-control" id="filtroCodigoUOOrgao" placeholder="Digite...">
+            </div>
+            <div class="filter-group" style="flex:2">
+                <label class="filter-label">Nome UO</label>
+                <input type="text" class="form-control" id="filtroNomeUOOrgao" placeholder="Digite...">
+            </div>
+        </div>
+        <div class="botoes-abaixo">
+            <button class="btn-pesquisa" onclick="aplicarFiltrosOrgao()"><i class="material-icons">refresh</i> Atualizar Filtros</button>
+            <button class="btn-secondary-custom" onclick="limparFiltrosOrgao()"><i class="material-icons">clear</i> Limpar Filtros</button>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <button class="btn-export" onclick="exportarOrgaoCSV()"><i class="material-icons">description</i> CSV</button>
+        </div>
+        <div class="toolbar-right">
+            <span class="table-badge" id="badgeOrgao">-</span>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-fixed-header-container">
+            <table class="table" id="tabelaOrgao">
+                <thead><tr>
+                    <th class="sortable-header" onclick="sortORGAO('iniciativa_label')">Iniciativa <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortORGAO('anexo')">Anexo <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortORGAO('codigo_orgao')">Cód. UO <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortORGAO('nome_orgao')">Nome UO <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_empenhado')">Empenhado <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_liquidado')">Liquidado <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_pago_financeiro')">Pago Financeiro <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_cancelado_rp')">Cancelado RP <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_empenhado_efetivo')">Empenhado Efetivo <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_pago_rp')">Pago RP <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_pago_total')">Total Pago <i class="material-icons">unfold_more</i></th>
+                </tr></thead>
+                <tbody id="tbodyOrgao"></tbody>
+                <tfoot id="tfootOrgao"></tfoot>
+            </table>
+        </div>
+        <div class="pagination-container" id="pagContainerORGAO"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="btn-topo" onclick="voltarAoTopo()"><i class="material-icons">arrow_upward</i> Voltar ao topo</button>
+    </div>`;
+
+    calcularTabelaOrgao();
+}
+
+let sortCfgOrgao = { col:'nome_orgao', dir:'asc' };
+let pagOrgao = { atual:1, porPag:50, total:1 };
+window.orgaoFiltrada = [];
+
+function calcularTabelaOrgao() {
+    const anx  = document.getElementById('filtroAnexoOrgao')?.value||'';
+    const inic = document.getElementById('filtroInicOrgao')?.value||'';
+    const codUO = (document.getElementById('filtroCodigoUOOrgao')?.value||'').toLowerCase().trim();
+    const nomeUO = (document.getElementById('filtroNomeUOOrgao')?.value||'').toLowerCase().trim();
+
+    // Filtra diretamente no array de orgao.csv, enriquecendo com label da iniciativa
+    let base = dadosOrgao.filter(r=>{
+        const chave = (r.codigo_iniciativa||'').trim();
+        if (anx && (r.anexo||'').trim()!==anx) return false;
+        if (inic && chave!==inic) return false;
+        if (codUO && !String(r.codigo_orgao||'').toLowerCase().includes(codUO)) return false;
+        if (nomeUO && !String(r.nome_orgao||'').toLowerCase().includes(nomeUO)) return false;
+        return true;
+    });
+
+    // Enriquecer com label da iniciativa (de dadosIniciativas)
+    base = base.map(r=>{
+        const chave=(r.codigo_iniciativa||'').trim();
+        const iObj=dadosIniciativas.find(i=>(i.codigo_iniciativa||'').trim()===chave);
+        return {...r,
+            iniciativa_label: iObj?(iObj.iniciativa||chave):chave,
+            codigo_iniciativa_label: iObj?(iObj.codigo_iniciativa||chave):chave,
+        };
+    });
+
+    window.orgaoFiltrada = ordenarOrgao(base, sortCfgOrgao.col, sortCfgOrgao.dir);
+    pagOrgao.atual=1;
+    pagOrgao.total=Math.ceil(window.orgaoFiltrada.length/pagOrgao.porPag);
+    atualizarTabelaOrgao();
+}
+
+function ordenarOrgao(arr, col, dir) {
+    return [...arr].sort((a,b)=>{
+        let va = a[col]!==undefined&&a[col]!==null ? a[col] : '';
+        let vb = b[col]!==undefined&&b[col]!==null ? b[col] : '';
+        const isNum = col.includes('valor');
+        if (isNum) { va=parseNum(va); vb=parseNum(vb); }
+        else { va=va.toString().toLowerCase(); vb=vb.toString().toLowerCase(); }
+        return dir==='asc'?(va<vb?-1:va>vb?1:0):(va>vb?-1:va<vb?1:0);
+    });
+}
+
+function atualizarTabelaOrgao() {
+    const ini=(pagOrgao.atual-1)*pagOrgao.porPag;
+    const fim=Math.min(ini+pagOrgao.porPag,window.orgaoFiltrada.length);
+    const rows=window.orgaoFiltrada.slice(ini,fim);
+    const tbody=document.getElementById('tbodyOrgao');
+    if (!tbody) return;
+    tbody.innerHTML = rows.length===0
+        ? '<tr><td colspan="11" class="text-center py-4">Nenhum registro encontrado</td></tr>'
+        : rows.map(r=>{
+            const chave=(r.codigo_iniciativa||'').trim();
+            const inicLabel = r.iniciativa_label||chave||'-';
+            const inicCod = r.codigo_iniciativa_label||chave||'-';
+            const inicLink = chave
+                ? `<a href="#" class="proc-link" title="${inicLabel}" onclick="irParaExecucaoDeEmpenho('${esc(chave)}');return false;">${inicCod}</a>`
+                : `<span>${inicCod}</span>`;
+            return `<tr>
+            <td>${inicLink}</td>
+            <td>${(r.anexo||'-')}</td>
+            <td>${r.codigo_orgao||'-'}</td>
+            <td title="${r.nome_orgao||''}">${(r.nome_orgao||'-').substring(0,40)}${(r.nome_orgao||'').length>40?'...':''}</td>
+            <td class="text-right">${formatarMoeda(r.valor_empenhado)}</td>
+            <td class="text-right">${formatarMoeda(r.valor_liquidado)}</td>
+            <td class="text-right">${formatarMoeda(r.valor_pago_financeiro)}</td>
+            <td class="text-right">${formatarMoeda(r.valor_cancelado_rp)}</td>
+            <td class="text-right">${formatarMoeda(r.valor_empenhado_efetivo)}</td>
+            <td class="text-right">${formatarMoeda(r.valor_pago_rp)}</td>
+            <td class="text-right">${formatarMoeda(r.valor_pago_total)}</td>
+        </tr>`;
+        }).join('');
+    // Totais
+    const tot=window.orgaoFiltrada.reduce((acc,r)=>{
+        acc.empenhado+=parseNum(r.valor_empenhado);
+        acc.liquidado+=parseNum(r.valor_liquidado);
+        acc.pago_financeiro+=parseNum(r.valor_pago_financeiro);
+        acc.cancelado_rp+=parseNum(r.valor_cancelado_rp);
+        acc.empenhado_efetivo+=parseNum(r.valor_empenhado_efetivo);
+        acc.pago_rp+=parseNum(r.valor_pago_rp);
+        acc.pago_total+=parseNum(r.valor_pago_total);
+        return acc;
+    },{empenhado:0,liquidado:0,pago_financeiro:0,cancelado_rp:0,empenhado_efetivo:0,pago_rp:0,pago_total:0});
+    const tfoot=document.getElementById('tfootOrgao');
+    if (tfoot) tfoot.innerHTML=`<tr>
+        <td colspan="4"><strong>TOTAL (${window.orgaoFiltrada.length} registros)</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.empenhado)}</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.liquidado)}</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.pago_financeiro)}</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.cancelado_rp)}</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.empenhado_efetivo)}</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.pago_rp)}</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.pago_total)}</strong></td>
+    </tr>`;
+    const badge=document.getElementById('badgeOrgao');
+    if(badge) badge.textContent=window.orgaoFiltrada.length+' registros';
+    // Paginação
+    const pgCont=document.getElementById('pagContainerORGAO');
+    if(pgCont){
+        if(pagOrgao.total<=1){pgCont.innerHTML='';return;}
+        let h=`<div class="pagination-info"><span>Mostrando ${ini+1}–${fim} de ${window.orgaoFiltrada.length}</span></div>`;
+        h+=`<div class="pagination-controls">
+            <button onclick="mudaPagOrgao(${pagOrgao.atual-1})" ${pagOrgao.atual===1?'disabled':''}><i class="fas fa-angle-left"></i></button>`;
+        for(let i=Math.max(1,pagOrgao.atual-2);i<=Math.min(pagOrgao.total,pagOrgao.atual+2);i++)
+            h+=`<button onclick="mudaPagOrgao(${i})" class="${i===pagOrgao.atual?'active':''}">${i}</button>`;
+        h+=`<button onclick="mudaPagOrgao(${pagOrgao.atual+1})" ${pagOrgao.atual===pagOrgao.total?'disabled':''}><i class="fas fa-angle-right"></i></button></div>`;
+        pgCont.innerHTML=h;
+    }
+}
+
+window.mudaPagOrgao = function(p) { if(p<1||p>pagOrgao.total)return; pagOrgao.atual=p; atualizarTabelaOrgao(); };
+window.aplicarFiltrosOrgao = function() { calcularTabelaOrgao(); };
+window.limparFiltrosOrgao = function() {
+    ['filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    calcularTabelaOrgao();
+};
+window.sortORGAO = function(col) {
+    if(sortCfgOrgao.col===col) sortCfgOrgao.dir=sortCfgOrgao.dir==='asc'?'desc':'asc';
+    else{sortCfgOrgao.col=col;sortCfgOrgao.dir='asc';}
+    window.orgaoFiltrada=ordenarOrgao(window.orgaoFiltrada,sortCfgOrgao.col,sortCfgOrgao.dir);
+    pagOrgao.atual=1; atualizarTabelaOrgao();
+}
+window.exportarOrgaoCSV = function() {
+    const campos=['codigo_iniciativa_label','iniciativa_label','anexo','codigo_orgao','nome_orgao',
+        'valor_empenhado','valor_liquidado','valor_pago_financeiro',
+        'valor_cancelado_rp','valor_empenhado_efetivo',
+        'valor_pago_rp','valor_pago_total'];
+    const headers=['Código Iniciativa','Iniciativa','Anexo','Cód. UO','Nome UO',
+        'Empenhado','Liquidado','Pago Financeiro','Cancelado RP','Empenhado Efetivo','Pago RP','Total Pago'];
+    const csv=[headers.join(';'),...(window.orgaoFiltrada||[]).map(r=>campos.map(c=>`"${r[c]||''}"`).join(';'))].join('\n');
+    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='execucao_por_orgao.csv'; a.click();
+};
 function renderizarDownloads() {
     const c=document.getElementById('downloads-content'); if(!c)return;
     c.innerHTML=`
@@ -1331,23 +1752,32 @@ function renderizarDownloads() {
                 <table class="metadata-table">
                     <thead><tr><th>Campo</th><th>Descrição</th><th>Tipo</th></tr></thead>
                     <tbody>
-                        <tr><td><code>numero_empenho</code></td><td>Número do documento de empenho</td><td>Texto</td></tr>
-                        <tr><td><code>data_registro_doc_empenho</code></td><td>Data de registro do empenho</td><td>Data</td></tr>
-                        <tr><td><code>ano_de_exercicio</code></td><td>Ano de exercício do empenho</td><td>Número</td></tr>
-                        <tr><td><code>codigo_iniciativa</code></td><td>Código da iniciativa vinculada</td><td>Texto</td></tr>
-                        <tr><td><code>unidade_orcamentaria_nome</code></td><td>Órgão/unidade orçamentária responsável</td><td>Texto</td></tr>
-                        <tr><td><code>razao_social_credor</code></td><td>Razão social do credor/fornecedor</td><td>Texto</td></tr>
-                        <tr><td><code>cnpj_cpf_credor_formatado</code></td><td>CNPJ ou CPF do credor</td><td>Texto</td></tr>
-                        <tr><td><code>numero_processo_compra_siad</code></td><td>Número do processo de compra no SIAD (usado para cruzamento com edital e contrato)</td><td>Texto</td></tr>
-                        <tr><td><code>licitacao_descricao_da_modalidade</code></td><td>Modalidade licitatória utilizada</td><td>Texto</td></tr>
-                        <tr><td><code>valor_despesa_empenhada</code></td><td>Valor empenhado da despesa</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_despesa_liquidada</code></td><td>Valor liquidado da despesa</td><td>Moeda</td></tr>
+                        <tr><td><code>no_empenho</code></td><td>Número do documento de empenho</td><td>Texto</td></tr>
+                        <tr><td><code>data_empenho</code></td><td>Data de registro do empenho</td><td>Data</td></tr>
+                        <tr><td><code>ano</code></td><td>Ano de exercício do empenho</td><td>Número</td></tr>
+                        <tr><td><code>codigo_iniciativa</code></td><td>Código do contrato/convênio de entrada (vincula à iniciativa)</td><td>Texto</td></tr>
+                        <tr><td><code>codigo_orgao</code></td><td>Código da unidade orçamentária responsável</td><td>Texto</td></tr>
+                        <tr><td><code>nome_orgao</code></td><td>Nome da unidade orçamentária responsável</td><td>Texto</td></tr>
+                        <tr><td><code>credor</code></td><td>Razão social do credor/fornecedor</td><td>Texto</td></tr>
+                        <tr><td><code>cnpj_cpf_credor</code></td><td>CNPJ ou CPF do credor</td><td>Texto</td></tr>
+                        <tr><td><code>no_processo_compra</code></td><td>Número do processo de compra no SIAD</td><td>Texto</td></tr>
+                        <tr><td><code>modalidade_licitacao</code></td><td>Modalidade licitatória utilizada</td><td>Texto</td></tr>
+                        <tr><td><code>cod_elemento_despesa</code></td><td>Código do elemento de despesa</td><td>Texto</td></tr>
+                        <tr><td><code>nome_elemento_despesa</code></td><td>Descrição do elemento de despesa</td><td>Texto</td></tr>
+                        <tr><td><code>codigo_item_despesa</code></td><td>Código do item de despesa</td><td>Texto</td></tr>
+                        <tr><td><code>nome_item_despesa</code></td><td>Descrição do item de despesa</td><td>Texto</td></tr>
+                        <tr><td><code>codigo_fonte_recurso</code></td><td>Código da fonte de recurso</td><td>Texto</td></tr>
+                        <tr><td><code>nome_fonte_recurso</code></td><td>Descrição da fonte de recurso</td><td>Texto</td></tr>
+                        <tr><td><code>valor_empenhado</code></td><td>Valor empenhado da despesa</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_liquidado</code></td><td>Valor liquidado da despesa</td><td>Moeda</td></tr>
                         <tr><td><code>valor_pago_financeiro</code></td><td>Valor pago financeiramente</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_despesa_liquidada_rp</code></td><td>Valor liquidado em restos a pagar</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_cancelado_em_restoa_a_pagar_8_9_10_11</code></td><td>Valor cancelado em restos a pagar</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_empenhado_efetivo_4_12</code></td><td>Valor empenhado efetivo</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_pago_em_restos_a_pagar_14_15</code></td><td>Valor pago em restos a pagar</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_pago_total_6_16</code></td><td>Valor total pago (financeiro + RP)</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_liquidado_rp</code></td><td>Valor liquidado em restos a pagar</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_cancelado_rp</code></td><td>Valor cancelado em restos a pagar</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_empenhado_efetivo</code></td><td>Valor empenhado efetivo</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_pago_processado</code></td><td>Valor pago processado</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_pago_nao_processado</code></td><td>Valor pago não processado</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_pago_rp</code></td><td>Valor pago em restos a pagar</td><td>Moeda</td></tr>
+                        <tr><td><code>valor_total_pag</code></td><td>Valor total pago (financeiro + RP)</td><td>Moeda</td></tr>
                     </tbody>
                 </table>
             </div>
