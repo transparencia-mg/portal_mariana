@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.15,
+  "time": 0.134,
   "errors": [],
   "tasks": [
     {
@@ -18,75 +18,75 @@
         "schema": {
           "fields": [
             {
-              "name": "ano_de_exercicio",
+              "name": "ano",
               "type": "integer"
             },
             {
-              "name": "contratoconvenio_entrada",
+              "name": "iniciativa",
               "type": "integer"
             },
             {
-              "name": "unidade_orcamentaria_codigo",
+              "name": "codigo_orgao",
               "type": "integer"
             },
             {
-              "name": "unidade_orcamentaria_nome",
+              "name": "nome_orgao",
               "type": "string"
             },
             {
-              "name": "numero_empenho",
+              "name": "no_empenho",
               "type": "integer"
             },
             {
-              "name": "data_registro_doc_empenho",
+              "name": "data_empenho",
               "type": "date"
             },
             {
-              "name": "numero_processo_compra_siad",
+              "name": "no_processo_compra",
               "type": "string"
             },
             {
-              "name": "licitacao_descricao_da_modalidade",
+              "name": "modalidade_licitacao",
               "type": "string"
             },
             {
-              "name": "elemento_despesa_codigo",
+              "name": "cod_elemento_despesa",
               "type": "integer"
             },
             {
-              "name": "elemento_despesa_descricao",
+              "name": "nome_elemento_despesa",
               "type": "string"
             },
             {
-              "name": "elemento_item_despesa_codigo",
+              "name": "codigo_item_despesa",
               "type": "integer"
             },
             {
-              "name": "elemento_item_despesa_descricao",
+              "name": "nome_item_despesa",
               "type": "string"
             },
             {
-              "name": "fonte_recurso_codigo",
+              "name": "codigo_fonte_recurso",
               "type": "integer"
             },
             {
-              "name": "fonte_recurso_descricao",
+              "name": "nome_fonte_recurso",
               "type": "string"
             },
             {
-              "name": "cnpj_cpf_credor_formatado",
+              "name": "cnpj_cpf_credor",
               "type": "string"
             },
             {
-              "name": "razao_social_credor",
+              "name": "credor",
               "type": "string"
             },
             {
-              "name": "valor_despesa_empenhada",
+              "name": "valor_empenhado",
               "type": "string"
             },
             {
-              "name": "valor_despesa_liquidada",
+              "name": "valor_liquidado",
               "type": "string"
             },
             {
@@ -94,7 +94,7 @@
               "type": "string"
             },
             {
-              "name": "valor_despesa_liquidada_1",
+              "name": "valor_liquidado_rp",
               "type": "any"
             },
             {
@@ -114,11 +114,11 @@
               "type": "any"
             },
             {
-              "name": "valor_cancelado_em_restoa_a_pagar_10_11_12_13",
+              "name": "valor_cancelado_rp",
               "type": "any"
             },
             {
-              "name": "valor_empenhado_efetivo_6_14",
+              "name": "valor_empenhado_efetivo",
               "type": "string"
             },
             {
@@ -130,11 +130,11 @@
               "type": "any"
             },
             {
-              "name": "valor_pago_em_restos_a_pagar_16_17",
+              "name": "valor_pago_rp",
               "type": "any"
             },
             {
-              "name": "valor_total_pago_8_18",
+              "name": "valor_total_pago",
               "type": "string"
             }
           ]
@@ -142,13 +142,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "f8de54cf64af1e4cfd5e9c18806d13d4",
-          "bytes": 82198,
+          "hash": "0da9846116133aaf799c5063ee0e8840",
+          "bytes": 81962,
           "fields": 30,
           "rows": 210
         }
       },
-      "time": 0.053,
+      "time": 0.047,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -217,7 +217,7 @@
           "rows": 38
         }
       },
-      "time": 0.011,
+      "time": 0.009,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -285,23 +285,23 @@
         "schema": {
           "fields": [
             {
-              "name": "contratoconvenio_entrada",
+              "name": "iniciativa",
               "type": "integer"
             },
             {
-              "name": "unidade_orcamentaria_codigo",
+              "name": "codigo_orgao",
               "type": "integer"
             },
             {
-              "name": "unidade_orcamentaria_nome",
+              "name": "nome_orgao",
               "type": "string"
             },
             {
-              "name": "valor_despesa_empenhada",
+              "name": "valor_empenhado",
               "type": "string"
             },
             {
-              "name": "valor_despesa_liquidada",
+              "name": "valor_liquidado",
               "type": "string"
             },
             {
@@ -309,7 +309,7 @@
               "type": "string"
             },
             {
-              "name": "valor_despesa_liquidada_1",
+              "name": "valor_liquidado_rp",
               "type": "any"
             },
             {
@@ -329,11 +329,11 @@
               "type": "any"
             },
             {
-              "name": "valor_cancelado_em_restoa_a_pagar_8_9_10_11",
+              "name": "valor_cancelado_rp",
               "type": "any"
             },
             {
-              "name": "valor_empenhado_efetivo_4_12",
+              "name": "valor_empenhado_efetivo",
               "type": "string"
             },
             {
@@ -345,11 +345,11 @@
               "type": "any"
             },
             {
-              "name": "valor_pago_em_restos_a_pagar_14_15",
+              "name": "valor_pago_rp",
               "type": "any"
             },
             {
-              "name": "valor_pago_total_6_16",
+              "name": "valor_pago_total",
               "type": "string"
             }
           ]
@@ -357,13 +357,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "a7e70635550b298e85ef478bbb67c90c",
-          "bytes": 3038,
+          "hash": "d0043054611f657f29a493353ee6093d",
+          "bytes": 2914,
           "fields": 17,
           "rows": 16
         }
       },
-      "time": 0.027,
+      "time": 0.024,
       "scope": [
         "hash-count-error",
         "byte-count-error",
