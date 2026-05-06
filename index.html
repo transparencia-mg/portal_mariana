@@ -192,6 +192,47 @@
         .metadata-table tbody td { padding: 10px; border-bottom: 1px solid #f0f4f8; vertical-align: top; color: #334155; }
         .metadata-table code { background: #e2e8f0; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
+        /* TOOLTIP COLUNAS */
+        .th-tooltip { position: relative; }
+        .th-tooltip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a3a5c;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 400;
+            white-space: normal;
+            min-width: 180px;
+            max-width: 260px;
+            padding: 7px 10px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.18s ease;
+            z-index: 9999;
+            text-transform: none;
+            line-height: 1.4;
+        }
+        .th-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 1px);
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #1a3a5c;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.18s ease;
+            z-index: 9999;
+        }
+        .th-tooltip:hover::after,
+        .th-tooltip:hover::before { opacity: 1; }
+
         /* BADGE SITUAÇÃO */
         .badge-situacao { padding: 3px 8px; border-radius: 20px; font-size: 10.5px; font-weight: 700; display: inline-block; letter-spacing: 0.2px; white-space: nowrap; }
         .badge-ativo    { background: #dcf5e7; color: #0f6b3a; border: 1px solid #b2e6c8; }
@@ -244,6 +285,11 @@
                     </button>
                 </li>
                 <li class="nav-item">
+                    <button class="nav-link" id="receita-tab" data-bs-toggle="tab" data-bs-target="#tab-receita">
+                        <i class="material-icons">savings</i>Receita
+                    </button>
+                </li>
+                <li class="nav-item">
                     <button class="nav-link" id="downloads-tab" data-bs-toggle="tab" data-bs-target="#tab-downloads">
                         <i class="material-icons">download</i>Downloads
                     </button>
@@ -269,6 +315,9 @@
             </div>
             <div class="tab-pane fade" id="tab-execucao" role="tabpanel">
                 <div id="execucao-content"></div>
+            </div>
+            <div class="tab-pane fade" id="tab-receita" role="tabpanel">
+                <div id="receita-content"></div>
             </div>
             <div class="tab-pane fade" id="tab-downloads" role="tabpanel">
                 <div id="downloads-content"></div>
@@ -329,6 +378,9 @@ let dadosEmpenho = [];
 let dadosOrgao = []; // array direto do orgao.csv
 let dadosOrgaoMap = {}; // mapa: codigo_iniciativa -> dados do órgão (para modal)
 let dadosLicitacoes = {}; // mapa: numero_processo_formatado -> dados da licitação
+let dadosReceita = [];
+let dadosContaBancaria = [];
+let receitaFiltrada = [];
 
 let empenhoFiltradoTabela = [];
 let iniciativasFiltradas  = [];
@@ -337,6 +389,8 @@ let sortCfg = {
     iniciativas: { col: 'codigo_iniciativa', dir: 'asc' },
     execucao:    { col: 'data_empenho', dir: 'desc' }
 };
+let sortCfgReceita = { col: 'ano', dir: 'desc' };
+let pagReceita = { atual: 1, porPag: 50, total: 1 };
 let pag = {
     iniciativas: { atual: 1, porPag: 50, total: 1 },
     execucao:    { atual: 1, porPag: 50, total: 1 }
@@ -417,6 +471,11 @@ function voltarAoTopo() {
 }
 
 // ============================================================
+// UTILITÁRIOS DE LIMPEZA (BOM, espaços invisíveis)
+// ============================================================
+function _limpar(s) { return String(s||'').replace(/[\uFEFF\u200B\u00A0]/g,'').trim(); }
+
+// ============================================================
 // 3. CARREGAMENTO DE DADOS
 // ============================================================
 async function carregarDados() {
@@ -481,9 +540,30 @@ async function carregarDados() {
         empenhoFiltradoTabela = [...dadosEmpenho];
         iniciativasFiltradas  = [...dadosIniciativas];
 
+        // Receita
+        mostrarLoading(true,'Carregando receitas...');
+        try {
+            const rRec = await fetch(GITHUB_BASE+'receita.csv');
+            const tRec = await rRec.text();
+            const pRec = Papa.parse(tRec.replace(/^\uFEFF/,''),{header:true,skipEmptyLines:true,delimiter:';'});
+            dadosReceita = pRec.data;
+        } catch(e){ dadosReceita=[]; }
+
+        try {
+            const rCB = await fetch(GITHUB_BASE+'contabancaria.csv');
+            const tCB = await rCB.text();
+            const pCB = Papa.parse(tCB.replace(/^\uFEFF/,''),{header:true,skipEmptyLines:true,delimiter:';'});
+            dadosContaBancaria = pCB.data;
+        } catch(e){ dadosContaBancaria=[]; }
+
+        // Resetar cache de normalização para forçar re-normalização
+        window._receitaNorm   = null;
+        window._contaBancNorm = null;
+
         renderizarIniciativas();
         renderizarExecucaoOrgao();
         renderizarExecucao();
+        renderizarReceita();
         renderizarDownloads();
         setupDataAtualizacao();
         setTimeout(carregarFiltrosDaURL, 400);
@@ -652,33 +732,73 @@ window.buscarINIC = function(termo) {
 // 5. IR PARA EXECUÇÃO
 // ============================================================
 window.irParaExecucao = function(codigoIniciativa, nome) {
-    // Navega para aba execução
-    document.getElementById('execucao-tab').click();
-    // Aguarda a aba renderizar completamente antes de setar o filtro
+    const cod = (codigoIniciativa||'').trim();
+
+    // Verificar se existe alguma execução para essa iniciativa em dadosOrgao
+    const temExecucao = dadosOrgao.some(r => (r.codigo_iniciativa||'').trim() === cod);
+
+    if (!temExecucao) {
+        // Mostrar modal de aviso amigável em vez de navegar
+        let modalEl = document.getElementById('modalSemExecucao');
+        if (!modalEl) {
+            const div = document.createElement('div');
+            div.innerHTML = `
+            <div class="modal fade" id="modalSemExecucao" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
+                    <div class="modal-content modal-creative">
+                        <div class="modal-header" style="background:linear-gradient(135deg,#20445d,#0f2a44);">
+                            <h5 class="modal-title"><i class="material-icons me-2">info</i> Execução não encontrada</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" style="padding:28px 24px;text-align:center;">
+                            <i class="material-icons" style="font-size:48px;color:#b93c42;margin-bottom:12px;display:block;">assignment_late</i>
+                            <p id="msgSemExecucao" style="font-size:14px;color:#1e293b;font-weight:500;margin:0;line-height:1.6;"></p>
+                        </div>
+                        <div class="modal-footer" style="justify-content:center;padding:16px;">
+                            <button class="btn-pesquisa" data-bs-dismiss="modal" onclick="document.getElementById('iniciativas-tab').click()">
+                                <i class="material-icons">arrow_back</i> Voltar às Iniciativas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            document.body.appendChild(div.firstElementChild);
+            modalEl = document.getElementById('modalSemExecucao');
+        }
+        const msgEl = document.getElementById('msgSemExecucao');
+        if (msgEl) msgEl.textContent = `A Iniciativa ${cod} ainda não possui execução registrada.`;
+        // compatível com Bootstrap 5 — getInstance se já existir, senão cria novo
+        const existingModal = bootstrap.Modal.getInstance(modalEl);
+        const modal = existingModal || new bootstrap.Modal(modalEl, {backdrop: true, keyboard: true});
+        modal.show();
+        return;
+    }
+
+    // Navega para aba Execução por Órgão
+    document.getElementById('execucao-orgao-tab').click();
     function tentarSetarFiltro(tentativas) {
-        const sel = document.getElementById('filtroInicExec');
+        const sel = document.getElementById('filtroInicOrgao');
         if (!sel) {
             if (tentativas > 0) setTimeout(()=>tentarSetarFiltro(tentativas-1), 200);
             return;
         }
-        // Limpa filtros antes de aplicar o novo
-        sel.value = '';
-        // Tenta match exato pelo valor do option
+        ['filtroAnexoOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao']
+            .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
         let found = false;
         for (let opt of sel.options) {
-            if (opt.value === codigoIniciativa) { sel.value = opt.value; found = true; break; }
+            if (opt.value.trim() === cod) { sel.value = opt.value; found = true; break; }
         }
         if (!found) {
             for (let opt of sel.options) {
-                if (opt.value.startsWith(codigoIniciativa) || opt.text.startsWith(codigoIniciativa)) { sel.value = opt.value; found = true; break; }
+                if (opt.value.trim().startsWith(cod) || opt.text.startsWith(cod)) {
+                    sel.value = opt.value; found = true; break;
+                }
             }
         }
-        // Limpa outros filtros para mostrar APENAS a iniciativa selecionada
-        ['filtroAnoExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec']
-            .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-        aplicarFiltrosEXEC();
+        calcularTabelaOrgao();
+        setTimeout(()=>{ try{ document.getElementById('execucao-orgao-content')?.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }, 300);
     }
-    setTimeout(()=>tentarSetarFiltro(10), 400);
+    setTimeout(()=>tentarSetarFiltro(15), 300);
 };
 
 // Chamada a partir da célula de iniciativa na tabela execução
@@ -1883,6 +2003,449 @@ window.buscarORGAO = function(termo) {
     }).join('');
     document.getElementById('badgeOrgao').textContent = f.length+' registros';
 };
+// ============================================================
+// RECEITA — mapeamento direto das colunas reais dos CSVs
+// receita.csv      : ano_de_exercicio | mes_descritivo | unidade_orcamentaria_codigo |
+//                    unidade_orcamentaria_nome | classificacao_receita_formatado |
+//                    classificacao_receita_descricao | valor_previsto_inicial | valor_previsto_atualizado
+// contabancaria.csv: ano_de_exercicio | mes_descritivo | unidade_orcamentaria_codigo |
+//                    unidade_orcamentaria_nome | classificacao_receita_descricao |
+//                    classificacao_receita_formatado | valor_arrecadado_liquido
+// ============================================================
+
+// Converte nome do mês (pt-BR) para número "01"–"12"
+const MESES_DESCR_MAP = {
+    'janeiro':'01','fevereiro':'02','março':'03','marco':'03',
+    'abril':'04','maio':'05','junho':'06','julho':'07',
+    'agosto':'08','setembro':'09','outubro':'10',
+    'novembro':'11','dezembro':'12'
+};
+function _mesDescritivoParaNum(v) {
+    if (!v) return '';
+    const s = String(v).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if (MESES_DESCR_MAP[s]) return MESES_DESCR_MAP[s];
+    // Já é número (ex: "3" ou "03")
+    const n = parseInt(s,10);
+    if (!isNaN(n) && n>=1 && n<=12) return String(n).padStart(2,'0');
+    return '';
+}
+
+function renderizarReceita() {
+    const c = document.getElementById('receita-content');
+    if (!c) return;
+
+    const anosDisp = [...new Set([...dadosReceita,...dadosContaBancaria]
+        .map(r => {
+            // Tenta todas as chaves que contenham 'ano'
+            const k = Object.keys(r).find(k=>_limpar(k).toLowerCase().includes('ano'));
+            return k ? _limpar(r[k]) : '';
+        }).filter(Boolean))].sort((a,b)=>b-a);
+
+    // Ano mais recente e último mês disponível nesse ano
+    const anoMaisRecente = anosDisp[0] || '';
+    const mesesDoAno = [...new Set([...dadosReceita,...dadosContaBancaria]
+        .filter(r => {
+            const k = Object.keys(r).find(k=>_limpar(k).toLowerCase().includes('ano'));
+            return k && _limpar(r[k]) === anoMaisRecente;
+        })
+        .map(r => {
+            // Suporta mes_descritivo (texto) e mes_numerico (número)
+            const kDesc = Object.keys(r).find(k=>_limpar(k).toLowerCase().includes('mes'));
+            const raw = kDesc ? _limpar(r[kDesc]) : '';
+            return _mesDescritivoParaNum(raw) || raw.padStart(2,'0');
+        })
+        .filter(m => m && m !== '00'))].sort();
+    const ultimoMes = mesesDoAno[mesesDoAno.length-1] || '12';
+
+    c.innerHTML = `
+    <div class="filter-container">
+        <div class="filters-row">
+            <div class="filter-group">
+                <label class="filter-label">Ano <span style="color:var(--accent-red)">*</span></label>
+                <select class="form-select modern-select" id="filtroAnoREC">
+                    <option value="">Selecione...</option>
+                    ${anosDisp.map(a=>`<option value="${a}" ${a===anoMaisRecente?'selected':''} >${a}</option>`).join('')}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Mês Inicial</label>
+                <select class="form-select modern-select" id="filtroMesInicREC">
+                    <option value="01">Janeiro</option>
+                    <option value="02">Fevereiro</option>
+                    <option value="03">Março</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Maio</option>
+                    <option value="06">Junho</option>
+                    <option value="07">Julho</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Mês Final</label>
+                <select class="form-select modern-select" id="filtroMesFimREC">
+                    <option value="01">Janeiro</option>
+                    <option value="02">Fevereiro</option>
+                    <option value="03">Março</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Maio</option>
+                    <option value="06">Junho</option>
+                    <option value="07">Julho</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+            <div class="filter-group" style="flex:2;min-width:200px;">
+                <label class="filter-label">Classificação da Receita</label>
+                <input type="text" class="form-control" id="filtroClassifREC" placeholder="Código ou descrição...">
+            </div>
+            <div class="filter-group" style="flex:2;min-width:180px;">
+                <label class="filter-label">Unidade Orçamentária</label>
+                <input type="text" class="form-control" id="filtroUOREC" placeholder="Código ou nome...">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Tipo</label>
+                <select class="form-select modern-select" id="filtroTipoREC">
+                    <option value="">Todos</option>
+                    <option value="receita">Receita Orçamentária</option>
+                    <option value="contabancaria">Conta Bancária</option>
+                </select>
+            </div>
+        </div>
+        <div class="botoes-abaixo">
+            <button class="btn-pesquisa" onclick="aplicarFiltrosREC()"><i class="material-icons">refresh</i> Atualizar Filtros</button>
+            <button class="btn-secondary-custom" onclick="limparFiltrosREC()"><i class="material-icons">clear</i> Limpar Filtros</button>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <button class="btn-export" onclick="exportarReceitaCSV()"><i class="material-icons">description</i> CSV</button>
+            <button class="btn-export" onclick="exportarReceitaPDF()"><i class="material-icons">print</i> PDF</button>
+        </div>
+        <div class="toolbar-right" style="display:flex;align-items:center;gap:8px;">
+            <input type="text" id="buscaREC" maxlength="50" placeholder="Buscar registros..." class="form-control" style="height:32px;font-size:12px;width:240px;padding:4px 10px;" oninput="buscarREC(this.value)">
+            <span class="table-badge" id="badgeREC">0 registros</span>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-fixed-header-container">
+            <table class="table" id="tabelaReceita">
+                <thead><tr>
+                    <th class="sortable-header th-tooltip" onclick="sortREC('ano_de_exercicio')" style="min-width:55px;" data-tip="Ano de exercício orçamentário">Ano <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header th-tooltip" onclick="sortREC('periodo_desc')" style="min-width:110px;" data-tip="Período selecionado (mês inicial – mês final)">Período <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header th-tooltip" onclick="sortREC('unidade_orcamentaria_codigo')" style="min-width:70px;" data-tip="Código da unidade orçamentária responsável">Cód. UO <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header th-tooltip" onclick="sortREC('unidade_orcamentaria_nome')" style="min-width:160px;" data-tip="Nome completo da unidade orçamentária responsável">Unidade Orçamentária <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header th-tooltip" onclick="sortREC('classificacao_receita_formatado')" style="min-width:130px;" data-tip="Código formatado da classificação orçamentária da receita">Cód. Classificação <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header th-tooltip" onclick="sortREC('classificacao_receita_descricao')" style="min-width:200px;" data-tip="Descrição da natureza/categoria da receita orçamentária">Classificação da Receita <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right th-tooltip" onclick="sortREC('valor_previsto_inicial')" style="min-width:130px;" data-tip="Valor previsto na Lei Orçamentária Anual (LOA) — apenas Receita Orçamentária">Vl. Prev. Inicial <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right th-tooltip" onclick="sortREC('valor_previsto_atualizado')" style="min-width:140px;" data-tip="Valor previsto atualizado após créditos adicionais — apenas Receita Orçamentária">Vl. Prev. Atualizado <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right th-tooltip" onclick="sortREC('valor_contabilizado')" style="min-width:130px;" data-tip="Valor contabilizado da receita no período — apenas Receita Orçamentária">Vl. Contabilizado <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header text-right th-tooltip" onclick="sortREC('valor_arrecadado_liquido')" style="min-width:130px;" data-tip="Valor efetivamente arrecadado e registrado na conta bancária — apenas Conta Bancária">Vl. Arrecadado Líq. <i class="material-icons">unfold_more</i></th>
+                    <th class="th-tooltip" style="min-width:120px;text-align:center;" data-tip="Origem do dado: Receita Orçamentária (receita.csv) ou Conta Bancária (contabancaria.csv)">Tipo</th>
+                </tr></thead>
+                <tbody id="tbodyReceita"></tbody>
+                <tfoot><tr id="tfootReceita"></tr></tfoot>
+            </table>
+        </div>
+        <div class="pagination-container" id="pagContainerREC"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="btn-topo" onclick="voltarAoTopo()"><i class="material-icons">arrow_upward</i> Voltar ao topo</button>
+    </div>`;
+
+    // Pré-selecionar mês final = último mês com dados no ano mais recente
+    const selMesFim = document.getElementById('filtroMesFimREC');
+    if (selMesFim && ultimoMes) selMesFim.value = ultimoMes;
+
+    calcularTabelaREC();
+}
+
+// Normaliza BOM, espaços e capitalização em chaves E valores
+function _normalizarCamposREC(arr, tipo) {
+    return arr.map(r => {
+        const n = { _tipo_linha: tipo };
+        Object.keys(r).forEach(k => {
+            n[_limpar(k).toLowerCase()] = _limpar(r[k]);
+        });
+        return n;
+    });
+}
+
+// Encontra o valor de um campo no objeto normalizado, tentando variações do nome
+function _campo(r, ...nomes) {
+    for (const nome of nomes) {
+        if (r[nome] !== undefined) return r[nome];
+        // tenta sem underscores
+        const s = nome.replace(/_/g,'');
+        const found = Object.keys(r).find(k => k.replace(/_/g,'') === s);
+        if (found) return r[found];
+    }
+    return '';
+}
+
+function calcularTabelaREC() {
+    const ano    = (document.getElementById('filtroAnoREC')?.value||'').trim();
+    const mesInic= (document.getElementById('filtroMesInicREC')?.value||'01').trim();
+    const mesFim = (document.getElementById('filtroMesFimREC')?.value||'12').trim();
+    const classif= (document.getElementById('filtroClassifREC')?.value||'').toLowerCase().trim();
+    const uo     = (document.getElementById('filtroUOREC')?.value||'').toLowerCase().trim();
+    const tipo   = (document.getElementById('filtroTipoREC')?.value||'').trim();
+
+    // Re-normaliza sempre (força limpeza completa de BOM)
+    window._receitaNorm   = _normalizarCamposREC(dadosReceita,      'receita');
+    window._contaBancNorm = _normalizarCamposREC(dadosContaBancaria, 'contabancaria');
+
+    // Exige seleção de ano
+    if (!ano) {
+        window.receitaFiltradaView = [];
+        pagReceita.atual = 1; pagReceita.total = 1;
+        const tbody = document.getElementById('tbodyReceita');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="text-center py-4" style="color:#94a3b8;font-style:italic;">Selecione um Ano para visualizar os dados.</td></tr>';
+        const badge = document.getElementById('badgeREC');
+        if (badge) badge.textContent = '0 registros';
+        const tfoot = document.getElementById('tfootReceita');
+        if (tfoot) tfoot.innerHTML = '';
+        return;
+    }
+
+    const MESES_NOME = {'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'};
+    const periodoLabel = (mesInic === mesFim)
+        ? `${MESES_NOME[mesInic]}/${ano}`
+        : `${MESES_NOME[mesInic]}–${MESES_NOME[mesFim]}/${ano}`;
+
+    let base = [...window._receitaNorm, ...window._contaBancNorm];
+
+    // Filtros — usa _campo() para ser robusto a variações no nome
+    base = base.filter(r => _campo(r,'ano_de_exercicio','ano') === ano);
+    base = base.filter(r => {
+        const raw = _campo(r,'mes_descritivo','mes_numerico','mes');
+        const m = _mesDescritivoParaNum(raw) || raw.padStart(2,'0');
+        return m >= mesInic && m <= mesFim;
+    });
+    if(classif) base = base.filter(r=>
+        _campo(r,'classificacao_receita_formatado').toLowerCase().includes(classif)||
+        _campo(r,'classificacao_receita_descricao').toLowerCase().includes(classif));
+    if(uo) base = base.filter(r=>
+        _campo(r,'unidade_orcamentaria_codigo').toLowerCase().includes(uo)||
+        _campo(r,'unidade_orcamentaria_nome').toLowerCase().includes(uo));
+    if(tipo) base = base.filter(r=>r._tipo_linha===tipo);
+
+    // AGRUPAMENTO por UO + classificação + tipo, somando valores do período
+    const grupos = new Map();
+    base.forEach(r => {
+        const uoCod   = _campo(r,'unidade_orcamentaria_codigo');
+        const uoNome  = _campo(r,'unidade_orcamentaria_nome');
+        const classCod= _campo(r,'classificacao_receita_formatado');
+        const classDesc=_campo(r,'classificacao_receita_descricao');
+        const tpLinha = r._tipo_linha||'';
+        const chave   = [ano, uoCod, uoNome, classCod, classDesc, tpLinha].join('||');
+
+        if (!grupos.has(chave)) {
+            grupos.set(chave, {
+                ano_de_exercicio:                ano,
+                periodo_desc:                    periodoLabel,
+                unidade_orcamentaria_codigo:     uoCod||'-',
+                unidade_orcamentaria_nome:       uoNome||'-',
+                classificacao_receita_formatado: classCod,
+                classificacao_receita_descricao: classDesc,
+                _tipo_linha:                     tpLinha,
+                valor_previsto_inicial:          0,
+                valor_previsto_atualizado:       0,
+                valor_contabilizado:             0,
+                valor_arrecadado_liquido:        0
+            });
+        }
+        const g = grupos.get(chave);
+        g.valor_previsto_inicial    += parseNum(_campo(r,'valor_previsto_inicial'));
+        g.valor_previsto_atualizado += parseNum(_campo(r,'valor_previsto_atualizado'));
+        g.valor_contabilizado       += parseNum(_campo(r,'valor_contabilizado'));
+        g.valor_arrecadado_liquido  += parseNum(_campo(r,'valor_arrecadado_liquido'));
+    });
+
+    const agrupado = Array.from(grupos.values());
+    window.receitaFiltradaView = ordenarREC(agrupado, sortCfgReceita.col, sortCfgReceita.dir);
+    pagReceita.atual = 1;
+    pagReceita.total = Math.ceil(window.receitaFiltradaView.length / pagReceita.porPag);
+    atualizarTabelaREC();
+}
+
+function ordenarREC(arr, col, dir) {
+    return [...arr].sort((a,b)=>{
+        let va=a[col]!==undefined&&a[col]!==null?a[col]:'';
+        let vb=b[col]!==undefined&&b[col]!==null?b[col]:'';
+        const isNum=['valor_previsto_inicial','valor_previsto_atualizado','valor_contabilizado','valor_arrecadado_liquido'].includes(col);
+        if(isNum){va=parseNum(va);vb=parseNum(vb);}
+        else{va=va.toString().toLowerCase();vb=vb.toString().toLowerCase();}
+        return dir==='asc'?(va<vb?-1:va>vb?1:0):(va>vb?-1:va<vb?1:0);
+    });
+}
+
+function _badgeTipo(tipo) {
+    if(tipo==='contabancaria') return `<span class="badge-situacao badge-concluido">Conta Bancária</span>`;
+    return `<span class="badge-situacao badge-ativo">Receita Orç.</span>`;
+}
+
+function _tdVal(v) {
+    if(v===''||v===null||v===undefined) return `<td class="text-right nao-aplica">—</td>`;
+    return `<td class="text-right">${formatarMoeda(v)}</td>`;
+}
+
+function _linhaREC(r) {
+    const classifCod = r.classificacao_receita_formatado||'';
+    const classifDesc = r.classificacao_receita_descricao||'';
+    const uo_nome = r.unidade_orcamentaria_nome||'-';
+    // Quando os valores já foram somados (agrupados), são números; senão são strings
+    const vPI  = typeof r.valor_previsto_inicial   === 'number' ? r.valor_previsto_inicial   : parseNum(r.valor_previsto_inicial);
+    const vPA  = typeof r.valor_previsto_atualizado=== 'number' ? r.valor_previsto_atualizado : parseNum(r.valor_previsto_atualizado);
+    const vCO  = typeof r.valor_contabilizado      === 'number' ? r.valor_contabilizado       : parseNum(r.valor_contabilizado);
+    const vAL  = typeof r.valor_arrecadado_liquido === 'number' ? r.valor_arrecadado_liquido  : parseNum(r.valor_arrecadado_liquido);
+    return `<tr>
+        <td style="text-align:center;">${r.ano_de_exercicio||'-'}</td>
+        <td style="text-align:center;white-space:nowrap;">${r.periodo_desc||'-'}</td>
+        <td>${r.unidade_orcamentaria_codigo||'-'}</td>
+        <td title="${uo_nome.replace(/"/g,'&quot;')}">${uo_nome.substring(0,35)}${uo_nome.length>35?'...':''}</td>
+        <td>${classifCod||'<span class="nao-aplica">—</span>'}</td>
+        <td title="${classifDesc.replace(/"/g,'&quot;')}">${classifDesc.substring(0,50)}${classifDesc.length>50?'...':''}</td>
+        ${r._tipo_linha==='receita'        ? `<td class="text-right">${formatarMoeda(vPI)}</td>`  : '<td class="text-right nao-aplica">—</td>'}
+        ${r._tipo_linha==='receita'        ? `<td class="text-right">${formatarMoeda(vPA)}</td>`  : '<td class="text-right nao-aplica">—</td>'}
+        ${r._tipo_linha==='receita'        ? `<td class="text-right">${formatarMoeda(vCO)}</td>`  : '<td class="text-right nao-aplica">—</td>'}
+        ${r._tipo_linha==='contabancaria'  ? `<td class="text-right">${formatarMoeda(vAL)}</td>`  : '<td class="text-right nao-aplica">—</td>'}
+        <td style="text-align:center;">${_badgeTipo(r._tipo_linha)}</td>
+    </tr>`;
+}
+
+function atualizarTabelaREC() {
+    const data = window.receitaFiltradaView||[];
+    const ini  = (pagReceita.atual-1)*pagReceita.porPag;
+    const fim  = Math.min(ini+pagReceita.porPag, data.length);
+    const rows = data.slice(ini, fim);
+    const tbody = document.getElementById('tbodyReceita');
+    if(!tbody) return;
+
+    tbody.innerHTML = rows.length===0
+        ? '<tr><td colspan="11" class="text-center py-4">Nenhum registro encontrado</td></tr>'
+        : rows.map(_linhaREC).join('');
+
+    // Totais — valores já são numéricos após agrupamento
+    const tot = data.reduce((acc,r)=>{
+        acc.prev_ini += (typeof r.valor_previsto_inicial   ==='number') ? r.valor_previsto_inicial   : parseNum(r.valor_previsto_inicial);
+        acc.prev_atu += (typeof r.valor_previsto_atualizado==='number') ? r.valor_previsto_atualizado : parseNum(r.valor_previsto_atualizado);
+        acc.contab   += (typeof r.valor_contabilizado      ==='number') ? r.valor_contabilizado       : parseNum(r.valor_contabilizado);
+        acc.arrec    += (typeof r.valor_arrecadado_liquido ==='number') ? r.valor_arrecadado_liquido  : parseNum(r.valor_arrecadado_liquido);
+        return acc;
+    },{prev_ini:0, prev_atu:0, contab:0, arrec:0});
+
+    const tfoot = document.getElementById('tfootReceita');
+    if(tfoot) tfoot.innerHTML=`
+        <td colspan="6"><strong>TOTAL (${data.length} registros)</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.prev_ini)}</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.prev_atu)}</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.contab)}</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.arrec)}</strong></td>
+        <td></td>`;
+
+    const badge = document.getElementById('badgeREC');
+    if(badge) badge.textContent = data.length+' registros';
+
+    // Paginação
+    const pgCont = document.getElementById('pagContainerREC');
+    if(pgCont){
+        if(pagReceita.total<=1){pgCont.innerHTML='';return;}
+        let h=`<div class="pagination-info"><span>Mostrando ${ini+1}–${fim} de ${data.length}</span></div>`;
+        h+=`<div class="pagination-controls">
+            <button onclick="mudaPagREC(${pagReceita.atual-1})" ${pagReceita.atual===1?'disabled':''}><i class="fas fa-angle-left"></i></button>`;
+        for(let i=Math.max(1,pagReceita.atual-2);i<=Math.min(pagReceita.total,pagReceita.atual+2);i++)
+            h+=`<button onclick="mudaPagREC(${i})" class="${i===pagReceita.atual?'active':''}">${i}</button>`;
+        h+=`<button onclick="mudaPagREC(${pagReceita.atual+1})" ${pagReceita.atual===pagReceita.total?'disabled':''}><i class="fas fa-angle-right"></i></button></div>`;
+        pgCont.innerHTML=h;
+    }
+}
+
+window.mudaPagREC    = function(p){ if(p<1||p>pagReceita.total)return; pagReceita.atual=p; atualizarTabelaREC(); };
+window.aplicarFiltrosREC = function(){ calcularTabelaREC(); };
+window.limparFiltrosREC  = function(){
+    ['filtroClassifREC','filtroUOREC','filtroTipoREC']
+        .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    const selInic = document.getElementById('filtroMesInicREC');
+    if (selInic) selInic.value = '01';
+    // Recalcula o último mês disponível para o ano selecionado
+    const anoSel = (document.getElementById('filtroAnoREC')?.value||'').trim();
+    const selFim = document.getElementById('filtroMesFimREC');
+    if (selFim && anoSel) {
+        const meses = [...new Set([...dadosReceita,...dadosContaBancaria]
+            .filter(r=>{ const k=Object.keys(r).find(k2=>_limpar(k2).toLowerCase().includes('ano')); return k&&_limpar(r[k])===anoSel; })
+            .map(r=>{ const k=Object.keys(r).find(k2=>_limpar(k2).toLowerCase().includes('mes')); const raw=k?_limpar(r[k]):''; return _mesDescritivoParaNum(raw)||raw.padStart(2,'0'); })
+            .filter(m=>m&&m!=='00'))].sort();
+        selFim.value = meses[meses.length-1] || '12';
+    } else if (selFim) { selFim.value = '12'; }
+    calcularTabelaREC();
+};
+window.sortREC = function(col){
+    if(sortCfgReceita.col===col) sortCfgReceita.dir=sortCfgReceita.dir==='asc'?'desc':'asc';
+    else{sortCfgReceita.col=col;sortCfgReceita.dir='asc';}
+    window.receitaFiltradaView=ordenarREC(window.receitaFiltradaView||[], sortCfgReceita.col, sortCfgReceita.dir);
+    pagReceita.atual=1; atualizarTabelaREC();
+};
+window.buscarREC = function(termo){
+    const t=(termo||'').toLowerCase().trim();
+    if(!t){atualizarTabelaREC();return;}
+    const f=(window.receitaFiltradaView||[]).filter(r=>
+        (r.ano_de_exercicio||'').includes(t)||
+        (r.unidade_orcamentaria_codigo||'').toLowerCase().includes(t)||
+        (r.unidade_orcamentaria_nome||'').toLowerCase().includes(t)||
+        (r.classificacao_receita_formatado||'').toLowerCase().includes(t)||
+        (r.classificacao_receita_descricao||'').toLowerCase().includes(t)
+    );
+    const tbody=document.getElementById('tbodyReceita');
+    if(!tbody) return;
+    tbody.innerHTML = f.slice(0,pagReceita.porPag).map(_linhaREC).join('');
+    if(document.getElementById('badgeREC')) document.getElementById('badgeREC').textContent=f.length+' registros';
+};
+window.exportarReceitaCSV = function(){
+    const campos=['ano_de_exercicio','periodo_desc','unidade_orcamentaria_codigo','unidade_orcamentaria_nome',
+        'classificacao_receita_formatado','classificacao_receita_descricao',
+        'valor_previsto_inicial','valor_previsto_atualizado','valor_contabilizado','valor_arrecadado_liquido','_tipo_linha'];
+    const headers=['Ano','Período','Cód. UO','Unidade Orçamentária','Cód. Classificação','Classificação da Receita',
+        'Vl. Prev. Inicial','Vl. Prev. Atualizado','Vl. Contabilizado','Vl. Arrecadado Líq.','Tipo'];
+    const data=window.receitaFiltradaView||[];
+    const csv=[headers.join(';'),...data.map(r=>campos.map(c=>{
+        const v = r[c];
+        return `"${(typeof v==='number' ? v.toFixed(2).replace('.',',') : (v||''))}"`; 
+    }).join(';'))].join('\n');
+    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='receita.csv'; a.click();
+};
+window.exportarReceitaPDF = function(){
+    const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:'landscape'});
+    doc.autoTable({
+        head:[['Ano','Período','Cód. UO','Unidade Orçamentária','Cód. Classif.','Classificação da Receita',
+               'Vl. Prev. Inicial','Vl. Prev. Atualizado','Vl. Contabilizado','Vl. Arrecadado Líq.','Tipo']],
+        body:(window.receitaFiltradaView||[]).slice(0,150).map(r=>[
+            r.ano_de_exercicio||'-',
+            r.periodo_desc||'-',
+            r.unidade_orcamentaria_codigo||'-',
+            (r.unidade_orcamentaria_nome||'-').substring(0,25),
+            r.classificacao_receita_formatado||'-',
+            (r.classificacao_receita_descricao||'-').substring(0,30),
+            formatarMoeda(r.valor_previsto_inicial),
+            formatarMoeda(r.valor_previsto_atualizado),
+            formatarMoeda(r.valor_contabilizado),
+            formatarMoeda(r.valor_arrecadado_liquido),
+            r._tipo_linha==='contabancaria'?'Conta Bancária':'Receita Orç.'
+        ]),
+        headStyles:{fillColor:[32,68,93]}, styles:{fontSize:6.5},
+        didDrawPage:()=>{doc.setFontSize(9);doc.text('Receita - Acordo de Mariana',14,10);doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,doc.internal.pageSize.height-5);}
+    });
+    doc.save('receita.pdf');
+};
+
 function renderizarDownloads() {
     const c=document.getElementById('downloads-content'); if(!c)return;
     c.innerHTML=`
@@ -1917,10 +2480,16 @@ function renderizarDownloads() {
                     <i class="material-icons">business</i> CSV Órgão
                 </button>
             </div>
+            <div style="background:#f8fafd;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;min-width:160px;">
+                <div style="font-weight:700;color:#20445d;font-size:14px;margin-bottom:8px;">Receita</div>
+                <button class="btn-export" style="width:100%;justify-content:center;" onclick="exportarReceitaCSV()">
+                    <i class="material-icons">savings</i> CSV Receita
+                </button>
+            </div>
         </div>
     </div>
     <div class="filter-container">
-        <h5 style="font-size:14px;font-weight:700;color:#20445d;margin-bottom:12px;"><i class="material-icons" style="vertical-align:middle;margin-right:4px;">info</i> Metadados — Dicionário de Variáveis</h5>
+        <h5 style="font-size:14px;font-weight:700;color:#20445d;margin-bottom:12px;"><i class="material-icons" style="vertical-align:middle;margin-right:4px;">info</i> Dicionário de Dados</h5>
         <div class="metadata-container mb-3">
             <div class="metadata-header"><i class="material-icons me-2" style="vertical-align:middle">account_balance</i> Iniciativas</div>
             <div class="table-responsive">
@@ -1952,6 +2521,26 @@ function renderizarDownloads() {
                         <tr><td><code>valor_empenhado_efetivo</code></td><td>Valor empenhado efetivo pelo órgão</td><td>Moeda</td></tr>
                         <tr><td><code>valor_pago_rp</code></td><td>Valor pago em restos a pagar</td><td>Moeda</td></tr>
                         <tr><td><code>valor_pago_total</code></td><td>Valor total pago pelo órgão (financeiro + RP)</td><td>Moeda</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="metadata-container mb-3">
+            <div class="metadata-header"><i class="material-icons me-2" style="vertical-align:middle">savings</i> Receita</div>
+            <div class="table-responsive">
+                <table class="metadata-table">
+                    <thead><tr><th>Campo</th><th>Descrição</th><th>Tipo</th><th>Fonte</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>ano_de_exercicio</code></td><td>Ano de exercício</td><td>Número</td><td>receita.csv / contabancaria.csv</td></tr>
+                        <tr><td><code>mes_descritivo</code></td><td>Mês de referência por extenso (ex: Janeiro, Fevereiro...)</td><td>Texto</td><td>receita.csv / contabancaria.csv</td></tr>
+                        <tr><td><code>unidade_orcamentaria_codigo</code></td><td>Código da unidade orçamentária</td><td>Texto</td><td>receita.csv / contabancaria.csv</td></tr>
+                        <tr><td><code>unidade_orcamentaria_nome</code></td><td>Nome da unidade orçamentária</td><td>Texto</td><td>receita.csv / contabancaria.csv</td></tr>
+                        <tr><td><code>classificacao_receita_formatado</code></td><td>Código formatado da classificação da receita</td><td>Texto</td><td>receita.csv / contabancaria.csv</td></tr>
+                        <tr><td><code>classificacao_receita_descricao</code></td><td>Descrição da classificação da receita</td><td>Texto</td><td>receita.csv / contabancaria.csv</td></tr>
+                        <tr><td><code>valor_previsto_inicial</code></td><td>Valor previsto na LOA</td><td>Moeda</td><td>receita.csv</td></tr>
+                        <tr><td><code>valor_previsto_atualizado</code></td><td>Valor previsto atualizado (após créditos adicionais)</td><td>Moeda</td><td>receita.csv</td></tr>
+                        <tr><td><code>valor_contabilizado</code></td><td>Valor contabilizado da receita no período</td><td>Moeda</td><td>receita.csv</td></tr>
+                        <tr><td><code>valor_arrecadado_liquido</code></td><td>Valor efetivamente arrecadado líquido (conta bancária)</td><td>Moeda</td><td>contabancaria.csv</td></tr>
                     </tbody>
                 </table>
             </div>
