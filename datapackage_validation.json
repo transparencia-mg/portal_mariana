@@ -1,8 +1,89 @@
 {
   "version": "4.16.6",
-  "time": 0.139,
+  "time": 0.194,
   "errors": [],
   "tasks": [
+    {
+      "resource": {
+        "description": "Insira a descrição/explicação detalhada deste recurso.",
+        "dialect": {
+          "delimiter": ";"
+        },
+        "encoding": "utf-8-sig",
+        "format": "csv",
+        "hashing": "md5",
+        "name": "contabancaria",
+        "path": "data/contabancaria.csv",
+        "profile": "tabular-data-resource",
+        "schema": {
+          "fields": [
+            {
+              "name": "ano_de_exercicio",
+              "type": "integer"
+            },
+            {
+              "name": "mes_numerico",
+              "type": "integer"
+            },
+            {
+              "name": "unidade_orcamentaria_codigo",
+              "type": "integer"
+            },
+            {
+              "name": "unidade_orcamentaria_nome",
+              "type": "string"
+            },
+            {
+              "name": "classificacao_receita_descricao",
+              "type": "string"
+            },
+            {
+              "name": "classificacao_receita_formatado",
+              "type": "string"
+            },
+            {
+              "name": "valor_arrecadado_liquido",
+              "type": "string"
+            }
+          ]
+        },
+        "scheme": "file",
+        "title": "Insira um título humanamente legível para este recurso.",
+        "stats": {
+          "hash": "be236af17eda1d315ac7a71538f6e931",
+          "bytes": 3015,
+          "fields": 7,
+          "rows": 22
+        }
+      },
+      "time": 0.012,
+      "scope": [
+        "hash-count-error",
+        "byte-count-error",
+        "field-count-error",
+        "row-count-error",
+        "blank-header",
+        "extra-label",
+        "missing-label",
+        "blank-label",
+        "duplicate-label",
+        "incorrect-label",
+        "blank-row",
+        "primary-key-error",
+        "foreign-key-error",
+        "extra-cell",
+        "missing-cell",
+        "type-error",
+        "constraint-error",
+        "unique-error"
+      ],
+      "partial": false,
+      "errors": [],
+      "stats": {
+        "errors": 0
+      },
+      "valid": true
+    },
     {
       "resource": {
         "description": "Insira a descrição/explicação detalhada deste recurso.",
@@ -22,7 +103,7 @@
               "type": "integer"
             },
             {
-              "name": "iniciativa",
+              "name": "codigo_iniciativa",
               "type": "integer"
             },
             {
@@ -142,13 +223,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "9afecab93e309d49f07e13dda1310802",
-          "bytes": 81969,
+          "hash": "cb05e462ca7fa83dc30d3d146370b7ef",
+          "bytes": 83585,
           "fields": 30,
-          "rows": 210
+          "rows": 214
         }
       },
-      "time": 0.046,
+      "time": 0.052,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -170,63 +251,11 @@
         "unique-error"
       ],
       "partial": false,
-      "errors": [
-        {
-          "label": "codigo_iniciativa",
-          "fieldName": "iniciativa",
-          "fieldNumber": 2,
-          "fieldPosition": 2,
-          "labels": [
-            "ano",
-            "codigo_iniciativa",
-            "codigo_orgao",
-            "nome_orgao",
-            "no_empenho",
-            "data_empenho",
-            "no_processo_compra",
-            "modalidade_licitacao",
-            "cod_elemento_despesa",
-            "nome_elemento_despesa",
-            "codigo_item_despesa",
-            "nome_item_despesa",
-            "codigo_fonte_recurso",
-            "nome_fonte_recurso",
-            "cnpj_cpf_credor",
-            "credor",
-            "valor_empenhado",
-            "valor_liquidado",
-            "valor_pago_financeiro",
-            "valor_liquidado_rp",
-            "valor_cancelado_processado",
-            "valor_restabelecido_processado",
-            "valor_cancelado_nao_processado",
-            "valor_restabelecido_nao_processado",
-            "valor_cancelado_rp",
-            "valor_empenhado_efetivo",
-            "valor_pago_processado",
-            "valor_pago_nao_processado",
-            "valor_pago_rp",
-            "valor_total_pago"
-          ],
-          "rowPositions": [
-            1
-          ],
-          "code": "incorrect-label",
-          "name": "Incorrect Label",
-          "tags": [
-            "#table",
-            "#header",
-            "#label"
-          ],
-          "note": "",
-          "message": "Label \"codigo_iniciativa\" in field iniciativa at position \"2\" does not match the field name in the schema",
-          "description": "One of the data source header does not match the field name defined in the schema."
-        }
-      ],
+      "errors": [],
       "stats": {
-        "errors": 1
+        "errors": 0
       },
-      "valid": false
+      "valid": true
     },
     {
       "resource": {
@@ -269,7 +298,7 @@
           "rows": 38
         }
       },
-      "time": 0.009,
+      "time": 0.01,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -337,7 +366,7 @@
         "schema": {
           "fields": [
             {
-              "name": "iniciativa",
+              "name": "codigo_iniciativa",
               "type": "integer"
             },
             {
@@ -409,13 +438,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "65a7bdcef33217f675b73a619f922a41",
-          "bytes": 2921,
+          "hash": "481dc432914a2274ac25e9c05be6648f",
+          "bytes": 3034,
           "fields": 17,
-          "rows": 16
+          "rows": 17
         }
       },
-      "time": 0.024,
+      "time": 0.028,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -437,55 +466,101 @@
         "unique-error"
       ],
       "partial": false,
-      "errors": [
-        {
-          "label": "codigo_iniciativa",
-          "fieldName": "iniciativa",
-          "fieldNumber": 1,
-          "fieldPosition": 1,
-          "labels": [
-            "codigo_iniciativa",
-            "codigo_orgao",
-            "nome_orgao",
-            "valor_empenhado",
-            "valor_liquidado",
-            "valor_pago_financeiro",
-            "valor_liquidado_rp",
-            "valor_cancelado_processado",
-            "valor_restabelecido_processado",
-            "valor_cancelado_nao_processado",
-            "valor_restabelecido_nao_processado",
-            "valor_cancelado_rp",
-            "valor_empenhado_efetivo",
-            "valor_pago_processado",
-            "valor_pago_nao_processado",
-            "valor_pago_rp",
-            "valor_pago_total"
-          ],
-          "rowPositions": [
-            1
-          ],
-          "code": "incorrect-label",
-          "name": "Incorrect Label",
-          "tags": [
-            "#table",
-            "#header",
-            "#label"
-          ],
-          "note": "",
-          "message": "Label \"codigo_iniciativa\" in field iniciativa at position \"1\" does not match the field name in the schema",
-          "description": "One of the data source header does not match the field name defined in the schema."
-        }
-      ],
+      "errors": [],
       "stats": {
-        "errors": 1
+        "errors": 0
       },
-      "valid": false
+      "valid": true
+    },
+    {
+      "resource": {
+        "description": "Insira a descrição/explicação detalhada deste recurso.",
+        "dialect": {
+          "delimiter": ";"
+        },
+        "encoding": "utf-8-sig",
+        "format": "csv",
+        "hashing": "md5",
+        "name": "receita",
+        "path": "data/receita.csv",
+        "profile": "tabular-data-resource",
+        "schema": {
+          "fields": [
+            {
+              "name": "ano_de_exercicio",
+              "type": "integer"
+            },
+            {
+              "name": "mes_numerico",
+              "type": "integer"
+            },
+            {
+              "name": "unidade_orcamentaria_codigo",
+              "type": "integer"
+            },
+            {
+              "name": "unidade_orcamentaria_nome",
+              "type": "string"
+            },
+            {
+              "name": "classificacao_receita_formatado",
+              "type": "string"
+            },
+            {
+              "name": "classificacao_receita_descricao",
+              "type": "string"
+            },
+            {
+              "name": "valor_previsto_inicial",
+              "type": "integer"
+            },
+            {
+              "name": "valor_previsto_atualizado",
+              "type": "integer"
+            }
+          ]
+        },
+        "scheme": "file",
+        "title": "Insira um título humanamente legível para este recurso.",
+        "stats": {
+          "hash": "ba120aca35864788075089393cefe0e2",
+          "bytes": 2969,
+          "fields": 8,
+          "rows": 22
+        }
+      },
+      "time": 0.013,
+      "scope": [
+        "hash-count-error",
+        "byte-count-error",
+        "field-count-error",
+        "row-count-error",
+        "blank-header",
+        "extra-label",
+        "missing-label",
+        "blank-label",
+        "duplicate-label",
+        "incorrect-label",
+        "blank-row",
+        "primary-key-error",
+        "foreign-key-error",
+        "extra-cell",
+        "missing-cell",
+        "type-error",
+        "constraint-error",
+        "unique-error"
+      ],
+      "partial": false,
+      "errors": [],
+      "stats": {
+        "errors": 0
+      },
+      "valid": true
     }
   ],
   "stats": {
-    "errors": 3,
-    "tasks": 3
+    "errors": 1,
+    "tasks": 5
   },
   "valid": false
 }
