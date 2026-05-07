@@ -64,7 +64,7 @@
           "rows": 22
         }
       },
-      "time": 0.013,
+      "time": 0.012,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -451,13 +451,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "3086ffd1c791f47c542a94d309918cfd",
-          "bytes": 3089,
+          "hash": "57ced5b13c3df84bafb1cab301bb4202",
+          "bytes": 4212,
           "fields": 8,
           "rows": 22
         }
       },
-      "time": 0.011,
+      "time": 0.013,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -479,15 +479,2120 @@
         "unique-error"
       ],
       "partial": false,
-      "errors": [],
+      "errors": [
+        {
+          "label": "",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "labels": [
+            "ano_de_exercicio",
+            "mes_descritivo",
+            "unidade_orcamentaria_codigo",
+            "unidade_orcamentaria_nome",
+            "classificacao_receita_formatado",
+            "classificacao_receita_descricao",
+            "fonte_recurso_codigo",
+            "fonte_recurso_descricao",
+            "valor_previsto_inicial",
+            "valor_previsto_atualizado"
+          ],
+          "rowPositions": [
+            1
+          ],
+          "code": "extra-label",
+          "name": "Extra Label",
+          "tags": [
+            "#table",
+            "#header",
+            "#label"
+          ],
+          "note": "",
+          "message": "There is an extra label \"\" in header at position \"9\"",
+          "description": "The header of the data source contains label that does not exist in the provided schema."
+        },
+        {
+          "label": "",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "labels": [
+            "ano_de_exercicio",
+            "mes_descritivo",
+            "unidade_orcamentaria_codigo",
+            "unidade_orcamentaria_nome",
+            "classificacao_receita_formatado",
+            "classificacao_receita_descricao",
+            "fonte_recurso_codigo",
+            "fonte_recurso_descricao",
+            "valor_previsto_inicial",
+            "valor_previsto_atualizado"
+          ],
+          "rowPositions": [
+            1
+          ],
+          "code": "extra-label",
+          "name": "Extra Label",
+          "tags": [
+            "#table",
+            "#header",
+            "#label"
+          ],
+          "note": "",
+          "message": "There is an extra label \"\" in header at position \"10\"",
+          "description": "The header of the data source contains label that does not exist in the provided schema."
+        },
+        {
+          "label": "fonte_recurso_codigo",
+          "fieldName": "valor_previsto_inicial",
+          "fieldNumber": 7,
+          "fieldPosition": 7,
+          "labels": [
+            "ano_de_exercicio",
+            "mes_descritivo",
+            "unidade_orcamentaria_codigo",
+            "unidade_orcamentaria_nome",
+            "classificacao_receita_formatado",
+            "classificacao_receita_descricao",
+            "fonte_recurso_codigo",
+            "fonte_recurso_descricao",
+            "valor_previsto_inicial",
+            "valor_previsto_atualizado"
+          ],
+          "rowPositions": [
+            1
+          ],
+          "code": "incorrect-label",
+          "name": "Incorrect Label",
+          "tags": [
+            "#table",
+            "#header",
+            "#label"
+          ],
+          "note": "",
+          "message": "Label \"fonte_recurso_codigo\" in field valor_previsto_inicial at position \"7\" does not match the field name in the schema",
+          "description": "One of the data source header does not match the field name defined in the schema."
+        },
+        {
+          "label": "fonte_recurso_descricao",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "labels": [
+            "ano_de_exercicio",
+            "mes_descritivo",
+            "unidade_orcamentaria_codigo",
+            "unidade_orcamentaria_nome",
+            "classificacao_receita_formatado",
+            "classificacao_receita_descricao",
+            "fonte_recurso_codigo",
+            "fonte_recurso_descricao",
+            "valor_previsto_inicial",
+            "valor_previsto_atualizado"
+          ],
+          "rowPositions": [
+            1
+          ],
+          "code": "incorrect-label",
+          "name": "Incorrect Label",
+          "tags": [
+            "#table",
+            "#header",
+            "#label"
+          ],
+          "note": "",
+          "message": "Label \"fonte_recurso_descricao\" in field valor_previsto_atualizado at position \"8\" does not match the field name in the schema",
+          "description": "One of the data source header does not match the field name defined in the schema."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2024",
+            "Dezembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "4700000"
+          ],
+          "rowNumber": 1,
+          "rowPosition": 2,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"2\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2024",
+            "Dezembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "4700000"
+          ],
+          "rowNumber": 1,
+          "rowPosition": 2,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"2\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "4700000",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2024",
+            "Dezembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "4700000"
+          ],
+          "rowNumber": 1,
+          "rowPosition": 2,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"2\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2024",
+            "Dezembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "740335000"
+          ],
+          "rowNumber": 2,
+          "rowPosition": 3,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"3\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2024",
+            "Dezembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "740335000"
+          ],
+          "rowNumber": 2,
+          "rowPosition": 3,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"3\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "740335000",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2024",
+            "Dezembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "740335000"
+          ],
+          "rowNumber": 2,
+          "rowPosition": 3,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"3\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Abril",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 3,
+          "rowPosition": 4,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"4\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Abril",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 3,
+          "rowPosition": 4,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"4\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Abril",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 3,
+          "rowPosition": 4,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"4\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Agosto",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 4,
+          "rowPosition": 5,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"5\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Agosto",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 4,
+          "rowPosition": 5,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"5\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Agosto",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 4,
+          "rowPosition": 5,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"5\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Dezembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 5,
+          "rowPosition": 6,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"6\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Dezembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 5,
+          "rowPosition": 6,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"6\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Dezembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 5,
+          "rowPosition": 6,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"6\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Fevereiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "89000000"
+          ],
+          "rowNumber": 6,
+          "rowPosition": 7,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"7\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Fevereiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "89000000"
+          ],
+          "rowNumber": 6,
+          "rowPosition": 7,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"7\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "89000000",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Fevereiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "89000000"
+          ],
+          "rowNumber": 6,
+          "rowPosition": 7,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"7\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 7,
+          "rowPosition": 8,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"8\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 7,
+          "rowPosition": 8,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"8\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 7,
+          "rowPosition": 8,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"8\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "809526379",
+            "809526379"
+          ],
+          "rowNumber": 8,
+          "rowPosition": 9,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"9\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "809526379",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "809526379",
+            "809526379"
+          ],
+          "rowNumber": 8,
+          "rowPosition": 9,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"9\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "809526379",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "809526379",
+            "809526379"
+          ],
+          "rowNumber": 8,
+          "rowPosition": 9,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"9\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Julho",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 9,
+          "rowPosition": 10,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"10\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Julho",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 9,
+          "rowPosition": 10,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"10\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Julho",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 9,
+          "rowPosition": 10,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"10\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Junho",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 10,
+          "rowPosition": 11,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"11\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Junho",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 10,
+          "rowPosition": 11,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"11\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Junho",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 10,
+          "rowPosition": 11,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"11\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Junho",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 11,
+          "rowPosition": 12,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"12\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Junho",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 11,
+          "rowPosition": 12,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"12\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Junho",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 11,
+          "rowPosition": 12,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"12\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Maio",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 12,
+          "rowPosition": 13,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"13\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Maio",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 12,
+          "rowPosition": 13,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"13\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Maio",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 12,
+          "rowPosition": 13,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"13\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Março",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 13,
+          "rowPosition": 14,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"14\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Março",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 13,
+          "rowPosition": 14,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"14\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Março",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 13,
+          "rowPosition": 14,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"14\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Novembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 14,
+          "rowPosition": 15,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"15\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Novembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 14,
+          "rowPosition": 15,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"15\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Novembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 14,
+          "rowPosition": 15,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"15\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Outubro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 15,
+          "rowPosition": 16,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"16\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Outubro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 15,
+          "rowPosition": 16,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"16\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Outubro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 15,
+          "rowPosition": 16,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"16\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2025",
+            "Setembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 16,
+          "rowPosition": 17,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"17\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2025",
+            "Setembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 16,
+          "rowPosition": 17,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"17\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2025",
+            "Setembro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 16,
+          "rowPosition": 17,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"17\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2026",
+            "Abril",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 17,
+          "rowPosition": 18,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"18\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2026",
+            "Abril",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 17,
+          "rowPosition": 18,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"18\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2026",
+            "Abril",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 17,
+          "rowPosition": 18,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"18\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2026",
+            "Abril",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 18,
+          "rowPosition": 19,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"19\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2026",
+            "Abril",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 18,
+          "rowPosition": 19,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"19\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2026",
+            "Abril",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 18,
+          "rowPosition": 19,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"19\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2026",
+            "Fevereiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "960000000"
+          ],
+          "rowNumber": 19,
+          "rowPosition": 20,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"20\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2026",
+            "Fevereiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "960000000"
+          ],
+          "rowNumber": 19,
+          "rowPosition": 20,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"20\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "960000000",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2026",
+            "Fevereiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "960000000"
+          ],
+          "rowNumber": 19,
+          "rowPosition": 20,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"20\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2026",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 20,
+          "rowPosition": 21,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"21\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2026",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 20,
+          "rowPosition": 21,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"21\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2026",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 20,
+          "rowPosition": 21,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"21\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2026",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "1141788255",
+            "1141788255"
+          ],
+          "rowNumber": 21,
+          "rowPosition": 22,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"22\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "1141788255",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2026",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "1141788255",
+            "1141788255"
+          ],
+          "rowNumber": 21,
+          "rowPosition": 22,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"22\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "1141788255",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2026",
+            "Janeiro",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "2999.99.0.1.04.000",
+            "DEMAIS REC. CAPITAL - PRINC. - ROMPIMENTO DA BARRAGEM DE FUNDAO EM MARIANA - ACORDO JUDICIAL DE REPARACAO INTEGRAL E DEFINITIVA",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "1141788255",
+            "1141788255"
+          ],
+          "rowNumber": 21,
+          "rowPosition": 22,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"22\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+          "fieldName": "valor_previsto_atualizado",
+          "fieldNumber": 8,
+          "fieldPosition": 8,
+          "cells": [
+            "2026",
+            "Março",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 22,
+          "rowPosition": 23,
+          "code": "type-error",
+          "name": "Type Error",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "type is \"integer/default\"",
+          "message": "Type error in the cell \"RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE\" in row \"23\" and field \"valor_previsto_atualizado\" at position \"8\": type is \"integer/default\"",
+          "description": "The value does not match the schema type and format for this field."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 8,
+          "fieldPosition": 9,
+          "cells": [
+            "2026",
+            "Março",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 22,
+          "rowPosition": 23,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"23\" has an extra value in field at position \"9\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        },
+        {
+          "cell": "0",
+          "fieldName": "",
+          "fieldNumber": 9,
+          "fieldPosition": 10,
+          "cells": [
+            "2026",
+            "Março",
+            "9999",
+            "EMG - ADMINISTRACAO DIRETA",
+            "1321.01.0.1.01.000",
+            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
+            "80",
+            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
+            "0",
+            "0"
+          ],
+          "rowNumber": 22,
+          "rowPosition": 23,
+          "code": "extra-cell",
+          "name": "Extra Cell",
+          "tags": [
+            "#table",
+            "#row",
+            "#cell"
+          ],
+          "note": "",
+          "message": "Row at position \"23\" has an extra value in field at position \"10\"",
+          "description": "This row has more values compared to the header row (the first row in the data source). A key concept is that all the rows in tabular data must have the same number of columns."
+        }
+      ],
       "stats": {
-        "errors": 0
+        "errors": 70
       },
-      "valid": true
+      "valid": false
     }
   ],
   "stats": {
-    "errors": 1,
+    "errors": 71,
     "tasks": 5
   },
   "valid": false
