@@ -90,10 +90,10 @@
         /* TABELAS */
         .table-badge { background: #1a3a5c; color: white; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
         .table-fixed-header-container { position: relative; overflow: auto; width: 100%; max-height: 600px; }
-        .table-fixed-header-container table thead th { background-color: #54697b !important; color: white !important; position: sticky; top: 0; z-index: 10; font-weight: 600; padding: 12px 10px; font-size: 12px; text-transform: uppercase; white-space: nowrap; }
+        .table-fixed-header-container table thead th { background-color: #54697b !important; color: white !important; position: sticky; top: 0; z-index: 10; font-weight: 600; padding: 10px 8px; font-size: 11px; text-transform: uppercase; white-space: normal; word-break: break-word; vertical-align: middle; line-height: 1.3; }
         .table { width: 100%; font-size: 12px; border-collapse: collapse; table-layout: auto; }
         .table th, .table td { border: 1px solid #d6dee6; }
-        .table thead th { background-color: #54697b !important; color: white !important; font-weight: 600; font-size: 12px; padding: 12px 10px; text-transform: uppercase; border: 1px solid #d6dee6; cursor: pointer; user-select: none; }
+        .table thead th { background-color: #54697b !important; color: white !important; font-weight: 600; font-size: 11px; padding: 10px 8px; text-transform: uppercase; border: 1px solid #d6dee6; cursor: pointer; user-select: none; white-space: normal; word-break: break-word; vertical-align: middle; line-height: 1.3; }
         .table thead th:first-child { border-top-left-radius: 8px; }
         .table thead th:last-child  { border-top-right-radius: 8px; }
         .table thead th:hover { background-color: #3d5566 !important; }
@@ -108,9 +108,9 @@
         .contrato-link { color: #006a82; text-decoration: none; font-weight: 500; }
         .contrato-link:hover { color: var(--accent-red); text-decoration: underline; }
         .nao-aplica { color: #adb5bd; font-size: 11px; }
-        .sortable-header { cursor: pointer; position: relative; padding-right: 22px !important; }
+        .sortable-header { cursor: pointer; position: relative; padding-right: 26px !important; }
         .sortable-header:hover { background-color: #3d5566 !important; }
-        .sortable-header i { font-size: 13px; position: absolute; right: 5px; top: 50%; transform: translateY(-50%); opacity: 0.8; }
+        .sortable-header .sort-icon { font-size: 13px; position: absolute; right: 5px; top: 50%; transform: translateY(-50%); opacity: 0.8; }
         .text-right { text-align: right; }
 
         /* BOTÕES */
@@ -192,46 +192,51 @@
         .metadata-table tbody td { padding: 10px; border-bottom: 1px solid #f0f4f8; vertical-align: top; color: #334155; }
         .metadata-table code { background: #e2e8f0; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
 
-        /* TOOLTIP COLUNAS */
+        /* TOOLTIP COLUNAS — tooltip flutuante via JS (evita corte pelo sticky thead) */
         .th-tooltip { position: relative; }
-        .th-tooltip::after {
-            content: attr(data-tip);
-            position: absolute;
-            bottom: calc(100% + 6px);
-            left: 50%;
-            transform: translateX(-50%);
+        .col-tooltip-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: rgba(255,255,255,0.25); color: #fff;
+            font-size: 9px; font-weight: 700; font-style: normal;
+            cursor: help; margin-left: 4px; vertical-align: middle;
+            border: 1px solid rgba(255,255,255,0.5); flex-shrink: 0;
+            position: relative; line-height: 1;
+        }
+        /* Tooltip flutuante global — posicionado via JS com position:fixed */
+        #col-tooltip-popup {
+            position: fixed;
             background: #1a3a5c;
             color: #fff;
             font-size: 11px;
             font-weight: 400;
+            font-family: 'Montserrat', sans-serif;
             white-space: normal;
             min-width: 180px;
-            max-width: 260px;
+            max-width: 280px;
             padding: 7px 10px;
             border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.40);
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.18s ease;
-            z-index: 9999;
+            transition: opacity 0.15s ease;
+            z-index: 999999;
             text-transform: none;
-            line-height: 1.4;
+            line-height: 1.45;
         }
-        .th-tooltip::before {
+        #col-tooltip-popup.visible { opacity: 1; }
+        #col-tooltip-popup::after {
             content: '';
             position: absolute;
-            bottom: calc(100% + 1px);
+            top: 100%;
             left: 50%;
             transform: translateX(-50%);
             border: 5px solid transparent;
             border-top-color: #1a3a5c;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.18s ease;
-            z-index: 9999;
         }
-        .th-tooltip:hover::after,
-        .th-tooltip:hover::before { opacity: 1; }
+        /* Garantir que o thead não crie contexto de recorte */
+        .table-fixed-header-container table thead { overflow: visible; }
+        .table-fixed-header-container table thead th { overflow: visible; }
 
         /* BADGE SITUAÇÃO */
         .badge-situacao { padding: 3px 8px; border-radius: 20px; font-size: 10.5px; font-weight: 700; display: inline-block; letter-spacing: 0.2px; white-space: nowrap; }
@@ -540,6 +545,16 @@ async function carregarDados() {
         empenhoFiltradoTabela = [...dadosEmpenho];
         iniciativasFiltradas  = [...dadosIniciativas];
 
+        // Construir mapa de código → nome de fonte de recurso a partir do empenho.csv
+        window.mapaFonteRecurso = {};
+        dadosEmpenho.forEach(e => {
+            const cod = (e.codigo_fonte_recurso||'').trim();
+            const nom = (e.nome_fonte_recurso||'').trim();
+            if (cod && nom && !window.mapaFonteRecurso[cod]) {
+                window.mapaFonteRecurso[cod] = nom;
+            }
+        });
+
         // Receita
         mostrarLoading(true,'Carregando receitas...');
         try {
@@ -642,10 +657,10 @@ function renderizarIniciativas() {
         <div class="table-fixed-header-container">
             <table class="table" id="tabelaIniciativas">
                 <thead><tr>
-                    <th class="sortable-header" onclick="sortINIC('codigo_iniciativa')">Código <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortINIC('iniciativa')">Iniciativa <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortINIC('anexo')">Anexo <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortINIC('valor_da_iniciativa')">Valor da Iniciativa <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortINIC('codigo_iniciativa')">Código Iniciativa <i class="col-tooltip-icon" data-tip="Código da Iniciativa no Armazém SIAFI">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortINIC('iniciativa')">Iniciativa <i class="col-tooltip-icon" data-tip="Descrição da iniciativa conforme consta no Acordo de Reparação do Rio Doce">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortINIC('anexo')">Anexo <i class="col-tooltip-icon" data-tip="Anexo ao qual a iniciativa se refere no Acordo de Reparação do Rio Doce">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortINIC('valor_da_iniciativa')">Valor da Iniciativa <i class="col-tooltip-icon" data-tip="Valor total destinado a iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                 </tr></thead>
                 <tbody id="tbodyIniciativas"></tbody>
             </table>
@@ -818,40 +833,39 @@ window.irParaExecucaoDeEmpenho = function(contratoconvenioEntrada) {
 // ============================================================
 
 // Configuração de colunas opcionais para execução
+// Ordem final (fixas): iniciativa, anexo, ano, empenho, data, órgão, favorecido, cnpj/cpf, valores
+// Opcionais: cod.órgão, proc.compra, contrato, proc.contratação, cód.elem, elem, cód.item, item, cód.fonte, fonte
 const EXEC_COLS_CONFIG = [
     // fixas (sempre visíveis, não entram no seletor)
-    // fixas (sempre visíveis, não entram no seletor)
-    { key:'iniciativa_display',      label:'Iniciativa',             fixed:true  },
-    { key:'no_empenho',              label:'Empenho',                fixed:true  },
-    { key:'data_empenho',            label:'Data',                   fixed:true  },
-    { key:'nome_orgao',              label:'Órgão',                  fixed:true  },
-    { key:'credor',                  label:'Credor',                 fixed:true  },
-    { key:'cnpj_cpf_credor',         label:'CNPJ/CPF',               fixed:true  },
-    // Valores — ordem: Empenhado, Liquidado, Pago Financeiro, Empenhado Efetivo, Total Pago
-    { key:'valor_empenhado',         label:'Vl. Empenhado',          fixed:true  },
-    { key:'valor_liquidado',         label:'Vl. Liquidado',          fixed:true  },
-    { key:'valor_pago_financeiro',   label:'Vl. Pago Financeiro',    fixed:true  },
-    { key:'valor_empenhado_efetivo', label:'Vl. Empenhado Efetivo',  fixed:true  },
-    { key:'valor_total_pag',         label:'Vl. Total Pago',         fixed:true  },
-    // opcionais de valores
-    { key:'valor_liquidado_rp',      label:'Vl. Liquidado RP',       fixed:false, defaultVisible:false },
-    { key:'valor_cancelado_rp',      label:'Vl. Cancelado RP',       fixed:false, defaultVisible:false },
-    { key:'valor_pago_rp',           label:'Vl. Pago RP',            fixed:false, defaultVisible:false },
-    { key:'valor_pago_processado',   label:'Vl. Pago Processado',    fixed:false, defaultVisible:false },
-    { key:'valor_pago_nao_processado',label:'Vl. Pago Não Proc.',    fixed:false, defaultVisible:false },
-    // opcionais de classificação
-    { key:'anexo_display',           label:'Anexo',                  fixed:false, defaultVisible:true  },
-    { key:'ano',                     label:'Ano',                    fixed:false, defaultVisible:false },
-    { key:'no_processo_compra',      label:'Proc. Compra',           fixed:false, defaultVisible:true  },
-    { key:'contrato_display',        label:'Contrato',               fixed:false, defaultVisible:true  },
-    { key:'modalidade_licitacao',    label:'Modalidade',             fixed:false, defaultVisible:true  },
-    { key:'nome_elemento_despesa',   label:'Elemento Despesa',       fixed:false, defaultVisible:true  },
-    { key:'cod_elemento_despesa',    label:'Cód. Elemento Despesa',  fixed:false, defaultVisible:false },
-    { key:'nome_item_despesa',       label:'Item Despesa',           fixed:false, defaultVisible:false },
-    { key:'codigo_item_despesa',     label:'Cód. Item Despesa',      fixed:false, defaultVisible:false },
-    { key:'nome_fonte_recurso',      label:'Fonte de Recurso',       fixed:false, defaultVisible:false },
-    { key:'codigo_fonte_recurso',    label:'Cód. Fonte de Recurso',  fixed:false, defaultVisible:false },
-    { key:'codigo_orgao',            label:'Cód. Órgão',             fixed:false, defaultVisible:false },
+    { key:'iniciativa_display',      label:'Iniciativa',                 fixed:true,  tip:'Descrição da iniciativa conforme consta no Acordo de Reparação do Rio Doce' },
+    { key:'anexo_display',           label:'Anexo',                      fixed:true,  tip:'Anexo ao qual a iniciativa se refere no Acordo de Reparação do Rio Doce' },
+    { key:'ano',                     label:'Ano',                        fixed:true,  tip:'Ano da execução da despesa ou receita no orçamento' },
+    { key:'no_empenho',              label:'Empenho',                    fixed:true,  tip:'Número de identificação do documento de empenho no SIAFI' },
+    { key:'data_empenho',            label:'Data',                       fixed:true,  tip:'Data de registro no documento do empenho' },
+    // opcional: cod.órgão aparece ANTES de órgão
+    { key:'codigo_orgao',            label:'Cód. Órgão',                 fixed:false, defaultVisible:false, tip:'Código da unidade orçamentária responsável pela iniciativa' },
+    { key:'nome_orgao',              label:'Órgão',                      fixed:true,  tip:'Descrição da unidade orçamentária responsável pela iniciativa' },
+    { key:'credor',                  label:'Favorecido',                 fixed:true,  tip:'Nome do favorecido que recebeu recursos públicos estaduais pela prestação de serviço ou entrega do produto' },
+    { key:'cnpj_cpf_credor',         label:'CNPJ/CPF',                   fixed:true,  tip:'Número de identificação do favorecido' },
+    // opcionais de classificação (posição inline)
+    { key:'no_processo_compra',      label:'Proc. Compra',               fixed:false, defaultVisible:true,  tip:'Número identificador do processo de compra no portal de compras' },
+    { key:'contrato_display',        label:'Contrato',                   fixed:false, defaultVisible:true,  tip:'Número identificador do contrato no portal de compras' },
+    { key:'modalidade_licitacao',    label:'Proc. Contratação',          fixed:false, defaultVisible:true,  tip:'Indica a modalidade de licitação utilizada para contratar o serviço ou o bem' },
+    { key:'cod_elemento_despesa',    label:'Cód. Elemento Despesa',      fixed:false, defaultVisible:false, tip:'Indica o elemento de despesa da contratação ou serviço' },
+    { key:'nome_elemento_despesa',   label:'Elemento Despesa',           fixed:false, defaultVisible:true,  tip:'Indica o elemento de despesa da contratação ou serviço' },
+    { key:'codigo_item_despesa',     label:'Cód. Item Despesa',          fixed:false, defaultVisible:false, tip:'Código do item de despesa' },
+    { key:'nome_item_despesa',       label:'Item Despesa',               fixed:false, defaultVisible:false, tip:'Descrição do item de despesa' },
+    { key:'codigo_fonte_recurso',    label:'Cód. Fonte de Recurso',      fixed:false, defaultVisible:false, tip:'Indica a origem do dinheiro arrecadado' },
+    { key:'nome_fonte_recurso',      label:'Fonte de Recurso',           fixed:false, defaultVisible:false, tip:'Indica a origem do dinheiro arrecadado' },
+    // Valores fixos (sempre no final)
+    { key:'valor_empenhado',         label:'Valor Empenhado',            fixed:true,  tip:'Valor do orçamento reservado para os compromissos financeiros com o credor' },
+    { key:'valor_liquidado',         label:'Valor Liquidado',            fixed:true,  tip:'Valor que o credor tem direito a receber referente ao produto ou serviço devidamente entregue ou prestado.' },
+    { key:'valor_pago_financeiro',   label:'Valor Pago',                 fixed:true,  tip:'Valor referente aos pagamentos efetuados no exercício, por meio de movimentação bancárias, escriturais e apropriação contábil da despesa. O efetivo pagamento pode estar pendente de transmissão bancária e/ou sujeita a compensação bancária' },
+    { key:'valor_liquidado_rp',      label:'Valor Liquidado em RP',         fixed:true,  tip:'Valor que o fornecedor ou credor tem direito a receber referente ao produto ou serviço devidamente entregue em exercícios anteriores' },
+    { key:'valor_cancelado_rp',      label:'Valor Cancelado em RP',         fixed:true,  tip:'Valor referente aos valores cancelados, tanto processados quanto não processados, que foram inscritos em restos a pagar, incluindo também os reestabelecimentos' },
+    { key:'valor_empenhado_efetivo', label:'Valor Empenhado Efetivo', fixed:true,  tip:'Valor efetivamente empenhado conforme compromissos financeiros com o credor' },
+    { key:'valor_pago_rp',           label:'Valor Pago em RP',              fixed:true,  tip:'Valor pago referente a exercícios anteriores efetuados por meio de movimentações bancárias, escriturais e apropriação contábil da despesa. O efetivo pagamento pode estar pendente de transmissão bancária e/ou sujeita a compensação bancária' },
+    { key:'valor_total_pag',         label:'Valor Total Pago',           fixed:true,  tip:'Somatório dos valores pagos neste exercício e pagos em restos a pagar processados e não processados' },
 ];
 
 // Estado das colunas visíveis (opcionais)
@@ -884,7 +898,7 @@ function renderizarExecucao() {
                     ${anos.map(a=>`<option value="${a}">${a}</option>`).join('')}
                 </select>
             </div>
-            <div class="filter-group">
+            <div class="filter-group" style="flex:3;min-width:220px;">
                 <label class="filter-label">Iniciativa</label>
                 <select class="form-select modern-select" id="filtroInicExec">
                     <option value="">Todas</option>
@@ -902,35 +916,47 @@ function renderizarExecucao() {
                     ${anexos.map(a=>`<option value="${a}">${a}</option>`).join('')}
                 </select>
             </div>
-            <div class="filter-group">
-                <label class="filter-label">Modalidade</label>
-                <select class="form-select modern-select" id="filtroModalExec">
-                    <option value="">Todas</option>
-                    ${modalidades.map(m=>`<option value="${m}">${m}</option>`).join('')}
-                </select>
-            </div>
-            <div class="filter-group">
+            <div class="filter-group" style="flex:2;min-width:200px;">
                 <label class="filter-label">Órgão</label>
                 <select class="form-select modern-select" id="filtroOrgaoExec">
                     <option value="">Todos</option>
                     ${orgaos.map(o=>`<option value="${o}">${o}</option>`).join('')}
                 </select>
             </div>
-            <div class="filter-group">
-                <label class="filter-label">Credor</label>
+        </div>
+        <div class="filters-row">
+            <div class="filter-group" style="flex:2;min-width:180px;">
+                <label class="filter-label">Favorecido</label>
                 <input type="text" class="form-control" id="filtroCredorExec" placeholder="Digite...">
             </div>
             <div class="filter-group">
                 <label class="filter-label">CNPJ/CPF</label>
                 <input type="text" class="form-control" id="filtroCnpjExec" placeholder="Digite...">
             </div>
-            <div class="filter-group">
+            <div class="filter-group" style="flex:2;min-width:180px;">
                 <label class="filter-label">Proc. Compra</label>
                 <input type="text" class="form-control" id="filtroProcessoExec" placeholder="Digite...">
             </div>
-            <div class="filter-group">
-                <label class="filter-label">Nº Empenho</label>
-                <input type="text" class="form-control" id="filtroEmpenhoExec" placeholder="Digite...">
+            <div class="filter-group" style="flex:2;min-width:180px;">
+                <label class="filter-label">Contrato</label>
+                <input type="text" class="form-control" id="filtroContratoExec" placeholder="Digite...">
+            </div>
+        </div>
+        <div class="filters-row">
+            <div class="filter-group" style="flex:2;min-width:180px;">
+                <label class="filter-label">Proc. Contratação</label>
+                <select class="form-select modern-select" id="filtroModalExec">
+                    <option value="">Todas</option>
+                    ${modalidades.map(m=>`<option value="${m}">${m}</option>`).join('')}
+                </select>
+            </div>
+            <div class="filter-group" style="flex:2;min-width:180px;">
+                <label class="filter-label">Elemento Despesa</label>
+                <input type="text" class="form-control" id="filtroElementoExec" placeholder="Digite...">
+            </div>
+            <div class="filter-group" style="flex:2;min-width:180px;">
+                <label class="filter-label">Item Despesa</label>
+                <input type="text" class="form-control" id="filtroItemExec" placeholder="Digite...">
             </div>
         </div>
         <div class="botoes-abaixo">
@@ -946,15 +972,15 @@ function renderizarExecucao() {
             <div class="metric-body"><div class="metric-value" id="mEmpenhos">${metInicial.qtdEmpenhos.toLocaleString('pt-BR')}</div><div class="metric-sublabel">registros</div></div></div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="metric-card"><div class="metric-header">Total Empenhado</div>
+            <div class="metric-card"><div class="metric-header">Valor Total Empenhado</div>
             <div class="metric-body"><div class="metric-value" id="mEmpenhado" style="font-size:14px">${formatarMoeda(metInicial.empenhado)}</div><div class="metric-sublabel">valor empenhado</div></div></div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="metric-card"><div class="metric-header">Total Liquidado</div>
+            <div class="metric-card"><div class="metric-header">Valor Total Liquidado</div>
             <div class="metric-body"><div class="metric-value" id="mLiquidado" style="font-size:14px">${formatarMoeda(metInicial.liquidado)}</div><div class="metric-sublabel">valor liquidado</div></div></div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="metric-card"><div class="metric-header">Total Pago</div>
+            <div class="metric-card"><div class="metric-header">Valor Total Pago</div>
             <div class="metric-body"><div class="metric-value" id="mPago" style="font-size:14px">${formatarMoeda(metInicial.pago)}</div><div class="metric-sublabel">valor total pago</div></div></div>
         </div>
     </div>
@@ -1054,20 +1080,18 @@ function reconstruirCabecalhoEXEC() {
     tr.innerHTML = colsVisiveis.map(col=>{
         const numKeys=['valor_empenhado','valor_liquidado','valor_pago_financeiro','valor_total_pag',
             'valor_liquidado_rp','valor_cancelado_rp','valor_empenhado_efetivo',
-            'valor_pago_rp','valor_pago_processado','valor_pago_nao_processado',
-            'valor_cancelado_processado','valor_restabelecido_processado','valor_cancelado_nao_processado','valor_restabelecido_nao_processado'];
+            'valor_pago_rp','valor_cancelado_processado','valor_restabelecido_processado','valor_cancelado_nao_processado','valor_restabelecido_nao_processado'];
         const cls = numKeys.includes(col.key)?'sortable-header text-right':'sortable-header';
+        const tipIcon = col.tip ? `<i class="col-tooltip-icon" data-tip="${col.tip.replace(/"/g,"&quot;")}">?</i>` : '';
         if (col.key==='contrato_display'||col.key==='iniciativa_display'||col.key==='anexo_display') {
-            return `<th>${col.label}</th>`;
+            return `<th><span class="th-label">${col.label}</span> ${tipIcon}</th>`;
         }
-        return `<th class="${cls}" onclick="sortEXEC('${col.key}')">${col.label} <i class="material-icons">unfold_more</i></th>`;
+        return `<th class="${cls}" onclick="sortEXEC('${col.key}')"><span class="th-label">${col.label}</span> ${tipIcon}<i class="material-icons sort-icon">unfold_more</i></th>`;
     }).join('') + '<th class="text-center">Ações</th>';
 }
 
 function getColunasVisiveis() {
-    const fixed = EXEC_COLS_CONFIG.filter(c=>c.fixed);
-    const optional = EXEC_COLS_CONFIG.filter(c=>!c.fixed && execColsVisiveis[c.key]);
-    return [...fixed, ...optional];
+    return EXEC_COLS_CONFIG.filter(c => c.fixed || execColsVisiveis[c.key]);
 }
 
 window.abrirSeletorColunas = function() {
@@ -1162,7 +1186,7 @@ function buildRowEXEC(e) {
         'valor_cancelado_rp': `<td class="text-right">${formatarMoeda(e.valor_cancelado_rp)}</td>`,
         'valor_empenhado_efetivo': `<td class="text-right">${formatarMoeda(e.valor_empenhado_efetivo)}</td>`,
         'valor_pago_rp': `<td class="text-right">${formatarMoeda(e.valor_pago_rp)}</td>`,
-        'valor_pago_total': `<td class="text-right">${formatarMoeda(e.valor_pago_total)}</td>`,
+        'valor_total_pag': `<td class="text-right">${formatarMoeda(e.valor_total_pag)}</td>`,
     };
     const colsVis = getColunasVisiveis();
     const cells = colsVis.map(col=>cellMap[col.key]||`<td>-</td>`).join('');
@@ -1205,15 +1229,18 @@ function sortEXEC(col) {
 }
 
 window.aplicarFiltrosEXEC = function() {
-    const ano  = document.getElementById('filtroAnoExec')?.value||'';
-    const inic = document.getElementById('filtroInicExec')?.value||'';
-    const anx  = document.getElementById('filtroAnexoExec')?.value||'';
-    const mod  = document.getElementById('filtroModalExec')?.value||'';
-    const org  = document.getElementById('filtroOrgaoExec')?.value||'';
-    const cred = (document.getElementById('filtroCredorExec')?.value||'').toLowerCase().trim();
-    const cnpj = (document.getElementById('filtroCnpjExec')?.value||'').toLowerCase().trim();
-    const proc = (document.getElementById('filtroProcessoExec')?.value||'').toLowerCase().trim();
-    const emp  = (document.getElementById('filtroEmpenhoExec')?.value||'').toLowerCase().trim();
+    const ano      = document.getElementById('filtroAnoExec')?.value||'';
+    const inic     = document.getElementById('filtroInicExec')?.value||'';
+    const anx      = document.getElementById('filtroAnexoExec')?.value||'';
+    const mod      = document.getElementById('filtroModalExec')?.value||'';
+    const org      = document.getElementById('filtroOrgaoExec')?.value||'';
+    const cred     = (document.getElementById('filtroCredorExec')?.value||'').toLowerCase().trim();
+    const cnpj     = (document.getElementById('filtroCnpjExec')?.value||'').toLowerCase().trim();
+    const proc     = (document.getElementById('filtroProcessoExec')?.value||'').toLowerCase().trim();
+    const contrato = (document.getElementById('filtroContratoExec')?.value||'').toLowerCase().trim();
+    const elem     = (document.getElementById('filtroElementoExec')?.value||'').toLowerCase().trim();
+    const item     = (document.getElementById('filtroItemExec')?.value||'').toLowerCase().trim();
+    const emp      = (document.getElementById('filtroEmpenhoExec')?.value||'').toLowerCase().trim();
     window.execFiltrada = ordenar(dadosEmpenho.filter(e=>{
         if (ano&&e.ano!==ano) return false;
         if (inic&&(e.codigo_iniciativa||'').trim()!==inic) return false;
@@ -1226,6 +1253,13 @@ window.aplicarFiltrosEXEC = function() {
         if (cred&&!String(e.credor||'').toLowerCase().includes(cred)) return false;
         if (cnpj&&!String(e.cnpj_cpf_credor||'').toLowerCase().includes(cnpj)) return false;
         if (proc&&!String(e.no_processo_compra||'').toLowerCase().includes(proc)) return false;
+        if (contrato) {
+            const lic = getLicitacaoParaProcesso(e.no_processo_compra||'');
+            const numCont = (lic&&lic['numero_contrato']?lic['numero_contrato']:'').toLowerCase();
+            if (!numCont.includes(contrato)) return false;
+        }
+        if (elem&&!String(e.nome_elemento_despesa||e.cod_elemento_despesa||'').toLowerCase().includes(elem)) return false;
+        if (item&&!String(e.nome_item_despesa||e.codigo_item_despesa||'').toLowerCase().includes(item)) return false;
         if (emp&&!String(e.no_empenho||'').toLowerCase().includes(emp)) return false;
         return true;
     }), sortCfg.execucao.col, sortCfg.execucao.dir);
@@ -1236,7 +1270,7 @@ window.aplicarFiltrosEXEC = function() {
 };
 
 window.limparFiltrosEXEC = function() {
-    ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec']
+    ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroContratoExec','filtroElementoExec','filtroItemExec','filtroEmpenhoExec']
         .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     window.execFiltrada = ordenar(dadosEmpenho, sortCfg.execucao.col, sortCfg.execucao.dir);
     pag.execucao.atual=1;
@@ -1743,12 +1777,6 @@ function renderizarExecucaoOrgao() {
     <div class="filter-container">
         <div class="filters-row">
             <div class="filter-group">
-                <label class="filter-label">Anexo</label>
-                <select class="form-select modern-select" id="filtroAnexoOrgao">
-                    <option value="">Todos</option>
-                    ${anexos.map(a=>`<option value="${a}">${a}</option>`).join('')}
-                </select>
-            </div>
             <div class="filter-group" style="flex:2">
                 <label class="filter-label">Iniciativa</label>
                 <select class="form-select modern-select" id="filtroInicOrgao">
@@ -1756,12 +1784,18 @@ function renderizarExecucaoOrgao() {
                     ${iniciativasOpts.map(i=>`<option value="${esc(i.codigo_iniciativa||i.codigo_iniciativa)}">${i.codigo_iniciativa} - ${(i.iniciativa||'').substring(0,60)}</option>`).join('')}
                 </select>
             </div>
+                <label class="filter-label">Anexo</label>
+                <select class="form-select modern-select" id="filtroAnexoOrgao">
+                    <option value="">Todos</option>
+                    ${anexos.map(a=>`<option value="${a}">${a}</option>`).join('')}
+                </select>
+            </div>
             <div class="filter-group">
-                <label class="filter-label">Cód. Órgão</label>
+                <label class="filter-label">Código Órgão</label>
                 <input type="text" class="form-control" id="filtroCodigoUOOrgao" placeholder="Digite...">
             </div>
             <div class="filter-group" style="flex:2">
-                <label class="filter-label">Nome Órgão</label>
+                <label class="filter-label">Órgão</label>
                 <input type="text" class="form-control" id="filtroNomeUOOrgao" placeholder="Digite...">
             </div>
         </div>
@@ -1787,17 +1821,18 @@ function renderizarExecucaoOrgao() {
         <div class="table-fixed-header-container">
             <table class="table" id="tabelaOrgao">
                 <thead><tr>
-                    <th class="sortable-header" onclick="sortORGAO('iniciativa_label')">Iniciativa <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortORGAO('anexo')">Anexo <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortORGAO('codigo_orgao')">Cód. Órgão <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortORGAO('nome_orgao')">Nome Órgão <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortORGAO('valor_empenhado')">Empenhado <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortORGAO('valor_liquidado')">Liquidado <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortORGAO('valor_pago_financeiro')">Pago Financeiro <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortORGAO('valor_cancelado_rp')">Cancelado RP <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortORGAO('valor_empenhado_efetivo')">Empenhado Efetivo <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortORGAO('valor_pago_rp')">Pago RP <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortORGAO('valor_pago_total')">Total Pago <i class="material-icons">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortORGAO('iniciativa_label')">Iniciativa <i class="col-tooltip-icon" data-tip="Descrição da iniciativa conforme consta no Acordo de Reparação do Rio Doce">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortORGAO('anexo')">Anexo <i class="col-tooltip-icon" data-tip="Anexo ao qual a iniciativa se refere no Acordo de Reparação do Rio Doce">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortORGAO('codigo_orgao')">Cód. Órgão <i class="col-tooltip-icon" data-tip="Código da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortORGAO('nome_orgao')">Órgão <i class="col-tooltip-icon" data-tip="Descrição da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_empenhado')">Valor Empenhado <i class="col-tooltip-icon" data-tip="Valor do orçamento reservado para os compromissos financeiros com o credor">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_liquidado')">Valor Liquidado <i class="col-tooltip-icon" data-tip="Valor que o credor tem direito a receber referente ao produto ou serviço devidamente entregue ou prestado.">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_pago_financeiro')">Valor Pago <i class="col-tooltip-icon" data-tip="Valor referente aos pagamentos efetuados no exercício, por meio de movimentação bancárias, escriturais e apropriação contábil da despesa. O efetivo pagamento pode estar pendente de transmissão bancária e/ou sujeita a compensação bancária">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_liquidado_rp')">Valor Liquidado em RP <i class="col-tooltip-icon" data-tip="Valor que o fornecedor ou credor tem direito a receber referente ao produto ou serviço devidamente entregue em exercícios anteriores">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_cancelado_rp')">Valor Cancelado em RP <i class="col-tooltip-icon" data-tip="Valor referente aos valores cancelados, tanto processados quanto não processados, que foram inscritos em restos a pagar, incluindo também os reestabelecimentos">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_empenhado_efetivo')">Valor Empenhado Efetivo <i class="col-tooltip-icon" data-tip="Valor efetivamente empenhado conforme compromissos financeiros com o credor">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_pago_rp')">Valor Pago em RP <i class="col-tooltip-icon" data-tip="Valor pago referente a exercícios anteriores efetuados por meio de movimentações bancárias, escriturais e apropriação contábil da despesa.">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortORGAO('valor_pago_total')">Valor Total Pago <i class="col-tooltip-icon" data-tip="Somatório dos valores pagos neste exercício e pagos em restos a pagar processados e não processados">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                 </tr></thead>
                 <tbody id="tbodyOrgao"></tbody>
                 <tfoot id="tfootOrgao"></tfoot>
@@ -1867,7 +1902,7 @@ function atualizarTabelaOrgao() {
     const tbody=document.getElementById('tbodyOrgao');
     if (!tbody) return;
     tbody.innerHTML = rows.length===0
-        ? '<tr><td colspan="11" class="text-center py-4">Nenhum registro encontrado</td></tr>'
+        ? '<tr><td colspan="12" class="text-center py-4">Nenhum registro encontrado</td></tr>'
         : rows.map(r=>{
             const chave=(r.codigo_iniciativa||'').trim();
             const inicLabel = r.iniciativa_label||chave||'-';
@@ -1883,6 +1918,7 @@ function atualizarTabelaOrgao() {
             <td class="text-right">${formatarMoeda(r.valor_empenhado)}</td>
             <td class="text-right">${formatarMoeda(r.valor_liquidado)}</td>
             <td class="text-right">${formatarMoeda(r.valor_pago_financeiro)}</td>
+            <td class="text-right">${formatarMoeda(r.valor_liquidado_rp)}</td>
             <td class="text-right">${formatarMoeda(r.valor_cancelado_rp)}</td>
             <td class="text-right">${formatarMoeda(r.valor_empenhado_efetivo)}</td>
             <td class="text-right">${formatarMoeda(r.valor_pago_rp)}</td>
@@ -1894,18 +1930,20 @@ function atualizarTabelaOrgao() {
         acc.empenhado+=parseNum(r.valor_empenhado);
         acc.liquidado+=parseNum(r.valor_liquidado);
         acc.pago_financeiro+=parseNum(r.valor_pago_financeiro);
+        acc.liquidado_rp+=parseNum(r.valor_liquidado_rp);
         acc.cancelado_rp+=parseNum(r.valor_cancelado_rp);
         acc.empenhado_efetivo+=parseNum(r.valor_empenhado_efetivo);
         acc.pago_rp+=parseNum(r.valor_pago_rp);
         acc.pago_total+=parseNum(r.valor_pago_total);
         return acc;
-    },{empenhado:0,liquidado:0,pago_financeiro:0,cancelado_rp:0,empenhado_efetivo:0,pago_rp:0,pago_total:0});
+    },{empenhado:0,liquidado:0,pago_financeiro:0,liquidado_rp:0,cancelado_rp:0,empenhado_efetivo:0,pago_rp:0,pago_total:0});
     const tfoot=document.getElementById('tfootOrgao');
     if (tfoot) tfoot.innerHTML=`<tr>
         <td colspan="4"><strong>TOTAL (${window.orgaoFiltrada.length} registros)</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.empenhado)}</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.liquidado)}</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.pago_financeiro)}</strong></td>
+        <td class="text-right"><strong>${formatarMoeda(tot.liquidado_rp)}</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.cancelado_rp)}</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.empenhado_efetivo)}</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.pago_rp)}</strong></td>
@@ -1995,6 +2033,7 @@ window.buscarORGAO = function(termo) {
         <td class="text-right">${formatarMoeda(r.valor_empenhado)}</td>
         <td class="text-right">${formatarMoeda(r.valor_liquidado)}</td>
         <td class="text-right">${formatarMoeda(r.valor_pago_financeiro)}</td>
+        <td class="text-right">${formatarMoeda(r.valor_liquidado_rp)}</td>
         <td class="text-right">${formatarMoeda(r.valor_cancelado_rp)}</td>
         <td class="text-right">${formatarMoeda(r.valor_empenhado_efetivo)}</td>
         <td class="text-right">${formatarMoeda(r.valor_pago_rp)}</td>
@@ -2139,17 +2178,20 @@ function renderizarReceita() {
         <div class="table-fixed-header-container">
             <table class="table" id="tabelaReceita">
                 <thead><tr>
-                    <th class="sortable-header th-tooltip" onclick="sortREC('ano_de_exercicio')" style="min-width:55px;" data-tip="Ano de exercício orçamentário">Ano <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header th-tooltip" onclick="sortREC('periodo_desc')" style="min-width:110px;" data-tip="Período selecionado (mês inicial – mês final)">Período <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header th-tooltip" onclick="sortREC('unidade_orcamentaria_codigo')" style="min-width:70px;" data-tip="Código da unidade orçamentária responsável">Cód. UO <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header th-tooltip" onclick="sortREC('unidade_orcamentaria_nome')" style="min-width:160px;" data-tip="Nome completo da unidade orçamentária responsável">Unidade Orçamentária <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header th-tooltip" onclick="sortREC('classificacao_receita_formatado')" style="min-width:130px;" data-tip="Código formatado da classificação orçamentária da receita">Cód. Classificação <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header th-tooltip" onclick="sortREC('classificacao_receita_descricao')" style="min-width:200px;" data-tip="Descrição da natureza/categoria da receita orçamentária">Classificação da Receita <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right th-tooltip" onclick="sortREC('valor_previsto_inicial')" style="min-width:130px;" data-tip="Valor previsto na Lei Orçamentária Anual (LOA) — apenas Receita Orçamentária">Vl. Prev. Inicial <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right th-tooltip" onclick="sortREC('valor_previsto_atualizado')" style="min-width:140px;" data-tip="Valor previsto atualizado após créditos adicionais — apenas Receita Orçamentária">Vl. Prev. Atualizado <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right th-tooltip" onclick="sortREC('valor_contabilizado')" style="min-width:130px;" data-tip="Valor contabilizado da receita no período — apenas Receita Orçamentária">Vl. Contabilizado <i class="material-icons">unfold_more</i></th>
-                    <th class="sortable-header text-right th-tooltip" onclick="sortREC('valor_arrecadado_liquido')" style="min-width:130px;" data-tip="Valor efetivamente arrecadado e registrado na conta bancária — apenas Conta Bancária">Vl. Arrecadado Líq. <i class="material-icons">unfold_more</i></th>
-                    <th class="th-tooltip" style="min-width:120px;text-align:center;" data-tip="Origem do dado: Receita Orçamentária (receita.csv) ou Conta Bancária (contabancaria.csv)">Tipo</th>
+                    <th class="sortable-header" onclick="sortREC('ano_de_exercicio')" style="min-width:55px;">Ano <i class="col-tooltip-icon" data-tip="Ano da execução da despesa ou receita no orçamento">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('periodo_desc')" style="min-width:80px;">Período <i class="col-tooltip-icon" data-tip="Compreende o período da receita contabilizada">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('unidade_orcamentaria_codigo')" style="min-width:65px;">Cód. Órgão <i class="col-tooltip-icon" data-tip="Código da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('unidade_orcamentaria_nome')" style="min-width:140px;">Órgão <i class="col-tooltip-icon" data-tip="Descrição da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('classificacao_receita_formatado')" style="min-width:100px;">Cód. Classificação da Receita <i class="col-tooltip-icon" data-tip="Classificação que identifica os recursos que ingressaram nos cofres públicos e indicam: categoria econômica, origem, espécie, desdobramento 1, desdobramento 2, desdobramento 3, tipo">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('classificacao_receita_descricao')" style="min-width:160px;">Classificação da Receita <i class="col-tooltip-icon" data-tip="Descrição da identificação detalhada dos recursos que ingressaram nos cofres públicos">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('codigo_fonte_recurso')" style="min-width:75px;">Cód. Fonte de Recurso <i class="col-tooltip-icon" data-tip="Indica a origem do dinheiro arrecadado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('nome_fonte_recurso')" style="min-width:130px;">Fonte de Recurso <i class="col-tooltip-icon" data-tip="Indica a origem do dinheiro arrecadado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('fonte_portaria_stn')" style="min-width:130px;">Fonte de Recursos – Portaria STN <i class="col-tooltip-icon" data-tip="Indicam a classificação de recursos utilizados pelos Estados, DF e municípios, conforme previsto da Portaria STN Nº710/2021">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortREC('valor_previsto_inicial')" style="min-width:100px;">Valor Previsto Inicial <i class="col-tooltip-icon" data-tip="Valor estimado da arrecadação para o ano consultado, previsto da LOA">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortREC('valor_previsto_atualizado')" style="min-width:100px;">Valor Previsto Atualizado <i class="col-tooltip-icon" data-tip="Valor estimado inicial para arrecadação no ano consultado, previsto na LOA, e atualizado ao longo do ano">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortREC('valor_contabilizado')" style="min-width:100px;">Valor Arrecadado <i class="col-tooltip-icon" data-tip="Valor financeiro que entrou nos cofres públicos no período consultado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortREC('valor_arrecadado_liquido')" style="min-width:100px;">Rendimentos <i class="col-tooltip-icon" data-tip="Valor referente aos rendimentos dos recursos que entram nos cofres públicos no período consultado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th style="min-width:100px;text-align:center;">Tipo <i class="col-tooltip-icon" data-tip="Origem do dado: Receita Orçamentária (receita.csv) ou Conta Bancária (contabancaria.csv)">?</i></th>
                 </tr></thead>
                 <tbody id="tbodyReceita"></tbody>
                 <tfoot><tr id="tfootReceita"></tr></tfoot>
@@ -2208,7 +2250,7 @@ function calcularTabelaREC() {
         window.receitaFiltradaView = [];
         pagReceita.atual = 1; pagReceita.total = 1;
         const tbody = document.getElementById('tbodyReceita');
-        if (tbody) tbody.innerHTML = '<tr><td colspan="11" class="text-center py-4" style="color:#94a3b8;font-style:italic;">Selecione um Ano para visualizar os dados.</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="14" class="text-center py-4" style="color:#94a3b8;font-style:italic;">Selecione um Ano para visualizar os dados.</td></tr>';
         const badge = document.getElementById('badgeREC');
         if (badge) badge.textContent = '0 registros';
         const tfoot = document.getElementById('tfootReceita');
@@ -2246,7 +2288,11 @@ function calcularTabelaREC() {
         const classCod= _campo(r,'classificacao_receita_formatado');
         const classDesc=_campo(r,'classificacao_receita_descricao');
         const tpLinha = r._tipo_linha||'';
-        const chave   = [ano, uoCod, uoNome, classCod, classDesc, tpLinha].join('||');
+        const codFonteG  = _campo(r,'fonte_recurso_codigo','codigo_fonte_recurso','cod_fonte_recurso');
+        const nomeFonteG = _campo(r,'fonte_recurso_descricao','nome_fonte_recurso','fonte_recurso') ||
+                           (codFonteG && window.mapaFonteRecurso ? (window.mapaFonteRecurso[codFonteG]||'') : '');
+        const fontePortG = _campo(r,'fonte_portaria_stn','fonte_portaria');
+        const chave   = [ano, uoCod, uoNome, classCod, classDesc, codFonteG, tpLinha].join('||');
 
         if (!grupos.has(chave)) {
             grupos.set(chave, {
@@ -2256,6 +2302,9 @@ function calcularTabelaREC() {
                 unidade_orcamentaria_nome:       uoNome||'-',
                 classificacao_receita_formatado: classCod,
                 classificacao_receita_descricao: classDesc,
+                codigo_fonte_recurso:            codFonteG||'-',
+                nome_fonte_recurso:              nomeFonteG||'-',
+                fonte_portaria_stn:              fontePortG||'-',
                 _tipo_linha:                     tpLinha,
                 valor_previsto_inicial:          0,
                 valor_previsto_atualizado:       0,
@@ -2307,6 +2356,9 @@ function _linhaREC(r) {
     const vPA  = typeof r.valor_previsto_atualizado=== 'number' ? r.valor_previsto_atualizado : parseNum(r.valor_previsto_atualizado);
     const vCO  = typeof r.valor_contabilizado      === 'number' ? r.valor_contabilizado       : parseNum(r.valor_contabilizado);
     const vAL  = typeof r.valor_arrecadado_liquido === 'number' ? r.valor_arrecadado_liquido  : parseNum(r.valor_arrecadado_liquido);
+    const codFonteRec = r.codigo_fonte_recurso||r.fonte_recurso_codigo||r.cod_fonte_recurso||'-';
+    const nomeFonteRec = r.nome_fonte_recurso||r.fonte_recurso_descricao||r.fonte_recurso||'-';
+    const fontePortaria = r.fonte_portaria_stn||r.fonte_portaria||'-';
     return `<tr>
         <td style="text-align:center;">${r.ano_de_exercicio||'-'}</td>
         <td style="text-align:center;white-space:nowrap;">${r.periodo_desc||'-'}</td>
@@ -2314,6 +2366,9 @@ function _linhaREC(r) {
         <td title="${uo_nome.replace(/"/g,'&quot;')}">${uo_nome.substring(0,35)}${uo_nome.length>35?'...':''}</td>
         <td>${classifCod||'<span class="nao-aplica">—</span>'}</td>
         <td title="${classifDesc.replace(/"/g,'&quot;')}">${classifDesc.substring(0,50)}${classifDesc.length>50?'...':''}</td>
+        <td>${codFonteRec}</td>
+        <td title="${nomeFonteRec}">${nomeFonteRec.substring(0,25)}${nomeFonteRec.length>25?'...':''}</td>
+        <td title="${fontePortaria}">${fontePortaria.substring(0,25)}${fontePortaria.length>25?'...':''}</td>
         ${r._tipo_linha==='receita'        ? `<td class="text-right">${formatarMoeda(vPI)}</td>`  : '<td class="text-right nao-aplica">—</td>'}
         ${r._tipo_linha==='receita'        ? `<td class="text-right">${formatarMoeda(vPA)}</td>`  : '<td class="text-right nao-aplica">—</td>'}
         ${r._tipo_linha==='receita'        ? `<td class="text-right">${formatarMoeda(vCO)}</td>`  : '<td class="text-right nao-aplica">—</td>'}
@@ -2331,7 +2386,7 @@ function atualizarTabelaREC() {
     if(!tbody) return;
 
     tbody.innerHTML = rows.length===0
-        ? '<tr><td colspan="11" class="text-center py-4">Nenhum registro encontrado</td></tr>'
+        ? '<tr><td colspan="12" class="text-center py-4">Nenhum registro encontrado</td></tr>'
         : rows.map(_linhaREC).join('');
 
     // Totais — valores já são numéricos após agrupamento
@@ -2345,7 +2400,7 @@ function atualizarTabelaREC() {
 
     const tfoot = document.getElementById('tfootReceita');
     if(tfoot) tfoot.innerHTML=`
-        <td colspan="6"><strong>TOTAL (${data.length} registros)</strong></td>
+        <td colspan="9"><strong>TOTAL (${data.length} registros)</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.prev_ini)}</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.prev_atu)}</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.contab)}</strong></td>
@@ -2608,6 +2663,43 @@ document.addEventListener('DOMContentLoaded', ()=>{
         tab.addEventListener('shown.bs.tab',()=>setTimeout(iframeH,300));
     });
     window.addEventListener('resize',()=>{ clearTimeout(window.rTimer); window.rTimer=setTimeout(iframeH,250); });
+
+    // Tooltip flutuante via position:fixed — nunca é cortado pelo sticky thead
+    const _ttp = document.createElement('div');
+    _ttp.id = 'col-tooltip-popup';
+    document.body.appendChild(_ttp);
+
+    document.addEventListener('mouseover', e => {
+        const icon = e.target.closest('.col-tooltip-icon');
+        if (!icon) return;
+        const tip = icon.getAttribute('data-tip');
+        if (!tip) return;
+        _ttp.textContent = tip;
+        const rect = icon.getBoundingClientRect();
+        // Posiciona acima do ícone, centralizado
+        const ttW = Math.max(180, Math.min(280, tip.length * 6.5));
+        let left = rect.left + rect.width/2 - ttW/2;
+        // Evita sair pela direita
+        if (left + ttW > window.innerWidth - 8) left = window.innerWidth - ttW - 8;
+        // Evita sair pela esquerda
+        if (left < 8) left = 8;
+        const top = rect.top - 10; // 10px de margem + será ajustado via transform
+        _ttp.style.width = ttW + 'px';
+        _ttp.style.left  = left + 'px';
+        _ttp.style.top   = top + 'px';
+        _ttp.style.transform = 'translateY(-100%)';
+        _ttp.classList.add('visible');
+    });
+    document.addEventListener('mouseout', e => {
+        const icon = e.target.closest('.col-tooltip-icon');
+        if (!icon) return;
+        _ttp.classList.remove('visible');
+    });
+    document.addEventListener('mousemove', e => {
+        if (!_ttp.classList.contains('visible')) return;
+        const icon = e.target.closest('.col-tooltip-icon');
+        if (!icon) _ttp.classList.remove('visible');
+    });
 });
 </script>
 </body>
