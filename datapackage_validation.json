@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.128,
+  "time": 0.204,
   "errors": [],
   "tasks": [
     {
@@ -64,7 +64,7 @@
           "rows": 22
         }
       },
-      "time": 0.012,
+      "time": 0.013,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -107,57 +107,137 @@
         "schema": {
           "fields": [
             {
-              "name": "ano_de_exercicio",
+              "name": "ano",
               "type": "integer"
             },
             {
-              "name": "mes_descritivo",
-              "type": "string"
-            },
-            {
-              "name": "unidade_orcamentaria_codigo",
+              "name": "codigo_iniciativa",
               "type": "integer"
             },
             {
-              "name": "unidade_orcamentaria_nome",
-              "type": "string"
-            },
-            {
-              "name": "classificacao_receita_formatado",
-              "type": "string"
-            },
-            {
-              "name": "classificacao_receita_descricao",
-              "type": "string"
-            },
-            {
-              "name": "fonte_recurso_codigo",
+              "name": "codigo_orgao",
               "type": "integer"
             },
             {
-              "name": "fonte_recurso_descricao",
+              "name": "nome_orgao",
               "type": "string"
             },
             {
-              "name": "valor_previsto_inicial",
+              "name": "no_empenho",
               "type": "integer"
             },
             {
-              "name": "valor_previsto_atualizado",
+              "name": "data_empenho",
+              "type": "date"
+            },
+            {
+              "name": "no_processo_compra",
+              "type": "string"
+            },
+            {
+              "name": "modalidade_licitacao",
+              "type": "string"
+            },
+            {
+              "name": "cod_elemento_despesa",
               "type": "integer"
+            },
+            {
+              "name": "nome_elemento_despesa",
+              "type": "string"
+            },
+            {
+              "name": "codigo_item_despesa",
+              "type": "integer"
+            },
+            {
+              "name": "nome_item_despesa",
+              "type": "string"
+            },
+            {
+              "name": "codigo_fonte_recurso",
+              "type": "integer"
+            },
+            {
+              "name": "nome_fonte_recurso",
+              "type": "string"
+            },
+            {
+              "name": "cnpj_cpf_credor",
+              "type": "string"
+            },
+            {
+              "name": "credor",
+              "type": "string"
+            },
+            {
+              "name": "valor_empenhado",
+              "type": "string"
+            },
+            {
+              "name": "valor_liquidado",
+              "type": "string"
+            },
+            {
+              "name": "valor_pago_financeiro",
+              "type": "string"
+            },
+            {
+              "name": "valor_liquidado_rp",
+              "type": "any"
+            },
+            {
+              "name": "valor_cancelado_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_restabelecido_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_cancelado_nao_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_restabelecido_nao_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_cancelado_rp",
+              "type": "any"
+            },
+            {
+              "name": "valor_empenhado_efetivo",
+              "type": "string"
+            },
+            {
+              "name": "valor_pago_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_pago_nao_processado",
+              "type": "any"
+            },
+            {
+              "name": "valor_pago_rp",
+              "type": "any"
+            },
+            {
+              "name": "valor_total_pago",
+              "type": "string"
             }
           ]
         },
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "57ced5b13c3df84bafb1cab301bb4202",
-          "bytes": 4212,
-          "fields": 10,
-          "rows": 22
+          "hash": "dae9672030d7323c1032a69b353eec69",
+          "bytes": 85206,
+          "fields": 30,
+          "rows": 218
         }
       },
-      "time": 0.013,
+      "time": 0.061,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -226,7 +306,7 @@
           "rows": 38
         }
       },
-      "time": 0.009,
+      "time": 0.01,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -372,7 +452,7 @@
           "rows": 17
         }
       },
-      "time": 0.024,
+      "time": 0.027,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -465,7 +545,7 @@
           "rows": 22
         }
       },
-      "time": 0.012,
+      "time": 0.014,
       "scope": [
         "hash-count-error",
         "byte-count-error",
