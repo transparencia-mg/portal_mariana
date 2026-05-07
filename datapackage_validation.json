@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.189,
+  "time": 0.127,
   "errors": [],
   "tasks": [
     {
@@ -42,6 +42,14 @@
               "type": "string"
             },
             {
+              "name": "fonte_recurso_codigo",
+              "type": "integer"
+            },
+            {
+              "name": "fonte_recurso_descricao",
+              "type": "string"
+            },
+            {
               "name": "valor_arrecadado_liquido",
               "type": "string"
             }
@@ -50,13 +58,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "f34c7f64fecf172e3f9bc9cb736b7d39",
-          "bytes": 3135,
-          "fields": 7,
+          "hash": "b69325cff1d3d23d84dbf8ca7d97dd64",
+          "bytes": 4258,
+          "fields": 9,
           "rows": 22
         }
       },
-      "time": 0.012,
+      "time": 0.013,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -99,137 +107,57 @@
         "schema": {
           "fields": [
             {
-              "name": "ano",
+              "name": "ano_de_exercicio",
               "type": "integer"
             },
             {
-              "name": "codigo_iniciativa",
+              "name": "mes_descritivo",
+              "type": "string"
+            },
+            {
+              "name": "unidade_orcamentaria_codigo",
               "type": "integer"
             },
             {
-              "name": "codigo_orgao",
+              "name": "unidade_orcamentaria_nome",
+              "type": "string"
+            },
+            {
+              "name": "classificacao_receita_formatado",
+              "type": "string"
+            },
+            {
+              "name": "classificacao_receita_descricao",
+              "type": "string"
+            },
+            {
+              "name": "fonte_recurso_codigo",
               "type": "integer"
             },
             {
-              "name": "nome_orgao",
+              "name": "fonte_recurso_descricao",
               "type": "string"
             },
             {
-              "name": "no_empenho",
+              "name": "valor_previsto_inicial",
               "type": "integer"
             },
             {
-              "name": "data_empenho",
-              "type": "date"
-            },
-            {
-              "name": "no_processo_compra",
-              "type": "string"
-            },
-            {
-              "name": "modalidade_licitacao",
-              "type": "string"
-            },
-            {
-              "name": "cod_elemento_despesa",
+              "name": "valor_previsto_atualizado",
               "type": "integer"
-            },
-            {
-              "name": "nome_elemento_despesa",
-              "type": "string"
-            },
-            {
-              "name": "codigo_item_despesa",
-              "type": "integer"
-            },
-            {
-              "name": "nome_item_despesa",
-              "type": "string"
-            },
-            {
-              "name": "codigo_fonte_recurso",
-              "type": "integer"
-            },
-            {
-              "name": "nome_fonte_recurso",
-              "type": "string"
-            },
-            {
-              "name": "cnpj_cpf_credor",
-              "type": "string"
-            },
-            {
-              "name": "credor",
-              "type": "string"
-            },
-            {
-              "name": "valor_empenhado",
-              "type": "string"
-            },
-            {
-              "name": "valor_liquidado",
-              "type": "string"
-            },
-            {
-              "name": "valor_pago_financeiro",
-              "type": "string"
-            },
-            {
-              "name": "valor_liquidado_rp",
-              "type": "any"
-            },
-            {
-              "name": "valor_cancelado_processado",
-              "type": "any"
-            },
-            {
-              "name": "valor_restabelecido_processado",
-              "type": "any"
-            },
-            {
-              "name": "valor_cancelado_nao_processado",
-              "type": "any"
-            },
-            {
-              "name": "valor_restabelecido_nao_processado",
-              "type": "any"
-            },
-            {
-              "name": "valor_cancelado_rp",
-              "type": "any"
-            },
-            {
-              "name": "valor_empenhado_efetivo",
-              "type": "string"
-            },
-            {
-              "name": "valor_pago_processado",
-              "type": "any"
-            },
-            {
-              "name": "valor_pago_nao_processado",
-              "type": "any"
-            },
-            {
-              "name": "valor_pago_rp",
-              "type": "any"
-            },
-            {
-              "name": "valor_total_pago",
-              "type": "string"
             }
           ]
         },
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "cb05e462ca7fa83dc30d3d146370b7ef",
-          "bytes": 83585,
-          "fields": 30,
-          "rows": 214
+          "hash": "57ced5b13c3df84bafb1cab301bb4202",
+          "bytes": 4212,
+          "fields": 10,
+          "rows": 22
         }
       },
-      "time": 0.052,
+      "time": 0.013,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -298,7 +226,7 @@
           "rows": 38
         }
       },
-      "time": 0.01,
+      "time": 0.009,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -438,13 +366,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "481dc432914a2274ac25e9c05be6648f",
-          "bytes": 3034,
+          "hash": "4fd30ed4b144f665a055f8d430eedabf",
+          "bytes": 3036,
           "fields": 17,
           "rows": 17
         }
       },
-      "time": 0.027,
+      "time": 0.024,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -529,7 +457,7 @@
           "rows": 22
         }
       },
-      "time": 0.013,
+      "time": 0.011,
       "scope": [
         "hash-count-error",
         "byte-count-error",
