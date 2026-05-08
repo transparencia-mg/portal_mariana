@@ -90,10 +90,14 @@
         /* TABELAS */
         .table-badge { background: #1a3a5c; color: white; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
         .table-fixed-header-container { position: relative; overflow: auto; width: 100%; max-height: 600px; }
-        .table-fixed-header-container table thead th { background-color: #54697b !important; color: white !important; position: sticky; top: 0; z-index: 10; font-weight: 600; padding: 10px 8px; font-size: 11px; text-transform: uppercase; white-space: normal; word-break: break-word; vertical-align: middle; line-height: 1.3; }
+        .table-fixed-header-container table thead th { background-color: #54697b !important; color: white !important; position: sticky; top: 0; z-index: 10; font-weight: 600; padding: 10px 8px; font-size: 11px; text-transform: uppercase; white-space: nowrap; vertical-align: middle; line-height: 1.3; }
         .table { width: 100%; font-size: 12px; border-collapse: collapse; table-layout: auto; }
         .table th, .table td { border: 1px solid #d6dee6; }
-        .table thead th { background-color: #54697b !important; color: white !important; font-weight: 600; font-size: 11px; padding: 10px 8px; text-transform: uppercase; border: 1px solid #d6dee6; cursor: pointer; user-select: none; white-space: normal; word-break: break-word; vertical-align: middle; line-height: 1.3; }
+        .table thead th { background-color: #54697b !important; color: white !important; font-weight: 600; font-size: 11px; padding: 10px 8px; text-transform: uppercase; border: 1px solid #d6dee6; cursor: pointer; user-select: none; white-space: nowrap; vertical-align: middle; line-height: 1.3; }
+        /* Colunas de valor: largura mínima para caber o título sem quebrar */
+        .table thead th.text-right { min-width: 130px; }
+        /* Colunas de texto descritivo: podem ter mais espaço */
+        .table thead th:not(.text-right) { min-width: 80px; }
         .table thead th:first-child { border-top-left-radius: 8px; }
         .table thead th:last-child  { border-top-right-radius: 8px; }
         .table thead th:hover { background-color: #3d5566 !important; }
@@ -250,6 +254,13 @@
         .iniciativa-codigo { color: #006a82; font-weight: 700; text-decoration: none; }
         .iniciativa-codigo:hover { color: var(--accent-red); text-decoration: underline; }
 
+        /* DICIONÁRIO */
+        .dic-tab-btn { background:#fff; border:1.5px solid #dfe5ec; border-radius:8px; padding:6px 16px; font-size:12px; font-weight:600; color:#1a3a5c; cursor:pointer; transition:all .2s ease; }
+        .dic-tab-btn:hover { background:#e6e9ed; }
+        .dic-tab-btn.active { background:#234c63; color:#fff; border-color:#234c63; box-shadow:0 4px 10px rgba(0,0,0,0.12); }
+        .dic-row-highlight { background:#fffbea !important; }
+        .metadata-header { display:flex; align-items:center; }
+
         /* RESPONSIVO */
         @media (max-width: 992px) { .container-fluid, .dashboard-container { padding: 0 15px !important; } }
         @media (max-width: 768px) {
@@ -281,17 +292,22 @@
                 </li>
                 <li class="nav-item">
                     <button class="nav-link" id="execucao-orgao-tab" data-bs-toggle="tab" data-bs-target="#tab-execucao-orgao">
-                        <i class="material-icons">domain</i>Execução por Órgão
+                        <i class="material-icons">domain</i>Por Órgão
                     </button>
                 </li>
                 <li class="nav-item">
                     <button class="nav-link" id="execucao-tab" data-bs-toggle="tab" data-bs-target="#tab-execucao">
-                        <i class="material-icons">receipt_long</i>Execução por Empenho
+                        <i class="material-icons">receipt_long</i>Por Empenho
                     </button>
                 </li>
                 <li class="nav-item">
                     <button class="nav-link" id="receita-tab" data-bs-toggle="tab" data-bs-target="#tab-receita">
                         <i class="material-icons">savings</i>Receita
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="dicionario-tab" data-bs-toggle="tab" data-bs-target="#tab-dicionario">
+                        <i class="material-icons">menu_book</i>Dicionário de Dados
                     </button>
                 </li>
                 <li class="nav-item">
@@ -323,6 +339,9 @@
             </div>
             <div class="tab-pane fade" id="tab-receita" role="tabpanel">
                 <div id="receita-content"></div>
+            </div>
+            <div class="tab-pane fade" id="tab-dicionario" role="tabpanel">
+                <div id="dicionario-content"></div>
             </div>
             <div class="tab-pane fade" id="tab-downloads" role="tabpanel">
                 <div id="downloads-content"></div>
@@ -2515,8 +2534,8 @@ function renderizarDownloads() {
         </div>
     </div>
     <div class="filter-container">
-        <h5 style="font-size:14px;font-weight:700;color:#20445d;margin-bottom:12px;"><i class="material-icons" style="vertical-align:middle;margin-right:4px;">download</i> Download Direto</h5>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+        <h5 style="font-size:14px;font-weight:700;color:#20445d;margin-bottom:16px;"><i class="material-icons" style="vertical-align:middle;margin-right:4px;">download</i> Download Direto — dados filtrados no painel</h5>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
             <div style="background:#f8fafd;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;min-width:160px;">
                 <div style="font-weight:700;color:#20445d;font-size:14px;margin-bottom:8px;">Iniciativas</div>
                 <button class="btn-export" style="width:100%;justify-content:center;" onclick="exportarIniciativasCSV()">
@@ -2543,103 +2562,172 @@ function renderizarDownloads() {
             </div>
         </div>
     </div>
-    <div class="filter-container">
-        <h5 style="font-size:14px;font-weight:700;color:#20445d;margin-bottom:12px;"><i class="material-icons" style="vertical-align:middle;margin-right:4px;">info</i> Dicionário de Dados</h5>
-        <div class="metadata-container mb-3">
-            <div class="metadata-header"><i class="material-icons me-2" style="vertical-align:middle">account_balance</i> Iniciativas</div>
-            <div class="table-responsive">
-                <table class="metadata-table">
-                    <thead><tr><th>Campo</th><th>Descrição</th><th>Tipo</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>codigo_iniciativa</code></td><td>Código único da iniciativa do Acordo de Mariana</td><td>Texto</td></tr>
-                        <tr><td><code>iniciativa</code></td><td>Descrição da iniciativa</td><td>Texto</td></tr>
-                        <tr><td><code>anexo</code></td><td>Anexo do acordo ao qual a iniciativa pertence</td><td>Texto</td></tr>
-                        <tr><td><code>valor_da_iniciativa</code></td><td>Valor total previsto para a iniciativa</td><td>Moeda</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="metadata-container mb-3">
-            <div class="metadata-header"><i class="material-icons me-2" style="vertical-align:middle">business</i> Órgão (Execução por Unidade Orçamentária)</div>
-            <div class="table-responsive">
-                <table class="metadata-table">
-                    <thead><tr><th>Campo</th><th>Descrição</th><th>Tipo</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>codigo_iniciativa</code></td><td>Código da iniciativa vinculada ao órgão</td><td>Texto</td></tr>
-                        <tr><td><code>anexo</code></td><td>Anexo do acordo ao qual a iniciativa pertence</td><td>Texto</td></tr>
-                        <tr><td><code>codigo_orgao</code></td><td>Código da unidade orçamentária responsável</td><td>Texto</td></tr>
-                        <tr><td><code>nome_orgao</code></td><td>Nome da unidade orçamentária responsável</td><td>Texto</td></tr>
-                        <tr><td><code>valor_empenhado</code></td><td>Valor empenhado pelo órgão</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_liquidado</code></td><td>Valor liquidado pelo órgão</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_pago_financeiro</code></td><td>Valor pago financeiramente pelo órgão</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_cancelado_rp</code></td><td>Valor cancelado em restos a pagar</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_empenhado_efetivo</code></td><td>Valor empenhado efetivo pelo órgão</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_pago_rp</code></td><td>Valor pago em restos a pagar</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_pago_total</code></td><td>Valor total pago pelo órgão (financeiro + RP)</td><td>Moeda</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="metadata-container mb-3">
-            <div class="metadata-header"><i class="material-icons me-2" style="vertical-align:middle">savings</i> Receita</div>
-            <div class="table-responsive">
-                <table class="metadata-table">
-                    <thead><tr><th>Campo</th><th>Descrição</th><th>Tipo</th><th>Fonte</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>ano_de_exercicio</code></td><td>Ano de exercício</td><td>Número</td><td>receita.csv / contabancaria.csv</td></tr>
-                        <tr><td><code>mes_descritivo</code></td><td>Mês de referência por extenso (ex: Janeiro, Fevereiro...)</td><td>Texto</td><td>receita.csv / contabancaria.csv</td></tr>
-                        <tr><td><code>unidade_orcamentaria_codigo</code></td><td>Código da unidade orçamentária</td><td>Texto</td><td>receita.csv / contabancaria.csv</td></tr>
-                        <tr><td><code>unidade_orcamentaria_nome</code></td><td>Nome da unidade orçamentária</td><td>Texto</td><td>receita.csv / contabancaria.csv</td></tr>
-                        <tr><td><code>classificacao_receita_formatado</code></td><td>Código formatado da classificação da receita</td><td>Texto</td><td>receita.csv / contabancaria.csv</td></tr>
-                        <tr><td><code>classificacao_receita_descricao</code></td><td>Descrição da classificação da receita</td><td>Texto</td><td>receita.csv / contabancaria.csv</td></tr>
-                        <tr><td><code>valor_previsto_inicial</code></td><td>Valor previsto na LOA</td><td>Moeda</td><td>receita.csv</td></tr>
-                        <tr><td><code>valor_previsto_atualizado</code></td><td>Valor previsto atualizado (após créditos adicionais)</td><td>Moeda</td><td>receita.csv</td></tr>
-                        <tr><td><code>valor_contabilizado</code></td><td>Valor contabilizado da receita no período</td><td>Moeda</td><td>receita.csv</td></tr>
-                        <tr><td><code>valor_arrecadado_liquido</code></td><td>Valor efetivamente arrecadado líquido (conta bancária)</td><td>Moeda</td><td>contabancaria.csv</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="metadata-container">
-            <div class="metadata-header"><i class="material-icons me-2" style="vertical-align:middle">receipt_long</i> Execução Financeira (Empenho)</div>
-            <div class="table-responsive">
-                <table class="metadata-table">
-                    <thead><tr><th>Campo</th><th>Descrição</th><th>Tipo</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>ano</code></td><td>Ano de exercício do empenho</td><td>Número</td></tr>
-                        <tr><td><code>codigo_iniciativa</code></td><td>Código do contrato/convênio de entrada (vincula à iniciativa)</td><td>Texto</td></tr>
-                        <tr><td><code>no_empenho</code></td><td>Número do documento de empenho</td><td>Texto</td></tr>
-                        <tr><td><code>data_empenho</code></td><td>Data de registro do empenho</td><td>Data</td></tr>
-                        <tr><td><code>codigo_orgao</code></td><td>Código da unidade orçamentária responsável</td><td>Texto</td></tr>
-                        <tr><td><code>nome_orgao</code></td><td>Nome da unidade orçamentária responsável</td><td>Texto</td></tr>
-                        <tr><td><code>credor</code></td><td>Razão social do credor/fornecedor</td><td>Texto</td></tr>
-                        <tr><td><code>cnpj_cpf_credor</code></td><td>CNPJ ou CPF do credor</td><td>Texto</td></tr>
-                        <tr><td><code>no_processo_compra</code></td><td>Número do processo de compra no SIAD</td><td>Texto</td></tr>
-                        <tr><td><code>modalidade_licitacao</code></td><td>Modalidade licitatória utilizada</td><td>Texto</td></tr>
-                        <tr><td><code>cod_elemento_despesa</code></td><td>Código do elemento de despesa</td><td>Texto</td></tr>
-                        <tr><td><code>nome_elemento_despesa</code></td><td>Descrição do elemento de despesa</td><td>Texto</td></tr>
-                        <tr><td><code>codigo_item_despesa</code></td><td>Código do item de despesa</td><td>Texto</td></tr>
-                        <tr><td><code>nome_item_despesa</code></td><td>Descrição do item de despesa</td><td>Texto</td></tr>
-                        <tr><td><code>codigo_fonte_recurso</code></td><td>Código da fonte de recurso</td><td>Texto</td></tr>
-                        <tr><td><code>nome_fonte_recurso</code></td><td>Descrição da fonte de recurso</td><td>Texto</td></tr>
-                        <tr><td><code>valor_empenhado</code></td><td>Valor empenhado da despesa</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_liquidado</code></td><td>Valor liquidado da despesa</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_pago_financeiro</code></td><td>Valor pago financeiramente</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_liquidado_rp</code></td><td>Valor liquidado em restos a pagar</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_cancelado_rp</code></td><td>Valor cancelado em restos a pagar</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_empenhado_efetivo</code></td><td>Valor empenhado efetivo</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_pago_rp</code></td><td>Valor pago em restos a pagar</td><td>Moeda</td></tr>
-                        <tr><td><code>valor_total_pag</code></td><td>Valor total pago (financeiro + RP)</td><td>Moeda</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
     <div style="display:flex;justify-content:flex-end;margin-top:12px;">
         <button class="btn-topo" onclick="voltarAoTopo()"><i class="material-icons">arrow_upward</i> Voltar ao topo</button>
     </div>`;
     setTimeout(iframeH,300);
 }
+
+// ============================================================
+// 9B. DICIONÁRIO DE DADOS
+// ============================================================
+const DICIONARIO = {
+    'iniciativas': [
+        { campo:'codigo_iniciativa', descricao:'Código único que identifica a iniciativa no âmbito do Acordo de Reparação do Rio Doce', tipo:'Texto' },
+        { campo:'iniciativa',        descricao:'Descrição da iniciativa prevista no acordo de reparação', tipo:'Texto' },
+        { campo:'anexo',             descricao:'Anexo do Acordo de Reparação ao qual a iniciativa pertence', tipo:'Texto' },
+        { campo:'valor_da_iniciativa', descricao:'Valor total previsto para execução da iniciativa conforme o acordo', tipo:'Moeda (R$)' },
+    ],
+    'orgao': [
+        { campo:'codigo_iniciativa',      descricao:'Código da iniciativa do Acordo de Reparação vinculada ao órgão', tipo:'Texto' },
+        { campo:'anexo',                  descricao:'Anexo do Acordo de Reparação ao qual a iniciativa pertence', tipo:'Texto' },
+        { campo:'codigo_orgao',           descricao:'Código da unidade orçamentária responsável pela execução', tipo:'Texto' },
+        { campo:'nome_orgao',             descricao:'Nome da unidade orçamentária responsável pela execução', tipo:'Texto' },
+        { campo:'valor_empenhado',        descricao:'Valor total empenhado pelo órgão — reserva orçamentária realizada para a iniciativa', tipo:'Moeda (R$)' },
+        { campo:'valor_liquidado',        descricao:'Valor liquidado pelo órgão — após confirmação de entrega do produto ou serviço', tipo:'Moeda (R$)' },
+        { campo:'valor_pago_financeiro',  descricao:'Valor pago financeiramente pelo órgão no exercício corrente', tipo:'Moeda (R$)' },
+        { campo:'valor_cancelado_rp',     descricao:'Valor cancelado em restos a pagar inscritos em exercícios anteriores', tipo:'Moeda (R$)' },
+        { campo:'valor_empenhado_efetivo',descricao:'Valor efetivamente empenhado pelo órgão, deduzidos cancelamentos', tipo:'Moeda (R$)' },
+        { campo:'valor_pago_rp',          descricao:'Valor pago em restos a pagar de exercícios anteriores', tipo:'Moeda (R$)' },
+        { campo:'valor_pago_total',       descricao:'Valor total pago pelo órgão: soma do pagamento financeiro e dos pagamentos em restos a pagar', tipo:'Moeda (R$)' },
+    ],
+    'receita': [
+        { campo:'ano_de_exercicio',               descricao:'Ano de exercício fiscal da receita', tipo:'Número (AAAA)' },
+        { campo:'mes_descritivo',                 descricao:'Mês de referência por extenso (ex: Janeiro, Fevereiro...)', tipo:'Texto' },
+        { campo:'unidade_orcamentaria_codigo',    descricao:'Código da unidade orçamentária gestora da receita', tipo:'Texto' },
+        { campo:'unidade_orcamentaria_nome',      descricao:'Nome da unidade orçamentária gestora da receita', tipo:'Texto' },
+        { campo:'classificacao_receita_formatado',descricao:'Código formatado da classificação da receita conforme tabela da SOF', tipo:'Texto' },
+        { campo:'classificacao_receita_descricao',descricao:'Descrição da classificação da receita', tipo:'Texto' },
+        { campo:'valor_previsto_inicial',         descricao:'Valor previsto na LOA (Lei Orçamentária Anual) para a receita', tipo:'Moeda (R$)' },
+        { campo:'valor_previsto_atualizado',      descricao:'Valor previsto atualizado após créditos adicionais aprovados', tipo:'Moeda (R$)' },
+        { campo:'valor_contabilizado',            descricao:'Valor contabilizado da receita no período', tipo:'Moeda (R$)' },
+        { campo:'valor_arrecadado_liquido',       descricao:'Valor efetivamente arrecadado líquido, conforme registros de conta bancária', tipo:'Moeda (R$)' },
+    ],
+    'empenho': [
+        { campo:'ano',                   descricao:'Ano de exercício do empenho', tipo:'Número (AAAA)' },
+        { campo:'codigo_iniciativa',     descricao:'Código do contrato/convênio de entrada que vincula o empenho à iniciativa do acordo', tipo:'Texto' },
+        { campo:'no_empenho',            descricao:'Número do documento de empenho no SIAFI/SIAD', tipo:'Texto' },
+        { campo:'data_empenho',          descricao:'Data de registro do empenho no sistema (DD/MM/AAAA)', tipo:'Data' },
+        { campo:'codigo_orgao',          descricao:'Código da unidade orçamentária responsável pelo empenho', tipo:'Texto' },
+        { campo:'nome_orgao',            descricao:'Nome da unidade orçamentária responsável pelo empenho', tipo:'Texto' },
+        { campo:'credor',                descricao:'Razão social do credor / fornecedor beneficiário do empenho', tipo:'Texto' },
+        { campo:'cnpj_cpf_credor',       descricao:'CNPJ ou CPF do credor', tipo:'Texto' },
+        { campo:'no_processo_compra',    descricao:'Número do processo de compra no SIAD — chave de ligação com o dataset de licitações', tipo:'Texto' },
+        { campo:'modalidade_licitacao',  descricao:'Modalidade licitatória utilizada na contratação (ex: Pregão Eletrônico, Dispensa)', tipo:'Texto' },
+        { campo:'cod_elemento_despesa',  descricao:'Código do elemento de despesa conforme classificação orçamentária', tipo:'Texto' },
+        { campo:'nome_elemento_despesa', descricao:'Descrição do elemento de despesa', tipo:'Texto' },
+        { campo:'codigo_item_despesa',   descricao:'Código do item de despesa (desdobramento do elemento)', tipo:'Texto' },
+        { campo:'nome_item_despesa',     descricao:'Descrição do item de despesa', tipo:'Texto' },
+        { campo:'codigo_fonte_recurso',  descricao:'Código da fonte de recurso que financia a despesa', tipo:'Texto' },
+        { campo:'nome_fonte_recurso',    descricao:'Descrição da fonte de recurso', tipo:'Texto' },
+        { campo:'valor_empenhado',        descricao:'Valor empenhado — reserva orçamentária realizada para a despesa', tipo:'Moeda (R$)' },
+        { campo:'valor_liquidado',        descricao:'Valor liquidado — após confirmação de entrega do produto ou serviço', tipo:'Moeda (R$)' },
+        { campo:'valor_pago_financeiro',  descricao:'Valor pago financeiramente no exercício, por movimentação bancária ou escritural', tipo:'Moeda (R$)' },
+        { campo:'valor_liquidado_rp',     descricao:'Valor liquidado em restos a pagar — produto ou serviço entregue em exercícios anteriores', tipo:'Moeda (R$)' },
+        { campo:'valor_cancelado_rp',     descricao:'Valor cancelado em restos a pagar, incluindo reestabelecimentos', tipo:'Moeda (R$)' },
+        { campo:'valor_empenhado_efetivo',descricao:'Valor efetivamente empenhado, deduzidos os cancelamentos', tipo:'Moeda (R$)' },
+        { campo:'valor_pago_rp',          descricao:'Valor pago em restos a pagar de exercícios anteriores', tipo:'Moeda (R$)' },
+        { campo:'valor_total_pag',        descricao:'Valor total pago: soma do pagamento financeiro e dos pagamentos em restos a pagar', tipo:'Moeda (R$)' },
+    ],
+};
+
+function renderizarDicionario() {
+    const container = document.getElementById('dicionario-content');
+    if (!container) return;
+
+    const tabelas = Object.keys(DICIONARIO);
+    const labelsTabela = { iniciativas: 'Iniciativas', orgao: 'Órgão', receita: 'Receita', empenho: 'Execução por Empenho' };
+    const coresTabela  = { iniciativas: '#1a3a5c', orgao: '#28a745', receita: '#17a2b8', empenho: '#b93c42' };
+
+    container.innerHTML = `
+    <div class="filter-container">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <i class="material-icons" style="font-size:32px;color:#20445d;">menu_book</i>
+            <div>
+                <h5 style="font-size:15px;font-weight:700;color:#20445d;margin:0;">Dicionário de Dados</h5>
+                <p style="color:#6c757d;font-size:12px;margin:0;">Descrição de todas as colunas de cada tabela do dataset do Acordo de Reparação do Rio Doce</p>
+            </div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="text" id="dicBusca" class="form-control" style="height:36px;font-size:12px;max-width:320px;padding:4px 12px;" placeholder="Buscar campo ou descrição em qualquer tabela..." oninput="buscarDicionario(this.value)">
+        </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="dicTabs">
+        <button class="dic-tab-btn active" onclick="mostrarTabelaDic('todas',this)">Todas as Tabelas</button>
+        ${tabelas.map(t=>`<button class="dic-tab-btn" onclick="mostrarTabelaDic('${t}',this)">${labelsTabela[t]||t}</button>`).join('')}
+    </div>
+
+    <div id="dicConteudo">
+        ${tabelas.map(tabela => `
+        <div class="metadata-container dic-section" data-tabela="${tabela}">
+            <div class="metadata-header" style="background:#20445d;color:white;padding:12px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;">
+                <i class="material-icons me-2" style="vertical-align:middle;margin-right:8px;">table_chart</i>${labelsTabela[tabela]||tabela}
+                <span style="margin-left:8px;background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:10px;font-size:11px;">${DICIONARIO[tabela].length} campos</span>
+                <a href="https://github.com/transparencia-mg/portal_mariana/tree/main/dataset/data" target="_blank" style="margin-left:auto;color:rgba(255,255,255,0.85);font-size:11px;display:flex;align-items:center;gap:3px;text-decoration:none;">
+                    <i class="material-icons" style="font-size:14px;">open_in_new</i> Ver no GitHub
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="metadata-table" id="dicTabela_${tabela}">
+                    <thead><tr>
+                        <th>Campo</th>
+                        <th>Descrição</th>
+                        <th>Tipo</th>
+                        <th>Tabela</th>
+                    </tr></thead>
+                    <tbody>
+                        ${DICIONARIO[tabela].map(row=>`<tr class="dic-linha">
+                            <td><code>${row.campo}</code></td>
+                            <td>${row.descricao}</td>
+                            <td><span style="background:#e2e8f0;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;color:#475569;">${row.tipo}</span></td>
+                            <td><span style="background:${coresTabela[tabela]||'#1a3a5c'};color:white;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600;">${labelsTabela[tabela]||tabela}</span></td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="btn-topo" onclick="voltarAoTopo()"><i class="material-icons">arrow_upward</i> Voltar ao topo</button>
+    </div>`;
+
+    setTimeout(iframeH, 300);
+}
+
+window.mostrarTabelaDic = function(qual, btnEl) {
+    document.querySelectorAll('.dic-tab-btn').forEach(b => b.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    document.querySelectorAll('.dic-section').forEach(s => {
+        s.style.display = (qual === 'todas' || s.dataset.tabela === qual) ? 'block' : 'none';
+    });
+    const busca = document.getElementById('dicBusca');
+    if (busca) busca.value = '';
+    document.querySelectorAll('.dic-linha').forEach(r => { r.style.display=''; r.classList.remove('dic-row-highlight'); });
+};
+
+window.buscarDicionario = function(termo) {
+    const t = (termo||'').toLowerCase().trim();
+    document.querySelectorAll('.dic-section').forEach(s => s.style.display = 'block');
+    document.querySelectorAll('.dic-tab-btn').forEach(b => b.classList.remove('active'));
+    const btnTodas = document.querySelector('.dic-tab-btn');
+    if (btnTodas) btnTodas.classList.add('active');
+
+    if (!t) {
+        document.querySelectorAll('.dic-linha').forEach(r => { r.style.display=''; r.classList.remove('dic-row-highlight'); });
+        return;
+    }
+    document.querySelectorAll('.dic-linha').forEach(row => {
+        const texto = row.textContent.toLowerCase();
+        const match = texto.includes(t);
+        row.style.display = match ? '' : 'none';
+        if (match) row.classList.add('dic-row-highlight'); else row.classList.remove('dic-row-highlight');
+    });
+    document.querySelectorAll('.dic-section').forEach(s => {
+        const vis = s.querySelectorAll('.dic-linha:not([style*="display: none"])').length;
+        s.style.display = vis > 0 ? 'block' : 'none';
+    });
+};
 
 // ============================================================
 // 13. IFRAME RESIZE
@@ -2660,7 +2748,10 @@ function renderizarDownloads() {
 document.addEventListener('DOMContentLoaded', ()=>{
     carregarDados();
     document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab=>{
-        tab.addEventListener('shown.bs.tab',()=>setTimeout(iframeH,300));
+        tab.addEventListener('shown.bs.tab', e => {
+            setTimeout(iframeH,300);
+            if (e.target.id === 'dicionario-tab') renderizarDicionario();
+        });
     });
     window.addEventListener('resize',()=>{ clearTimeout(window.rTimer); window.rTimer=setTimeout(iframeH,250); });
 
