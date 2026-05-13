@@ -1106,7 +1106,8 @@ function reconstruirCabecalhoEXEC() {
             return `<th><span class="th-label">${col.label}</span> ${tipIcon}</th>`;
         }
         return `<th class="${cls}" onclick="sortEXEC('${col.key}')"><span class="th-label">${col.label}</span> ${tipIcon}<i class="material-icons sort-icon">unfold_more</i></th>`;
-    }).join('') + '<th class="text-center">Ações</th>';
+    }).join('');
+    tr.innerHTML = '<th class="text-center" style="min-width:50px;">Ações</th>' + tr.innerHTML;
 }
 
 function getColunasVisiveis() {
@@ -1148,13 +1149,16 @@ function buildRowEXEC(e) {
             contratoDisplay = `<span class="contrato-link" style="cursor:default">${lic['numero_contrato'].trim()}</span>`;
         }
     }
-    // Proc. Compra — clicável para edital
+    // Proc. Compra — clicável para portal compras.mg ou edital
     let procDisplay = '-';
     if (proc) {
         const editalUrl = (lic&&lic['edital_retificacao_arquivos']&&lic['edital_retificacao_arquivos'].trim()) ? lic['edital_retificacao_arquivos'].trim() : '';
+        const comprasUrl = getUrlComprasMG(proc);
         const procTxt = proc.substring(0,25)+(proc.length>25?'...':'');
         if (editalUrl) {
             procDisplay = `<a href="${editalUrl}" target="_blank" class="proc-link" title="Ver Edital">${procTxt}</a>`;
+        } else if (comprasUrl) {
+            procDisplay = `<a href="${comprasUrl}" target="_blank" class="proc-link" title="Ver processo no Portal de Compras MG">${procTxt}</a>`;
         } else {
             procDisplay = `<a href="#" class="proc-link" onclick="verDetalhesEmpenho('${esc(e.no_empenho||'')}');return false;">${procTxt}</a>`;
         }
@@ -1209,7 +1213,7 @@ function buildRowEXEC(e) {
     };
     const colsVis = getColunasVisiveis();
     const cells = colsVis.map(col=>cellMap[col.key]||`<td>-</td>`).join('');
-    return `<tr>${cells}<td class="text-center"><button class="btn-action" onclick="verDetalhesEmpenho('${esc(e.no_empenho||'')}')"><i class="material-icons" style="font-size:15px">visibility</i></button></td></tr>`;
+    return `<tr><td class="text-center"><button class="btn-action" onclick="verDetalhesEmpenho('${esc(e.no_empenho||'')}')"><i class="material-icons" style="font-size:15px">visibility</i></button></td>${cells}</tr>`;
 }
 
 function atualizarMetricasEXEC(dados) {
@@ -1224,6 +1228,20 @@ function atualizarMetricasEXEC(dados) {
 function getLicitacaoParaProcesso(numProcesso) {
     if (!numProcesso||!numProcesso.trim()) return null;
     return dadosLicitacoes[numProcesso.trim()] || null;
+}
+
+// Monta URL do portal compras.mg.gov.br a partir do número do processo
+// Formato esperado: "UUUUUUU NNNNNN/AAAA"  ex: "1261029 000006/2026"
+function getUrlComprasMG(numProcesso) {
+    if (!numProcesso) return '';
+    const s = numProcesso.trim();
+    // Padrão: <codigoUC> <numero>/<ano>
+    const m = s.match(/^(\d+)\s+(\d+)\/(\d{4})$/);
+    if (!m) return '';
+    const uc  = m[1];
+    const num = m[2].padStart(6,'0');
+    const ano = m[3];
+    return `https://www1.compras.mg.gov.br/processocompra/processo/consultaProcessoCompra.html?metodo=pesquisar&codigoUnidadeCompra=${uc}&numero=${num}&ano=${ano}`;
 }
 
 function atualizarTabelaEXEC() {
@@ -2377,7 +2395,11 @@ function _linhaREC(r) {
     const vAL  = typeof r.valor_arrecadado_liquido === 'number' ? r.valor_arrecadado_liquido  : parseNum(r.valor_arrecadado_liquido);
     const codFonteRec = r.codigo_fonte_recurso||r.fonte_recurso_codigo||r.cod_fonte_recurso||'-';
     const nomeFonteRec = r.nome_fonte_recurso||r.fonte_recurso_descricao||r.fonte_recurso||'-';
-    const fontePortaria = r.fonte_portaria_stn||r.fonte_portaria||'-';
+    const fontePortariaRaw = r.fonte_portaria_stn||r.fonte_portaria||'-';
+    // Quando Cód. Fonte de Recurso = 80, exibir 899 - OUTROS RECURSOS VINCULADOS na coluna Fonte STN
+    const fontePortaria = (codFonteRec.trim() === '80')
+        ? '899 - OUTROS RECURSOS VINCULADOS'
+        : fontePortariaRaw;
     return `<tr>
         <td style="text-align:center;">${r.ano_de_exercicio||'-'}</td>
         <td style="text-align:center;white-space:nowrap;">${r.periodo_desc||'-'}</td>
