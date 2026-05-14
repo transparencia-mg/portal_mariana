@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.204,
+  "time": 0.177,
   "errors": [],
   "tasks": [
     {
@@ -58,13 +58,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "b69325cff1d3d23d84dbf8ca7d97dd64",
-          "bytes": 4258,
+          "hash": "6b9c37c48ae5c1520142cb28191f2c5a",
+          "bytes": 4421,
           "fields": 9,
-          "rows": 22
+          "rows": 23
         }
       },
-      "time": 0.013,
+      "time": 0.012,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -231,13 +231,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "dae9672030d7323c1032a69b353eec69",
-          "bytes": 85206,
+          "hash": "f697de726caeede755b7dcebfe77d7e2",
+          "bytes": 106813,
           "fields": 30,
-          "rows": 218
+          "rows": 293
         }
       },
-      "time": 0.061,
+      "time": 0.05,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -306,7 +306,7 @@
           "rows": 38
         }
       },
-      "time": 0.01,
+      "time": 0.009,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -446,13 +446,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "4fd30ed4b144f665a055f8d430eedabf",
-          "bytes": 3036,
+          "hash": "3d05626d7c50a5da3d6822dea46f7536",
+          "bytes": 3229,
           "fields": 17,
-          "rows": 17
+          "rows": 19
         }
       },
-      "time": 0.027,
+      "time": 0.024,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -539,13 +539,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "57ced5b13c3df84bafb1cab301bb4202",
-          "bytes": 4212,
+          "hash": "8f1a6b20a4338ae6ada3d0242c8b175d",
+          "bytes": 4367,
           "fields": 10,
-          "rows": 22
+          "rows": 23
         }
       },
-      "time": 0.014,
+      "time": 0.012,
       "scope": [
         "hash-count-error",
         "byte-count-error",
