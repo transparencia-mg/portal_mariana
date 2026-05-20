@@ -231,13 +231,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "f697de726caeede755b7dcebfe77d7e2",
-          "bytes": 106813,
+          "hash": "89517d39db13e123202502c2634eef4d",
+          "bytes": 112709,
           "fields": 30,
-          "rows": 293
+          "rows": 314
         }
       },
-      "time": 0.05,
+      "time": 0.051,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -446,13 +446,13 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "3d05626d7c50a5da3d6822dea46f7536",
-          "bytes": 3229,
+          "hash": "731f486b79ad99d64679a7118b24850c",
+          "bytes": 3251,
           "fields": 17,
           "rows": 19
         }
       },
-      "time": 0.024,
+      "time": 0.023,
       "scope": [
         "hash-count-error",
         "byte-count-error",
