@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.193,
+  "time": 0.181,
   "errors": [],
   "tasks": [
     {
@@ -237,7 +237,7 @@
           "rows": 393
         }
       },
-      "time": 0.056,
+      "time": 0.054,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -300,10 +300,10 @@
         "scheme": "file",
         "title": "Insira um título humanamente legível para este recurso.",
         "stats": {
-          "hash": "928075365334a6525699001520fb2f05",
-          "bytes": 7959,
+          "hash": "74684bd9f030c4a859623d397a610f1d",
+          "bytes": 7887,
           "fields": 4,
-          "rows": 38
+          "rows": 37
         }
       },
       "time": 0.009,
@@ -328,36 +328,11 @@
         "unique-error"
       ],
       "partial": false,
-      "errors": [
-        {
-          "cell": "Total Geral",
-          "fieldName": "codigo_iniciativa",
-          "fieldNumber": 1,
-          "fieldPosition": 1,
-          "cells": [
-            "Total Geral",
-            "",
-            "",
-            "6984499471,351777"
-          ],
-          "rowNumber": 38,
-          "rowPosition": 39,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"Total Geral\" in row \"39\" and field \"codigo_iniciativa\" at position \"1\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        }
-      ],
+      "errors": [],
       "stats": {
-        "errors": 1
+        "errors": 0
       },
-      "valid": false
+      "valid": true
     },
     {
       "resource": {
@@ -452,7 +427,7 @@
           "rows": 19
         }
       },
-      "time": 0.024,
+      "time": 0.023,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -545,7 +520,7 @@
           "rows": 23
         }
       },
-      "time": 0.013,
+      "time": 0.012,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -575,8 +550,8 @@
     }
   ],
   "stats": {
-    "errors": 1,
+    "errors": 0,
     "tasks": 5
   },
-  "valid": false
+  "valid": true
 }
