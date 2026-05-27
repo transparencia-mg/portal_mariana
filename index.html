@@ -94,6 +94,7 @@
         .table { width: 100%; font-size: 12px; border-collapse: collapse; table-layout: auto; }
         .table th, .table td { border: 1px solid #d6dee6; }
         .table thead th { background-color: #54697b !important; color: white !important; font-weight: 600; font-size: 11px; padding: 10px 8px; text-transform: uppercase; border: 1px solid #d6dee6; cursor: pointer; user-select: none; white-space: nowrap; vertical-align: middle; line-height: 1.3; }
+        .table thead th.th-wrap { white-space: normal !important; }
         /* Colunas de valor: largura mínima para caber o título sem quebrar */
         .table thead th.text-right { min-width: 130px; }
         /* Colunas de texto descritivo: podem ter mais espaço */
@@ -884,7 +885,7 @@ const EXEC_COLS_CONFIG = [
     { key:'valor_cancelado_rp',      label:'Valor Cancelado em RP',         fixed:true,  tip:'Valor referente aos valores cancelados, tanto processados quanto não processados, que foram inscritos em restos a pagar, incluindo também os reestabelecimentos' },
     { key:'valor_empenhado_efetivo', label:'Valor Empenhado Efetivo', fixed:true,  tip:'Valor efetivamente empenhado conforme compromissos financeiros com o credor' },
     { key:'valor_pago_rp',           label:'Valor Pago em RP',              fixed:true,  tip:'Valor pago referente a exercícios anteriores efetuados por meio de movimentações bancárias, escriturais e apropriação contábil da despesa. O efetivo pagamento pode estar pendente de transmissão bancária e/ou sujeita a compensação bancária' },
-    { key:'valor_total_pag',         label:'Valor Total Pago',           fixed:true,  tip:'Somatório dos valores pagos neste exercício e pagos em restos a pagar processados e não processados' },
+    { key:'valor_total_pago',        label:'Valor Total Pago',           fixed:true,  tip:'Somatório dos valores pagos neste exercício e pagos em restos a pagar processados e não processados' },
 ];
 
 // Estado das colunas visíveis (opcionais)
@@ -1083,7 +1084,7 @@ function calcMetricas(dados) {
         qtdEmpenhos: dados.length,
         empenhado: dados.reduce((s,e)=>s+parseNum(e.valor_empenhado),0),
         liquidado: dados.reduce((s,e)=>s+parseNum(e.valor_liquidado),0),
-        pago: dados.reduce((s,e)=>s+parseNum(e.valor_total_pag||e.valor_pago_financeiro),0)
+        pago: dados.reduce((s,e)=>s+parseNum(e.valor_total_pago||e.valor_pago_financeiro),0)
     };
 }
 
@@ -1097,7 +1098,7 @@ function reconstruirCabecalhoEXEC() {
     if (!tr) return;
     const colsVisiveis = getColunasVisiveis();
     tr.innerHTML = colsVisiveis.map(col=>{
-        const numKeys=['valor_empenhado','valor_liquidado','valor_pago_financeiro','valor_total_pag',
+        const numKeys=['valor_empenhado','valor_liquidado','valor_pago_financeiro','valor_total_pago',
             'valor_liquidado_rp','valor_cancelado_rp','valor_empenhado_efetivo',
             'valor_pago_rp','valor_cancelado_processado','valor_restabelecido_processado','valor_cancelado_nao_processado','valor_restabelecido_nao_processado'];
         const cls = numKeys.includes(col.key)?'sortable-header text-right':'sortable-header';
@@ -1142,7 +1143,12 @@ function buildRowEXEC(e) {
     const lic  = getLicitacaoParaProcesso(proc);
     // Contrato
     let contratoDisplay = '<span class="nao-aplica">-</span>';
-    if (lic && lic['numero_contrato'] && lic['numero_contrato'].trim()&&lic['numero_contrato'].trim()!=='0') {
+    // Se modalidade é "Não se aplica", exibir NÃO SE APLICA
+    const modalNaoAplica = (e.modalidade_licitacao||'').trim().toLowerCase() === 'não se aplica'
+        || (e.modalidade_licitacao||'').trim().toLowerCase() === 'nao se aplica';
+    if (modalNaoAplica) {
+        contratoDisplay = '<span class="nao-aplica">NÃO SE APLICA</span>';
+    } else if (lic && lic['numero_contrato'] && lic['numero_contrato'].trim()&&lic['numero_contrato'].trim()!=='0') {
         if (lic['contrato_termoaditivo_arquivos']&&lic['contrato_termoaditivo_arquivos'].trim()) {
             contratoDisplay = `<a href="${lic['contrato_termoaditivo_arquivos'].trim()}" target="_blank" class="contrato-link">${lic['numero_contrato'].trim()}</a>`;
         } else {
@@ -1151,7 +1157,9 @@ function buildRowEXEC(e) {
     }
     // Proc. Compra — clicável para portal compras.mg ou edital
     let procDisplay = '-';
-    if (proc) {
+    if (modalNaoAplica) {
+        procDisplay = '<span class="nao-aplica">NÃO SE APLICA</span>';
+    } else if (proc) {
         const editalUrl = (lic&&lic['edital_retificacao_arquivos']&&lic['edital_retificacao_arquivos'].trim()) ? lic['edital_retificacao_arquivos'].trim() : '';
         const comprasUrl = getUrlComprasMG(proc);
         const procTxt = proc.substring(0,25)+(proc.length>25?'...':'');
@@ -1209,7 +1217,7 @@ function buildRowEXEC(e) {
         'valor_cancelado_rp': `<td class="text-right">${formatarMoeda(e.valor_cancelado_rp)}</td>`,
         'valor_empenhado_efetivo': `<td class="text-right">${formatarMoeda(e.valor_empenhado_efetivo)}</td>`,
         'valor_pago_rp': `<td class="text-right">${formatarMoeda(e.valor_pago_rp)}</td>`,
-        'valor_total_pag': `<td class="text-right">${formatarMoeda(e.valor_total_pag)}</td>`,
+        'valor_total_pago': `<td class="text-right">${formatarMoeda(e.valor_total_pago)}</td>`,
     };
     const colsVis = getColunasVisiveis();
     const cells = colsVis.map(col=>cellMap[col.key]||`<td>-</td>`).join('');
@@ -2217,17 +2225,17 @@ function renderizarReceita() {
                 <thead><tr>
                     <th class="sortable-header" onclick="sortREC('ano_de_exercicio')" style="min-width:55px;">Ano <i class="col-tooltip-icon" data-tip="Ano da execução da despesa ou receita no orçamento">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortREC('periodo_desc')" style="min-width:80px;">Período <i class="col-tooltip-icon" data-tip="Compreende o período da receita contabilizada">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortREC('unidade_orcamentaria_codigo')" style="min-width:65px;">Cód. Órgão <i class="col-tooltip-icon" data-tip="Código da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('unidade_orcamentaria_codigo')" style="min-width:65px;white-space:normal;">Cód.<br>Órgão <i class="col-tooltip-icon" data-tip="Código da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortREC('unidade_orcamentaria_nome')" style="min-width:140px;">Órgão <i class="col-tooltip-icon" data-tip="Descrição da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortREC('classificacao_receita_formatado')" style="min-width:100px;">Cód. Classificação da Receita <i class="col-tooltip-icon" data-tip="Classificação que identifica os recursos que ingressaram nos cofres públicos e indicam: categoria econômica, origem, espécie, desdobramento 1, desdobramento 2, desdobramento 3, tipo">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortREC('classificacao_receita_descricao')" style="min-width:160px;">Classificação da Receita <i class="col-tooltip-icon" data-tip="Descrição da identificação detalhada dos recursos que ingressaram nos cofres públicos">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortREC('codigo_fonte_recurso')" style="min-width:75px;">Cód. Fonte de Recurso <i class="col-tooltip-icon" data-tip="Indica a origem do dinheiro arrecadado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortREC('nome_fonte_recurso')" style="min-width:130px;">Fonte de Recurso <i class="col-tooltip-icon" data-tip="Indica a origem do dinheiro arrecadado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
-                    <th class="sortable-header" onclick="sortREC('fonte_portaria_stn')" style="min-width:130px;">Fonte de Recursos – Portaria STN <i class="col-tooltip-icon" data-tip="Indicam a classificação de recursos utilizados pelos Estados, DF e municípios, conforme previsto da Portaria STN Nº710/2021">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortREC('valor_previsto_inicial')" style="min-width:100px;">Valor Previsto Inicial <i class="col-tooltip-icon" data-tip="Valor estimado da arrecadação para o ano consultado, previsto da LOA">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortREC('valor_previsto_atualizado')" style="min-width:100px;">Valor Previsto Atualizado <i class="col-tooltip-icon" data-tip="Valor estimado inicial para arrecadação no ano consultado, previsto na LOA, e atualizado ao longo do ano">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortREC('valor_contabilizado')" style="min-width:100px;">Valor Arrecadado <i class="col-tooltip-icon" data-tip="Valor financeiro que entrou nos cofres públicos no período consultado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
-                    <th class="sortable-header text-right" onclick="sortREC('valor_arrecadado_liquido')" style="min-width:100px;">Rendimentos <i class="col-tooltip-icon" data-tip="Valor referente aos rendimentos dos recursos que entram nos cofres públicos no período consultado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('classificacao_receita_formatado')" style="min-width:100px;white-space:normal;">Cód. Classif.<br>da Receita <i class="col-tooltip-icon" data-tip="Classificação que identifica os recursos que ingressaram nos cofres públicos e indicam: categoria econômica, origem, espécie, desdobramento 1, desdobramento 2, desdobramento 3, tipo">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('classificacao_receita_descricao')" style="min-width:160px;white-space:normal;">Classif.<br>da Receita <i class="col-tooltip-icon" data-tip="Descrição da identificação detalhada dos recursos que ingressaram nos cofres públicos">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('codigo_fonte_recurso')" style="min-width:75px;white-space:normal;">Cód. Fonte<br>de Recurso <i class="col-tooltip-icon" data-tip="Indica a origem do dinheiro arrecadado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('nome_fonte_recurso')" style="min-width:130px;white-space:normal;">Fonte<br>de Recurso <i class="col-tooltip-icon" data-tip="Indica a origem do dinheiro arrecadado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('fonte_portaria_stn')" style="min-width:130px;white-space:normal;">Fonte de Recursos<br>Portaria STN <i class="col-tooltip-icon" data-tip="Indicam a classificação de recursos utilizados pelos Estados, DF e municípios, conforme previsto da Portaria STN Nº710/2021">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortREC('valor_previsto_inicial')" style="min-width:100px;white-space:normal;">Valor Previsto<br>Inicial <i class="col-tooltip-icon" data-tip="Valor estimado da arrecadação para o ano consultado, previsto da LOA">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortREC('valor_previsto_atualizado')" style="min-width:100px;white-space:normal;">Valor Previsto<br>Atualizado <i class="col-tooltip-icon" data-tip="Valor estimado inicial para arrecadação no ano consultado, previsto na LOA, e atualizado ao longo do ano">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortREC('valor_contabilizado')" style="min-width:100px;white-space:normal;">Valor<br>Arrecadado <i class="col-tooltip-icon" data-tip="Valor financeiro que entrou nos cofres públicos no período consultado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header text-right" onclick="sortREC('valor_arrecadado_liquido')" style="min-width:100px;white-space:normal;">Rendimentos <i class="col-tooltip-icon" data-tip="Valor referente aos rendimentos dos recursos que entram nos cofres públicos no período consultado">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                     <th style="min-width:100px;text-align:center;">Tipo <i class="col-tooltip-icon" data-tip="Origem do dado: Receita Orçamentária (receita.csv) ou Conta Bancária (contabancaria.csv)">?</i></th>
                 </tr></thead>
                 <tbody id="tbodyReceita"></tbody>
