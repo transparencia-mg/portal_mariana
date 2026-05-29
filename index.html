@@ -63,7 +63,7 @@
             box-shadow: 0 3px 12px rgba(0,0,0,0.08);
             padding: 20px; margin-bottom: 20px; width: 100%;
         }
-        .filter-label { font-size: 13px; font-weight: 600; color: #1a3a5c; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-label { font-size: 11px; font-weight: 600; color: #1a3a5c; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; line-height: 1.3; }
         .form-control, .form-select { border: 2px solid #e9ecef; border-radius: 6px; padding: 10px 12px; font-size: 13px; transition: all 0.3s ease; height: auto; width: 100%; }
         .form-control:focus, .form-select:focus { border-color: var(--accent-red); box-shadow: 0 0 0 2px rgba(185,60,66,0.15); outline: none; }
         .modern-select { border: 1.5px solid #dfe5ec !important; border-radius: 8px !important; padding: 10px 12px !important; font-size: 13px !important; height: 42px !important; line-height: 1.5 !important; background-color: #fff; transition: all 0.2s ease; width: 100%; }
@@ -262,6 +262,19 @@
         .dic-row-highlight { background:#fffbea !important; }
         .metadata-header { display:flex; align-items:center; }
 
+
+        /* COMBOBOX FILTER */
+        .combo-filter-wrap { position: relative; width: 100%; }
+        .combo-filter-input { border: 1.5px solid #dfe5ec; border-radius: 8px; padding: 10px 32px 10px 12px; font-size: 13px; height: 42px; line-height: 1.5; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M0 0l6 7 6-7z' fill='%231a3a5c'/%3E%3C/svg%3E") no-repeat right 10px center; transition: all 0.2s ease; width: 100%; cursor: pointer; }
+        .combo-filter-input:focus { border-color: #1a3a5c; box-shadow: 0 0 0 2px rgba(26,58,92,0.1); outline: none; }
+        .combo-filter-dropdown { position: absolute; top: 44px; left: 0; right: 0; background: #fff; border: 1.5px solid #dfe5ec; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 9999; max-height: 260px; overflow-y: auto; display: none; }
+        .combo-filter-dropdown.open { display: block; }
+        .combo-filter-option { padding: 9px 12px; font-size: 12px; cursor: pointer; color: #1e293b; border-bottom: 1px solid #f1f5f9; }
+        .combo-filter-option:last-child { border-bottom: none; }
+        .combo-filter-option:hover, .combo-filter-option.active { background: #f0f4f8; color: #1a3a5c; font-weight: 600; }
+        .combo-filter-option.selected { background: #e6f0f8; font-weight: 700; color: #1a3a5c; }
+        .combo-clear-btn { position: absolute; right: 26px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 14px; padding: 2px 4px; line-height: 1; display: none; }
+        .combo-clear-btn.visible { display: block; }
         /* RESPONSIVO */
         @media (max-width: 992px) { .container-fluid, .dashboard-container { padding: 0 15px !important; } }
         @media (max-width: 768px) {
@@ -638,21 +651,15 @@ function renderizarIniciativas() {
         <div class="filters-row">
             <div class="filter-group">
                 <label class="filter-label">Código da Iniciativa</label>
-                <select class="form-select modern-select" id="filtroCodigoINIC">
-                    <option value="">Todos</option>
-                    ${[...new Set(dadosIniciativas.map(i=>i.codigo_iniciativa).filter(Boolean))].sort().map(c=>`<option value="${c}">${c}</option>`).join('')}
-                </select>
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroCodigoINIC" placeholder="Selecione ou digite..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
             <div class="filter-group" style="flex:3;min-width:250px;">
                 <label class="filter-label">Nome da Iniciativa</label>
-                <input type="text" class="form-control" id="filtroNomeINIC" placeholder="Palavra-chave...">
+                <input type="text" class="form-control" id="filtroNomeINIC" placeholder="Palavra-chave..." oninput="aplicarFiltrosINIC()">
             </div>
             <div class="filter-group">
                 <label class="filter-label">Anexo</label>
-                <select class="form-select modern-select" id="filtroAnexoINIC">
-                    <option value="">Todos</option>
-                    ${[...new Set(dadosIniciativas.map(i=>i.anexo).filter(Boolean))].sort().map(a=>`<option value="${a}">${a}</option>`).join('')}
-                </select>
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroAnexoINIC" placeholder="Selecione ou digite..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
         </div>
         <div class="botoes-abaixo">
@@ -695,6 +702,13 @@ function renderizarIniciativas() {
     pag.iniciativas.atual = 1;
     pag.iniciativas.total = Math.ceil(window.inicFiltradas.length / pag.iniciativas.porPag);
     atualizarTabelaINIC();
+    // Initialize combo filters for Iniciativas
+    const codigosINIC = [...new Set(dadosIniciativas.map(i=>i.codigo_iniciativa).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const anexosINIC = [...new Set(dadosIniciativas.map(i=>i.anexo).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    window._combos['filtroCodigoINIC'] = new ComboFilter('filtroCodigoINIC', codigosINIC, ()=>aplicarFiltrosINIC());
+    window._combos['filtroAnexoINIC'] = new ComboFilter('filtroAnexoINIC', anexosINIC, ()=>aplicarFiltrosINIC());
+    // Make combo inputs not readonly after init
+    ['filtroCodigoINIC','filtroAnexoINIC'].forEach(id=>{const el=document.getElementById(id);if(el)el.removeAttribute('readonly');});
 }
 
 function atualizarTabelaINIC() {
@@ -724,9 +738,9 @@ function sortINIC(col) {
 }
 
 window.aplicarFiltrosINIC = function() {
-    const cod  = (document.getElementById('filtroCodigoINIC')?.value||'').trim();
+    const cod  = (window._combos['filtroCodigoINIC']?.value || '').trim();
     const nome = (document.getElementById('filtroNomeINIC')?.value||'').toLowerCase().trim();
-    const anx  = document.getElementById('filtroAnexoINIC')?.value||'';
+    const anx  = window._combos['filtroAnexoINIC']?.value || '';
     window.inicFiltradas = ordenar(dadosIniciativas.filter(i=>{
         if (cod&&String(i.codigo_iniciativa||'').trim()!==cod) return false;
         if (nome&&!String(i.iniciativa||'').toLowerCase().includes(nome)) return false;
@@ -739,7 +753,7 @@ window.aplicarFiltrosINIC = function() {
 };
 
 window.limparFiltrosINIC = function() {
-    ['filtroCodigoINIC','filtroNomeINIC','filtroAnexoINIC'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['filtroNomeINIC'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); ['filtroCodigoINIC','filtroAnexoINIC'].forEach(id=>{if(window._combos[id])window._combos[id].clear();});
     window.inicFiltradas = ordenar(dadosIniciativas, sortCfg.iniciativas.col, sortCfg.iniciativas.dir);
     pag.iniciativas.atual=1;
     pag.iniciativas.total=Math.ceil(window.inicFiltradas.length/pag.iniciativas.porPag);
@@ -812,23 +826,17 @@ window.irParaExecucao = function(codigoIniciativa, nome) {
     // Navega para aba Execução por Órgão
     document.getElementById('execucao-orgao-tab').click();
     function tentarSetarFiltro(tentativas) {
+        const combo = window._combos['filtroInicOrgao'];
         const sel = document.getElementById('filtroInicOrgao');
-        if (!sel) {
+        if (!combo && !sel) {
             if (tentativas > 0) setTimeout(()=>tentarSetarFiltro(tentativas-1), 200);
             return;
         }
         ['filtroAnexoOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao']
-            .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-        let found = false;
-        for (let opt of sel.options) {
-            if (opt.value.trim() === cod) { sel.value = opt.value; found = true; break; }
-        }
-        if (!found) {
-            for (let opt of sel.options) {
-                if (opt.value.trim().startsWith(cod) || opt.text.startsWith(cod)) {
-                    sel.value = opt.value; found = true; break;
-                }
-            }
+            .forEach(id=>{ if(window._combos[id]) window._combos[id].clear(); });
+        if (combo) {
+            const opt = combo.allOptions.find(o=>o.value.trim()===cod||o.value.trim().startsWith(cod));
+            if (opt) { combo.setValue(opt.value); combo.input.value = opt.label; }
         }
         calcularTabelaOrgao();
         setTimeout(()=>{ try{ document.getElementById('execucao-orgao-content')?.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }, 300);
@@ -840,9 +848,11 @@ window.irParaExecucao = function(codigoIniciativa, nome) {
 window.irParaExecucaoDeEmpenho = function(contratoconvenioEntrada) {
     document.getElementById('execucao-tab').click();
     setTimeout(()=>{
-        const sel = document.getElementById('filtroInicExec');
-        if (sel) {
-            sel.value = contratoconvenioEntrada;
+        if (window._combos['filtroInicExec']) {
+            // Find matching option label
+            const opt = window._combos['filtroInicExec'].allOptions.find(o=>o.value===contratoconvenioEntrada);
+            window._combos['filtroInicExec'].setValue(contratoconvenioEntrada);
+            if (opt) window._combos['filtroInicExec'].input.value = opt.label;
         }
         aplicarFiltrosEXEC();
     }, 400);
@@ -913,35 +923,19 @@ function renderizarExecucao() {
         <div class="filters-row">
             <div class="filter-group">
                 <label class="filter-label">Ano</label>
-                <select class="form-select modern-select" id="filtroAnoExec">
-                    <option value="">Todos</option>
-                    ${anos.map(a=>`<option value="${a}">${a}</option>`).join('')}
-                </select>
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroAnoExec" placeholder="Todos os anos" autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
-            <div class="filter-group" style="flex:3;min-width:220px;">
+            <div class="filter-group" style="flex:3;min-width:160px;">
                 <label class="filter-label">Iniciativa</label>
-                <select class="form-select modern-select" id="filtroInicExec">
-                    <option value="">Todas</option>
-                    ${chavesNoEmpenho.map(chave=>{
-                        const iObj=dadosIniciativas.find(i=>(i.codigo_iniciativa||'').trim()===chave);
-                        const label=iObj?`${iObj.codigo_iniciativa||chave} - ${(iObj.iniciativa||'').substring(0,50)}`:chave;
-                        return `<option value="${chave}">${label}</option>`;
-                    }).join('')}
-                </select>
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroInicExec" placeholder="Selecione ou digite..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
-            <div class="filter-group">
+            <div class="filter-group"> 
                 <label class="filter-label">Anexo</label>
-                <select class="form-select modern-select" id="filtroAnexoExec">
-                    <option value="">Todos</option>
-                    ${anexos.map(a=>`<option value="${a}">${a}</option>`).join('')}
-                </select>
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroAnexoExec" placeholder="Selecione ou digite..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
             <div class="filter-group" style="flex:2;min-width:200px;">
                 <label class="filter-label">Órgão</label>
-                <select class="form-select modern-select" id="filtroOrgaoExec">
-                    <option value="">Todos</option>
-                    ${orgaos.map(o=>`<option value="${o}">${o}</option>`).join('')}
-                </select>
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroOrgaoExec" placeholder="Selecione ou digite..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
         </div>
         <div class="filters-row">
@@ -954,7 +948,7 @@ function renderizarExecucao() {
                 <input type="text" class="form-control" id="filtroCnpjExec" placeholder="Digite...">
             </div>
             <div class="filter-group" style="flex:2;min-width:180px;">
-                <label class="filter-label">Proc. Compra</label>
+                <label class="filter-label">Processo Compra</label>
                 <input type="text" class="form-control" id="filtroProcessoExec" placeholder="Digite...">
             </div>
             <div class="filter-group" style="flex:2;min-width:180px;">
@@ -964,11 +958,8 @@ function renderizarExecucao() {
         </div>
         <div class="filters-row">
             <div class="filter-group" style="flex:2;min-width:180px;">
-                <label class="filter-label">Proc. Contratação</label>
-                <select class="form-select modern-select" id="filtroModalExec">
-                    <option value="">Todas</option>
-                    ${modalidades.map(m=>`<option value="${m}">${m}</option>`).join('')}
-                </select>
+                <label class="filter-label">Mod. Licitação</label>
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroModalExec" placeholder="Selecione ou digite..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
             <div class="filter-group" style="flex:2;min-width:180px;">
                 <label class="filter-label">Elemento Despesa</label>
@@ -1077,6 +1068,43 @@ function renderizarExecucao() {
     pag.execucao.total=Math.ceil(window.execFiltrada.length/pag.execucao.porPag);
     atualizarTabelaEXEC();
     setTimeout(()=>{ atualizarGraficos(window.execFiltrada); },200);
+    // Initialize combo filters for Execução
+    inicializarCombosExec();
+}
+
+function getOptsExecByAno(ano) {
+    const base = ano ? dadosEmpenho.filter(e=>e.ano===ano) : dadosEmpenho;
+    const chavesF = [...new Set(base.map(e=>(e.codigo_iniciativa||'').trim()).filter(Boolean))].sort();
+    const inicOpts = chavesF.map(chave=>{
+        const iObj=dadosIniciativas.find(i=>(i.codigo_iniciativa||'').trim()===chave);
+        const label=iObj?`${iObj.codigo_iniciativa||chave} - ${(iObj.iniciativa||'').substring(0,50)}`:chave;
+        return {value:chave,label};
+    });
+    const anexosF = [...new Set(base.map(e=>{const iObj=dadosIniciativas.find(i=>(i.codigo_iniciativa||'').trim()===(e.codigo_iniciativa||'').trim());return iObj?iObj.anexo:'';}).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const orgaosF = [...new Set(base.map(e=>(e.nome_orgao||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const modF = [...new Set(base.map(e=>e.modalidade_licitacao).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    return {inicOpts, anexosF, orgaosF, modF};
+}
+
+function inicializarCombosExec() {
+    const anos = [...new Set(dadosEmpenho.map(e=>e.ano).filter(Boolean))].sort((a,b)=>b-a).map(v=>({value:v,label:String(v)}));
+    const opts = getOptsExecByAno('');
+    // Ano
+    if (!window._combos['filtroAnoExec']) {
+        window._combos['filtroAnoExec'] = new ComboFilter('filtroAnoExec', anos, (ano)=>{
+            const newOpts = getOptsExecByAno(ano);
+            if(window._combos['filtroInicExec']) window._combos['filtroInicExec'].updateOptions(newOpts.inicOpts);
+            if(window._combos['filtroAnexoExec']) window._combos['filtroAnexoExec'].updateOptions(newOpts.anexosF);
+            if(window._combos['filtroOrgaoExec']) window._combos['filtroOrgaoExec'].updateOptions(newOpts.orgaosF);
+            if(window._combos['filtroModalExec']) window._combos['filtroModalExec'].updateOptions(newOpts.modF);
+            aplicarFiltrosEXEC();
+        });
+    }
+    if (!window._combos['filtroInicExec']) window._combos['filtroInicExec'] = new ComboFilter('filtroInicExec', opts.inicOpts, ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroAnexoExec']) window._combos['filtroAnexoExec'] = new ComboFilter('filtroAnexoExec', opts.anexosF, ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroOrgaoExec']) window._combos['filtroOrgaoExec'] = new ComboFilter('filtroOrgaoExec', opts.orgaosF, ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroModalExec']) window._combos['filtroModalExec'] = new ComboFilter('filtroModalExec', opts.modF, ()=>aplicarFiltrosEXEC());
+    ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec'].forEach(id=>{const el=document.getElementById(id);if(el)el.removeAttribute('readonly');});
 }
 
 function calcMetricas(dados) {
@@ -1274,11 +1302,11 @@ function sortEXEC(col) {
 }
 
 window.aplicarFiltrosEXEC = function() {
-    const ano      = document.getElementById('filtroAnoExec')?.value||'';
-    const inic     = document.getElementById('filtroInicExec')?.value||'';
-    const anx      = document.getElementById('filtroAnexoExec')?.value||'';
-    const mod      = document.getElementById('filtroModalExec')?.value||'';
-    const org      = document.getElementById('filtroOrgaoExec')?.value||'';
+    const ano      = window._combos['filtroAnoExec']?.value || document.getElementById('filtroAnoExec')?.value||'';
+    const inic     = window._combos['filtroInicExec']?.value || document.getElementById('filtroInicExec')?.value||'';
+    const anx      = window._combos['filtroAnexoExec']?.value || document.getElementById('filtroAnexoExec')?.value||'';
+    const mod      = window._combos['filtroModalExec']?.value || document.getElementById('filtroModalExec')?.value||'';
+    const org      = window._combos['filtroOrgaoExec']?.value || document.getElementById('filtroOrgaoExec')?.value||'';
     const cred     = (document.getElementById('filtroCredorExec')?.value||'').toLowerCase().trim();
     const cnpj     = (document.getElementById('filtroCnpjExec')?.value||'').toLowerCase().trim();
     const proc     = (document.getElementById('filtroProcessoExec')?.value||'').toLowerCase().trim();
@@ -1315,8 +1343,7 @@ window.aplicarFiltrosEXEC = function() {
 };
 
 window.limparFiltrosEXEC = function() {
-    ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroContratoExec','filtroElementoExec','filtroItemExec','filtroEmpenhoExec']
-        .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroContratoExec','filtroElementoExec','filtroItemExec','filtroEmpenhoExec'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec'].forEach(id=>{if(window._combos[id])window._combos[id].clear();}); // Also restore all inits options const novoOpts=getOptsExecByAno(''); ['filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec'].forEach(id=>{const k={'filtroInicExec':'inicOpts','filtroAnexoExec':'anexosF','filtroOrgaoExec':'orgaosF','filtroModalExec':'modF'}[id]; if(window._combos[id]&&k)window._combos[id].updateOptions(novoOpts[k]);});
     window.execFiltrada = ordenar(dadosEmpenho, sortCfg.execucao.col, sortCfg.execucao.dir);
     pag.execucao.atual=1;
     pag.execucao.total=Math.ceil(window.execFiltrada.length/pag.execucao.porPag);
@@ -1712,25 +1739,24 @@ function copiarLinkContexto(tabOverride) {
     }
 
     // Incluir filtros ativos da aba de execução
+    function getFiltroVal(id) {
+        if (window._combos[id]) return window._combos[id].value||'';
+        const el = document.getElementById(id);
+        return el ? (el.value||'') : '';
+    }
     if (tabAtiva === 'execucao') {
-        const filtros = ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'];
-        filtros.forEach(id => {
-            const el = document.getElementById(id);
-            if (el && el.value) url.searchParams.set(id, el.value);
+        ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].forEach(id => {
+            const v = getFiltroVal(id); if (v) url.searchParams.set(id, v);
         });
     }
     if (tabAtiva === 'execucao-orgao') {
-        const filtros = ['filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao'];
-        filtros.forEach(id => {
-            const el = document.getElementById(id);
-            if (el && el.value) url.searchParams.set(id, el.value);
+        ['filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao'].forEach(id => {
+            const v = getFiltroVal(id); if (v) url.searchParams.set(id, v);
         });
     }
     if (tabAtiva === 'iniciativas') {
-        const filtros = ['filtroCodigoINIC','filtroNomeINIC','filtroAnexoINIC'];
-        filtros.forEach(id => {
-            const el = document.getElementById(id);
-            if (el && el.value) url.searchParams.set(id, el.value);
+        ['filtroCodigoINIC','filtroNomeINIC','filtroAnexoINIC'].forEach(id => {
+            const v = getFiltroVal(id); if (v) url.searchParams.set(id, v);
         });
     }
 
@@ -1785,14 +1811,16 @@ function carregarFiltrosDaURL() {
     // Restaurar filtros de execução
     setTimeout(()=>{
         ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].forEach(id=>{
-            const v = p.get(id); const el = document.getElementById(id);
-            if (v && el) { el.value = v; }
+            const v = p.get(id); if (!v) return;
+            if (window._combos[id]) { const opt=window._combos[id].allOptions.find(o=>o.value===v); window._combos[id].setValue(v); if(opt) window._combos[id].input.value=opt.label; }
+            else { const el = document.getElementById(id); if(el) el.value = v; }
         });
         if (['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].some(id=>p.get(id))) aplicarFiltrosEXEC();
         // Restaurar filtros execucao-orgao
         ['filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao'].forEach(id=>{
-            const v = p.get(id); const el = document.getElementById(id);
-            if (v && el) { el.value = v; }
+            const v = p.get(id); if (!v) return;
+            if (window._combos[id]) { const opt=window._combos[id].allOptions.find(o=>o.value===v); window._combos[id].setValue(v); if(opt) window._combos[id].input.value=opt.label; }
+            else { const el = document.getElementById(id); if(el) el.value = v; }
         });
         if (['filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao'].some(id=>p.get(id))) calcularTabelaOrgao();
         // Restaurar filtros iniciativas
@@ -1821,32 +1849,42 @@ function renderizarExecucaoOrgao() {
     c.innerHTML = `
     <div class="filter-container">
         <div class="filters-row">
-            <div class="filter-group">
             <div class="filter-group" style="flex:2">
                 <label class="filter-label">Iniciativa</label>
-                <select class="form-select modern-select" id="filtroInicOrgao">
-                    <option value="">Todas</option>
-                    ${iniciativasOpts.map(i=>`<option value="${esc(i.codigo_iniciativa||i.codigo_iniciativa)}">${i.codigo_iniciativa} - ${(i.iniciativa||'').substring(0,60)}</option>`).join('')}
-                </select>
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroInicOrgao" placeholder="Selecione ou digite..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
-                <label class="filter-label">Anexo</label>
-                <select class="form-select modern-select" id="filtroAnexoOrgao">
-                    <option value="">Todos</option>
-                    ${anexos.map(a=>`<option value="${a}">${a}</option>`).join('')}
-                </select>
+            <div class="filter-group">
+                <label class="filter-label">Anexo </label>
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroAnexoOrgao" placeholder="Selecione ou digite..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
             <div class="filter-group">
                 <label class="filter-label">Código Órgão</label>
-                <input type="text" class="form-control" id="filtroCodigoUOOrgao" placeholder="Digite...">
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroCodigoUOOrgao" placeholder="Selecione ou digite..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
             <div class="filter-group" style="flex:2">
                 <label class="filter-label">Órgão</label>
-                <input type="text" class="form-control" id="filtroNomeUOOrgao" placeholder="Digite...">
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroNomeUOOrgao" placeholder="Selecione ou digite..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
         </div>
         <div class="botoes-abaixo">
             <button class="btn-pesquisa" onclick="aplicarFiltrosOrgao()"><i class="material-icons">refresh</i> Atualizar Filtros</button>
             <button class="btn-secondary-custom" onclick="limparFiltrosOrgao()"><i class="material-icons">clear</i> Limpar Filtros</button>
+        </div>
+    </div>
+
+    <!-- GRÁFICOS POR ÓRGÃO -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div class="chart-header"><h4 class="chart-title">Valor Total Gasto por Órgão (Top 10)</h4></div>
+                <div class="chart-wrapper" style="height:300px;"><canvas id="chartOrgaoValor"></canvas></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div class="chart-header"><h4 class="chart-title">Valor Total Gasto por Iniciativa (Top 10)</h4></div>
+                <div class="chart-wrapper" style="height:300px;"><canvas id="chartOrgaoIniciativa"></canvas></div>
+            </div>
         </div>
     </div>
 
@@ -1890,6 +1928,20 @@ function renderizarExecucaoOrgao() {
     </div>`;
 
     calcularTabelaOrgao();
+    // Initialize combos for Por Órgão
+    setTimeout(()=>inicializarCombosOrgao(), 100);
+}
+
+function inicializarCombosOrgao() {
+    const inicOpts = dadosIniciativas.map(i=>({value:(i.codigo_iniciativa||'').trim(), label:`${i.codigo_iniciativa} - ${(i.iniciativa||'').substring(0,60)}`}));
+    const anexOpts = [...new Set(dadosOrgao.map(r=>(r.anexo||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const codUOOpts = [...new Set(dadosOrgao.map(r=>(r.codigo_orgao||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const nomeUOOpts = [...new Set(dadosOrgao.map(r=>(r.nome_orgao||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    window._combos['filtroInicOrgao'] = new ComboFilter('filtroInicOrgao', inicOpts, ()=>calcularTabelaOrgao());
+    window._combos['filtroAnexoOrgao'] = new ComboFilter('filtroAnexoOrgao', anexOpts, ()=>calcularTabelaOrgao());
+    window._combos['filtroCodigoUOOrgao'] = new ComboFilter('filtroCodigoUOOrgao', codUOOpts, ()=>calcularTabelaOrgao());
+    window._combos['filtroNomeUOOrgao'] = new ComboFilter('filtroNomeUOOrgao', nomeUOOpts, ()=>calcularTabelaOrgao());
+    ['filtroInicOrgao','filtroAnexoOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao'].forEach(id=>{const el=document.getElementById(id);if(el)el.removeAttribute('readonly');});
 }
 
 let sortCfgOrgao = { col:'nome_orgao', dir:'asc' };
@@ -1897,10 +1949,10 @@ let pagOrgao = { atual:1, porPag:50, total:1 };
 window.orgaoFiltrada = [];
 
 function calcularTabelaOrgao() {
-    const anx  = document.getElementById('filtroAnexoOrgao')?.value||'';
-    const inic = document.getElementById('filtroInicOrgao')?.value||'';
-    const codUO = (document.getElementById('filtroCodigoUOOrgao')?.value||'').toLowerCase().trim();
-    const nomeUO = (document.getElementById('filtroNomeUOOrgao')?.value||'').toLowerCase().trim();
+    const anx  = window._combos['filtroAnexoOrgao']?.value || document.getElementById('filtroAnexoOrgao')?.value||'';
+    const inic = window._combos['filtroInicOrgao']?.value || document.getElementById('filtroInicOrgao')?.value||'';
+    const codUO = (window._combos['filtroCodigoUOOrgao']?.value || document.getElementById('filtroCodigoUOOrgao')?.value||'').toLowerCase().trim();
+    const nomeUO = (window._combos['filtroNomeUOOrgao']?.value || document.getElementById('filtroNomeUOOrgao')?.value||'').toLowerCase().trim();
 
     // Filtra diretamente no array de orgao.csv, enriquecendo com label da iniciativa
     let base = dadosOrgao.filter(r=>{
@@ -1927,6 +1979,7 @@ function calcularTabelaOrgao() {
     pagOrgao.atual=1;
     pagOrgao.total=Math.ceil(window.orgaoFiltrada.length/pagOrgao.porPag);
     atualizarTabelaOrgao();
+    setTimeout(()=>atualizarGraficosOrgao(window.orgaoFiltrada), 200);
 }
 
 function ordenarOrgao(arr, col, dir) {
@@ -2007,6 +2060,50 @@ function atualizarTabelaOrgao() {
             h+=`<button onclick="mudaPagOrgao(${i})" class="${i===pagOrgao.atual?'active':''}">${i}</button>`;
         h+=`<button onclick="mudaPagOrgao(${pagOrgao.atual+1})" ${pagOrgao.atual===pagOrgao.total?'disabled':''}><i class="fas fa-angle-right"></i></button></div>`;
         pgCont.innerHTML=h;
+    }
+}
+
+let chartOrgaoValorInst = null;
+let chartOrgaoIniciativaInst = null;
+
+function atualizarGraficosOrgao(dados) {
+    // Gráfico por Órgão
+    const orgMap = new Map();
+    dados.forEach(r=>{
+        const label = (r.nome_orgao||'Não informado').substring(0,35);
+        orgMap.set(label, (orgMap.get(label)||0) + parseNum(r.valor_pago_total||r.valor_pago_financeiro));
+    });
+    const topOrg = Array.from(orgMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const ctxO = document.getElementById('chartOrgaoValor')?.getContext('2d');
+    if (ctxO) {
+        if (chartOrgaoValorInst) chartOrgaoValorInst.destroy();
+        chartOrgaoValorInst = new Chart(ctxO, {
+            type:'bar',
+            data:{ labels:topOrg.map(c=>c[0]), datasets:[{label:'Total Pago',data:topOrg.map(c=>c[1]),backgroundColor:chartPalette,borderWidth:0,borderRadius:4}] },
+            options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+                plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>`${formatarMoeda(ctx.raw)}`}} },
+                scales:{ x:{ticks:{callback:v=>'R$'+Number(v/1e6).toFixed(1)+'M',font:{size:9}}}, y:{ticks:{font:{size:9}}} }
+            }
+        });
+    }
+    // Gráfico por Iniciativa
+    const inicMap = new Map();
+    dados.forEach(r=>{
+        const label = r.codigo_iniciativa_label || (r.codigo_iniciativa||'Não informada');
+        inicMap.set(label, (inicMap.get(label)||0) + parseNum(r.valor_pago_total||r.valor_pago_financeiro));
+    });
+    const topInic = Array.from(inicMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const ctxI = document.getElementById('chartOrgaoIniciativa')?.getContext('2d');
+    if (ctxI) {
+        if (chartOrgaoIniciativaInst) chartOrgaoIniciativaInst.destroy();
+        chartOrgaoIniciativaInst = new Chart(ctxI, {
+            type:'bar',
+            data:{ labels:topInic.map(c=>c[0]), datasets:[{label:'Total Pago',data:topInic.map(c=>c[1]),backgroundColor:chartPalette,borderWidth:0,borderRadius:4}] },
+            options:{ responsive:true, maintainAspectRatio:false,
+                plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>`${formatarMoeda(ctx.raw)}`}} },
+                scales:{ x:{ticks:{font:{size:9}}}, y:{ticks:{callback:v=>'R$'+Number(v/1e6).toFixed(1)+'M'}} }
+            }
+        });
     }
 }
 
@@ -2771,6 +2868,127 @@ window.buscarDicionario = function(termo) {
     else { window.addEventListener('resize',sendH); setInterval(sendH,2000); }
     sendH();
 })();
+
+
+// ============================================================
+// COMBOBOX FILTER UTILITY
+// ============================================================
+class ComboFilter {
+    constructor(inputId, options, onChange) {
+        this.inputId = inputId;
+        this.allOptions = options; // [{value, label}]
+        this.currentOptions = [...options];
+        this.value = '';
+        this.onChange = onChange;
+        this.input = null;
+        this.dropdown = null;
+        this.init();
+    }
+    init() {
+        this.input = document.getElementById(this.inputId);
+        if (!this.input) return;
+        const wrap = this.input.closest('.combo-filter-wrap');
+        if (!wrap) return;
+        this.dropdown = wrap.querySelector('.combo-filter-dropdown');
+        this.clearBtn = wrap.querySelector('.combo-clear-btn');
+
+        this.input.addEventListener('input', ()=>this.onInput());
+        this.input.addEventListener('focus', ()=>this.open());
+        this.input.addEventListener('keydown', e=>this.onKeydown(e));
+        this.clearBtn && this.clearBtn.addEventListener('click', e=>{ e.stopPropagation(); this.clear(); });
+        document.addEventListener('click', e=>{
+            if (!wrap.contains(e.target)) this.close();
+        });
+        this.renderOptions(this.allOptions);
+    }
+    onInput() {
+        const t = this.input.value.toLowerCase();
+        const filtered = t ? this.allOptions.filter(o=>o.label.toLowerCase().includes(t)||o.value.toLowerCase().includes(t)) : this.allOptions;
+        this.renderOptions(filtered);
+        this.open();
+        // If typed text matches no option, treat as free text for text filters
+        // For select-style combos, value is the matched option's value
+        if (!t) { this.setValue('', false); }
+        if (this.clearBtn) this.clearBtn.classList.toggle('visible', !!t);
+    }
+    onKeydown(e) {
+        if (e.key === 'Escape') { this.close(); return; }
+        if (e.key === 'Enter') {
+            const active = this.dropdown && this.dropdown.querySelector('.combo-filter-option.active');
+            if (active) { this.selectOption(active.dataset.value, active.dataset.label); }
+            this.close(); return;
+        }
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (!this.dropdown) return;
+            const opts = [...this.dropdown.querySelectorAll('.combo-filter-option')];
+            if (!opts.length) return;
+            let idx = opts.findIndex(o=>o.classList.contains('active'));
+            idx = e.key==='ArrowDown' ? Math.min(idx+1,opts.length-1) : Math.max(idx-1,0);
+            if (idx < 0) idx = 0;
+            opts.forEach((o,i)=>o.classList.toggle('active',i===idx));
+            opts[idx].scrollIntoView({block:'nearest'});
+        }
+    }
+    renderOptions(opts) {
+        if (!this.dropdown) return;
+        this.dropdown.innerHTML = opts.length === 0
+            ? '<div class="combo-filter-option" style="color:#94a3b8;cursor:default;">Nenhuma opção</div>'
+            : opts.map(o=>`<div class="combo-filter-option${this.value===o.value?' selected':''}" data-value="${o.value.replace(/"/g,'&quot;')}" data-label="${o.label.replace(/"/g,'&quot;')}">${o.label}</div>`).join('');
+        this.dropdown.querySelectorAll('.combo-filter-option').forEach(el=>{
+            el.addEventListener('mousedown', e=>{ e.preventDefault(); this.selectOption(el.dataset.value, el.dataset.label); });
+        });
+    }
+    selectOption(val, label) {
+        this.value = val;
+        this.input.value = label || val;
+        if (this.clearBtn) this.clearBtn.classList.toggle('visible', !!val);
+        this.close();
+        if (this.onChange) this.onChange(val);
+        // Update selected highlight
+        if (this.dropdown) this.dropdown.querySelectorAll('.combo-filter-option').forEach(o=>o.classList.toggle('selected',o.dataset.value===val));
+    }
+    open() {
+        if (this.dropdown) this.dropdown.classList.add('open');
+    }
+    close() {
+        if (this.dropdown) this.dropdown.classList.remove('open');
+    }
+    clear() {
+        this.value = '';
+        this.input.value = '';
+        if (this.clearBtn) this.clearBtn.classList.remove('visible');
+        this.renderOptions(this.allOptions);
+        if (this.onChange) this.onChange('');
+    }
+    setValue(val, triggerChange=false) {
+        this.value = val;
+        const opt = this.allOptions.find(o=>o.value===val);
+        this.input.value = opt ? opt.label : (val||'');
+        if (this.clearBtn) this.clearBtn.classList.toggle('visible', !!val);
+        if (triggerChange && this.onChange) this.onChange(val);
+    }
+    updateOptions(newOpts, keepValue=false) {
+        this.allOptions = newOpts;
+        if (!keepValue || !newOpts.find(o=>o.value===this.value)) {
+            this.value = '';
+            this.input.value = '';
+            if (this.clearBtn) this.clearBtn.classList.remove('visible');
+        }
+        this.renderOptions(newOpts);
+    }
+}
+
+// Registry of all combo filters (id -> ComboFilter instance)
+window._combos = {};
+
+function buildComboHTML(id, placeholder='Selecione ou digite...') {
+    return `<div class="combo-filter-wrap">
+        <input type="text" class="combo-filter-input form-control" id="${id}" placeholder="${placeholder}" autocomplete="off" readonly>
+        <button class="combo-clear-btn" title="Limpar">✕</button>
+        <div class="combo-filter-dropdown"></div>
+    </div>`;
+}
 
 // ============================================================
 // INIT
