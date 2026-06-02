@@ -2,8 +2,7 @@ name: portal_mariana
 owner_org: ''
 profile: data-package
 resources:
-  - description: Insira a descrição/explicação detalhada deste recurso.
-    dialect:
+  - dialect:
       delimiter: ;
     encoding: utf-8-sig
     format: csv
@@ -32,9 +31,8 @@ resources:
         - name: valor_arrecadado_liquido
           type: string
     scheme: file
-    title: Insira um título humanamente legível para este recurso.
-  - description: Insira a descrição/explicação detalhada deste recurso.
-    dialect:
+    title: Rendimentos
+  - dialect:
       delimiter: ;
     encoding: utf-8-sig
     format: csv
@@ -105,9 +103,8 @@ resources:
         - name: valor_total_pago
           type: string
     scheme: file
-    title: Insira um título humanamente legível para este recurso.
-  - description: Insira a descrição/explicação detalhada deste recurso.
-    dialect:
+    title: Empenhos
+  - dialect:
       delimiter: ;
     encoding: utf-8-sig
     format: csv
@@ -126,9 +123,8 @@ resources:
         - name: valor_da_iniciativa
           type: string
     scheme: file
-    title: Insira um título humanamente legível para este recurso.
-  - description: Insira a descrição/explicação detalhada deste recurso.
-    dialect:
+    title: Iniciativas
+  - dialect:
       delimiter: ;
     encoding: utf-8-sig
     format: csv
@@ -173,9 +169,8 @@ resources:
         - name: valor_pago_total
           type: string
     scheme: file
-    title: Insira um título humanamente legível para este recurso.
-  - description: Insira a descrição/explicação detalhada deste recurso.
-    dialect:
+    title: Órgãos
+  - dialect:
       delimiter: ;
     encoding: utf-8-sig
     format: csv
@@ -205,6 +200,8 @@ resources:
           type: integer
         - name: valor_previsto_atualizado
           type: integer
+        - name: valor_efetivado_ajustado
+          type: integer
     scheme: file
-    title: Insira um título humanamente legível para este recurso.
-title: Portal_mariana
+    title: Receita
+title: Acordo Judicial de Reparação do Vale do Rio Doce
