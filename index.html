@@ -2459,7 +2459,9 @@ function calcularTabelaREC() {
         g.valor_previsto_inicial    += parseNum(_campo(r,'valor_previsto_inicial'));
         g.valor_previsto_atualizado += parseNum(_campo(r,'valor_previsto_atualizado'));
         // valor_contabilizado = valor_efetivado_ajustado (quando disponível) ou valor_contabilizado
-        g.valor_contabilizado       += parseNum(_campo(r,'valor_efetivado_ajustado','valor_contabilizado'));
+        // Tenta variações do nome para garantir leitura independente do formato do CSV
+        const _vEfetAdj = _campo(r,'valor_efetivado_ajustado','valorefetivadoajustado','valor_efetivado_ajustado');
+        g.valor_contabilizado       += parseNum(_vEfetAdj !== '' ? _vEfetAdj : _campo(r,'valor_contabilizado','valorcontabilizado'));
         g.valor_arrecadado_liquido  += parseNum(_campo(r,'valor_arrecadado_liquido'));
     });
 
