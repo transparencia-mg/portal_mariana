@@ -940,16 +940,20 @@ function renderizarExecucao() {
         </div>
         <div class="filters-row">
             <div class="filter-group" style="flex:2;min-width:180px;">
+                <label class="filter-label">Número do Empenho</label>
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroEmpenhoExec" placeholder="Digite ou selecione..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
+            </div>
+            <div class="filter-group" style="flex:2;min-width:180px;">
                 <label class="filter-label">Favorecido</label>
-                <input type="text" class="form-control" id="filtroCredorExec" placeholder="Digite...">
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroCredorExec" placeholder="Digite ou selecione..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
             <div class="filter-group">
                 <label class="filter-label">CNPJ/CPF</label>
-                <input type="text" class="form-control" id="filtroCnpjExec" placeholder="Digite...">
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroCnpjExec" placeholder="Digite ou selecione..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
             <div class="filter-group" style="flex:2;min-width:180px;">
                 <label class="filter-label">Processo Compra</label>
-                <input type="text" class="form-control" id="filtroProcessoExec" placeholder="Digite...">
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroProcessoExec" placeholder="Digite ou selecione..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
             <div class="filter-group" style="flex:2;min-width:180px;">
                 <label class="filter-label">Contrato</label>
@@ -963,11 +967,11 @@ function renderizarExecucao() {
             </div>
             <div class="filter-group" style="flex:2;min-width:180px;">
                 <label class="filter-label">Elemento Despesa</label>
-                <input type="text" class="form-control" id="filtroElementoExec" placeholder="Digite...">
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroElementoExec" placeholder="Digite ou selecione..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
             <div class="filter-group" style="flex:2;min-width:180px;">
                 <label class="filter-label">Item Despesa</label>
-                <input type="text" class="form-control" id="filtroItemExec" placeholder="Digite...">
+                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroItemExec" placeholder="Digite ou selecione..." autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
             </div>
         </div>
         <div class="botoes-abaixo">
@@ -1100,11 +1104,41 @@ function inicializarCombosExec() {
             aplicarFiltrosEXEC();
         });
     }
-    if (!window._combos['filtroInicExec']) window._combos['filtroInicExec'] = new ComboFilter('filtroInicExec', opts.inicOpts, ()=>aplicarFiltrosEXEC());
-    if (!window._combos['filtroAnexoExec']) window._combos['filtroAnexoExec'] = new ComboFilter('filtroAnexoExec', opts.anexosF, ()=>aplicarFiltrosEXEC());
-    if (!window._combos['filtroOrgaoExec']) window._combos['filtroOrgaoExec'] = new ComboFilter('filtroOrgaoExec', opts.orgaosF, ()=>aplicarFiltrosEXEC());
-    if (!window._combos['filtroModalExec']) window._combos['filtroModalExec'] = new ComboFilter('filtroModalExec', opts.modF, ()=>aplicarFiltrosEXEC());
-    ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec'].forEach(id=>{const el=document.getElementById(id);if(el)el.removeAttribute('readonly');});
+    if (!window._combos['filtroInicExec'])    window._combos['filtroInicExec']    = new ComboFilter('filtroInicExec',    opts.inicOpts,   ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroAnexoExec'])   window._combos['filtroAnexoExec']   = new ComboFilter('filtroAnexoExec',   opts.anexosF,    ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroOrgaoExec'])   window._combos['filtroOrgaoExec']   = new ComboFilter('filtroOrgaoExec',   opts.orgaosF,    ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroModalExec'])   window._combos['filtroModalExec']   = new ComboFilter('filtroModalExec',   opts.modF,       ()=>aplicarFiltrosEXEC());
+
+    // Novos combos com autocomplete — opções dinâmicas dos dados
+    const empOpts    = [...new Set(dadosEmpenho.map(e=>(e.no_empenho||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const credOpts   = [...new Set(dadosEmpenho.map(e=>(e.credor||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const cnpjOpts   = [...new Set(dadosEmpenho.map(e=>(e.cnpj_cpf_credor||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const procOpts   = [...new Set(dadosEmpenho.map(e=>(e.no_processo_compra||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const elemOpts   = [...new Set(dadosEmpenho.map(e=>{
+        const n=(e.nome_elemento_despesa||'').trim(); const c=(e.cod_elemento_despesa||'').trim();
+        return n ? (c ? `${c} - ${n}` : n) : c;
+    }).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const itemOpts   = [...new Set(dadosEmpenho.map(e=>{
+        const n=(e.nome_item_despesa||'').trim(); const c=(e.codigo_item_despesa||'').trim();
+        return n ? (c ? `${c} - ${n}` : n) : c;
+    }).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+
+    if (!window._combos['filtroEmpenhoExec'])  window._combos['filtroEmpenhoExec']  = new ComboFilter('filtroEmpenhoExec',  empOpts,  ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroCredorExec'])   window._combos['filtroCredorExec']   = new ComboFilter('filtroCredorExec',   credOpts, ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroCnpjExec'])     window._combos['filtroCnpjExec']     = new ComboFilter('filtroCnpjExec',     cnpjOpts, ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroProcessoExec']) window._combos['filtroProcessoExec'] = new ComboFilter('filtroProcessoExec', procOpts, ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroElementoExec']) window._combos['filtroElementoExec'] = new ComboFilter('filtroElementoExec', elemOpts, ()=>aplicarFiltrosEXEC());
+    if (!window._combos['filtroItemExec'])     window._combos['filtroItemExec']     = new ComboFilter('filtroItemExec',     itemOpts, ()=>aplicarFiltrosEXEC());
+
+    // Para combos de texto livre: também filtra enquanto digita (sem precisar selecionar opção)
+    ['filtroEmpenhoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroElementoExec','filtroItemExec'].forEach(id=>{
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', ()=>{ setTimeout(()=>aplicarFiltrosEXEC(), 0); });
+    });
+
+    ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec',
+     'filtroEmpenhoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroElementoExec','filtroItemExec'
+    ].forEach(id=>{const el=document.getElementById(id);if(el)el.removeAttribute('readonly');});
 }
 
 function calcMetricas(dados) {
@@ -1302,18 +1336,25 @@ function sortEXEC(col) {
 }
 
 window.aplicarFiltrosEXEC = function() {
-    const ano      = window._combos['filtroAnoExec']?.value || document.getElementById('filtroAnoExec')?.value||'';
-    const inic     = window._combos['filtroInicExec']?.value || document.getElementById('filtroInicExec')?.value||'';
-    const anx      = window._combos['filtroAnexoExec']?.value || document.getElementById('filtroAnexoExec')?.value||'';
-    const mod      = window._combos['filtroModalExec']?.value || document.getElementById('filtroModalExec')?.value||'';
-    const org      = window._combos['filtroOrgaoExec']?.value || document.getElementById('filtroOrgaoExec')?.value||'';
-    const cred     = (document.getElementById('filtroCredorExec')?.value||'').toLowerCase().trim();
-    const cnpj     = (document.getElementById('filtroCnpjExec')?.value||'').toLowerCase().trim();
-    const proc     = (document.getElementById('filtroProcessoExec')?.value||'').toLowerCase().trim();
+    const ano      = window._combos['filtroAnoExec']?.value      || '';
+    const inic     = window._combos['filtroInicExec']?.value     || '';
+    const anx      = window._combos['filtroAnexoExec']?.value    || '';
+    const mod      = window._combos['filtroModalExec']?.value    || '';
+    const org      = window._combos['filtroOrgaoExec']?.value    || '';
+    // Para combos de texto livre: usa o valor selecionado OU o texto digitado no input
+    function _comboVal(id) {
+        const combo = window._combos[id];
+        if (combo && combo.value) return combo.value.toLowerCase().trim();
+        const el = document.getElementById(id);
+        return (el ? el.value : '').toLowerCase().trim();
+    }
+    const emp      = _comboVal('filtroEmpenhoExec');
+    const cred     = _comboVal('filtroCredorExec');
+    const cnpj     = _comboVal('filtroCnpjExec');
+    const proc     = _comboVal('filtroProcessoExec');
+    const elem     = _comboVal('filtroElementoExec');
+    const item     = _comboVal('filtroItemExec');
     const contrato = (document.getElementById('filtroContratoExec')?.value||'').toLowerCase().trim();
-    const elem     = (document.getElementById('filtroElementoExec')?.value||'').toLowerCase().trim();
-    const item     = (document.getElementById('filtroItemExec')?.value||'').toLowerCase().trim();
-    const emp      = (document.getElementById('filtroEmpenhoExec')?.value||'').toLowerCase().trim();
     window.execFiltrada = ordenar(dadosEmpenho.filter(e=>{
         if (ano&&e.ano!==ano) return false;
         if (inic&&(e.codigo_iniciativa||'').trim()!==inic) return false;
@@ -1343,7 +1384,15 @@ window.aplicarFiltrosEXEC = function() {
 };
 
 window.limparFiltrosEXEC = function() {
-    ['filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroContratoExec','filtroElementoExec','filtroItemExec','filtroEmpenhoExec'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec'].forEach(id=>{if(window._combos[id])window._combos[id].clear();}); // Also restore all inits options const novoOpts=getOptsExecByAno(''); ['filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec'].forEach(id=>{const k={'filtroInicExec':'inicOpts','filtroAnexoExec':'anexosF','filtroOrgaoExec':'orgaosF','filtroModalExec':'modF'}[id]; if(window._combos[id]&&k)window._combos[id].updateOptions(novoOpts[k]);});
+    ['filtroContratoExec'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec',
+     'filtroEmpenhoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroElementoExec','filtroItemExec'
+    ].forEach(id=>{if(window._combos[id])window._combos[id].clear();});
+    const novoOpts=getOptsExecByAno('');
+    ['filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec'].forEach(id=>{
+        const k={'filtroInicExec':'inicOpts','filtroAnexoExec':'anexosF','filtroOrgaoExec':'orgaosF','filtroModalExec':'modF'}[id];
+        if(window._combos[id]&&k) window._combos[id].updateOptions(novoOpts[k]);
+    });
     window.execFiltrada = ordenar(dadosEmpenho, sortCfg.execucao.col, sortCfg.execucao.dir);
     pag.execucao.atual=1;
     pag.execucao.total=Math.ceil(window.execFiltrada.length/pag.execucao.porPag);
@@ -2199,71 +2248,17 @@ function renderizarReceita() {
     const c = document.getElementById('receita-content');
     if (!c) return;
 
-    const anosDisp = [...new Set([...dadosReceita,...dadosContaBancaria]
-        .map(r => {
-            // Tenta todas as chaves que contenham 'ano'
-            const k = Object.keys(r).find(k=>_limpar(k).toLowerCase().includes('ano'));
-            return k ? _limpar(r[k]) : '';
-        }).filter(Boolean))].sort((a,b)=>b-a);
-
-    // Ano mais recente e último mês disponível nesse ano
-    const anoMaisRecente = anosDisp[0] || '';
-    const mesesDoAno = [...new Set([...dadosReceita,...dadosContaBancaria]
-        .filter(r => {
-            const k = Object.keys(r).find(k=>_limpar(k).toLowerCase().includes('ano'));
-            return k && _limpar(r[k]) === anoMaisRecente;
-        })
-        .map(r => {
-            // Suporta mes_descritivo (texto) e mes_numerico (número)
-            const kDesc = Object.keys(r).find(k=>_limpar(k).toLowerCase().includes('mes'));
-            const raw = kDesc ? _limpar(r[kDesc]) : '';
-            return _mesDescritivoParaNum(raw) || raw.padStart(2,'0');
-        })
-        .filter(m => m && m !== '00'))].sort();
-    const ultimoMes = mesesDoAno[mesesDoAno.length-1] || '12';
-
     c.innerHTML = `
     <div class="filter-container">
         <div class="filters-row">
             <div class="filter-group">
-                <label class="filter-label">Ano <span style="color:var(--accent-red)">*</span></label>
-                <select class="form-select modern-select" id="filtroAnoREC">
-                    <option value="">Selecione...</option>
-                    ${anosDisp.map(a=>`<option value="${a}" ${a===anoMaisRecente?'selected':''} >${a}</option>`).join('')}
-                </select>
-            </div>
-            <div class="filter-group">
                 <label class="filter-label">Mês Inicial</label>
                 <select class="form-select modern-select" id="filtroMesInicREC">
-                    <option value="01">Janeiro</option>
-                    <option value="02">Fevereiro</option>
-                    <option value="03">Março</option>
-                    <option value="04">Abril</option>
-                    <option value="05">Maio</option>
-                    <option value="06">Junho</option>
-                    <option value="07">Julho</option>
-                    <option value="08">Agosto</option>
-                    <option value="09">Setembro</option>
-                    <option value="10">Outubro</option>
-                    <option value="11">Novembro</option>
-                    <option value="12">Dezembro</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label class="filter-label">Mês Final</label>
                 <select class="form-select modern-select" id="filtroMesFimREC">
-                    <option value="01">Janeiro</option>
-                    <option value="02">Fevereiro</option>
-                    <option value="03">Março</option>
-                    <option value="04">Abril</option>
-                    <option value="05">Maio</option>
-                    <option value="06">Junho</option>
-                    <option value="07">Julho</option>
-                    <option value="08">Agosto</option>
-                    <option value="09">Setembro</option>
-                    <option value="10">Outubro</option>
-                    <option value="11">Novembro</option>
-                    <option value="12">Dezembro</option>
                 </select>
             </div>
             <div class="filter-group" style="flex:2;min-width:200px;">
@@ -2304,7 +2299,6 @@ function renderizarReceita() {
         <div class="table-fixed-header-container">
             <table class="table" id="tabelaReceita">
                 <thead><tr>
-                    <th class="sortable-header" onclick="sortREC('ano_de_exercicio')" style="min-width:55px;">Ano <i class="col-tooltip-icon" data-tip="Ano da execução da despesa ou receita no orçamento">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortREC('periodo_desc')" style="min-width:80px;">Período <i class="col-tooltip-icon" data-tip="Compreende o período da receita contabilizada">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortREC('unidade_orcamentaria_codigo')" style="min-width:65px;white-space:normal;">Cód.<br>Órgão <i class="col-tooltip-icon" data-tip="Código da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortREC('unidade_orcamentaria_nome')" style="min-width:140px;">Órgão <i class="col-tooltip-icon" data-tip="Descrição da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
@@ -2331,7 +2325,36 @@ function renderizarReceita() {
 
     // Pré-selecionar mês final = último mês com dados no ano mais recente
     const selMesFim = document.getElementById('filtroMesFimREC');
-    if (selMesFim && ultimoMes) selMesFim.value = ultimoMes;
+
+    // Gerar opções de período: Jan/2024 até mês atual
+    const hoje = new Date();
+    const anoAtual = hoje.getFullYear();
+    const mesAtual = hoje.getMonth() + 1; // 1-12
+    const MESES_LABEL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const periodoOpts = [];
+    // Período disponível: dez/2024 até mês atual
+    const START_ANO = 2024, START_MES = 12;
+    for (let ano = START_ANO; ano <= anoAtual; ano++) {
+        const primMes = (ano === START_ANO) ? START_MES : 1;
+        const limMes  = (ano === anoAtual)  ? mesAtual  : 12;
+        for (let mes = primMes; mes <= limMes; mes++) {
+            const val = `${ano}-${String(mes).padStart(2,'0')}`;
+            const label = `${MESES_LABEL[mes-1]}/${ano}`;
+            periodoOpts.push({val, label});
+        }
+    }
+    const selInicEl = document.getElementById('filtroMesInicREC');
+    const selFimEl  = document.getElementById('filtroMesFimREC');
+    if (selInicEl) {
+        selInicEl.innerHTML = periodoOpts.map(o=>`<option value="${o.val}">${o.label}</option>`).join('');
+        selInicEl.value = '2024-12';
+    }
+    if (selFimEl) {
+        selFimEl.innerHTML = periodoOpts.map(o=>`<option value="${o.val}">${o.label}</option>`).join('');
+        // Selecionar último período com dados
+        const ultimoPeriodoComDados = periodoOpts[periodoOpts.length-1]?.val || `${anoAtual}-${String(mesAtual).padStart(2,'0')}`;
+        selFimEl.value = ultimoPeriodoComDados;
+    }
 
     calcularTabelaREC();
 }
@@ -2360,9 +2383,8 @@ function _campo(r, ...nomes) {
 }
 
 function calcularTabelaREC() {
-    const ano    = (document.getElementById('filtroAnoREC')?.value||'').trim();
-    const mesInic= (document.getElementById('filtroMesInicREC')?.value||'01').trim();
-    const mesFim = (document.getElementById('filtroMesFimREC')?.value||'12').trim();
+    const periodoInic = (document.getElementById('filtroMesInicREC')?.value||'2024-12').trim();
+    const periodoFim  = (document.getElementById('filtroMesFimREC')?.value||'').trim();
     const classif= (document.getElementById('filtroClassifREC')?.value||'').toLowerCase().trim();
     const uo     = (document.getElementById('filtroUOREC')?.value||'').toLowerCase().trim();
     const tipo   = (document.getElementById('filtroTipoREC')?.value||'').trim();
@@ -2371,33 +2393,27 @@ function calcularTabelaREC() {
     window._receitaNorm   = _normalizarCamposREC(dadosReceita,      'receita');
     window._contaBancNorm = _normalizarCamposREC(dadosContaBancaria, 'contabancaria');
 
-    // Exige seleção de ano
-    if (!ano) {
-        window.receitaFiltradaView = [];
-        pagReceita.atual = 1; pagReceita.total = 1;
-        const tbody = document.getElementById('tbodyReceita');
-        if (tbody) tbody.innerHTML = '<tr><td colspan="14" class="text-center py-4" style="color:#94a3b8;font-style:italic;">Selecione um Ano para visualizar os dados.</td></tr>';
-        const badge = document.getElementById('badgeREC');
-        if (badge) badge.textContent = '0 registros';
-        const tfoot = document.getElementById('tfootReceita');
-        if (tfoot) tfoot.innerHTML = '';
-        return;
-    }
-
     const MESES_NOME = {'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'};
-    const periodoLabel = (mesInic === mesFim)
-        ? `${MESES_NOME[mesInic]}/${ano}`
-        : `${MESES_NOME[mesInic]}–${MESES_NOME[mesFim]}/${ano}`;
+
+    // Constrói label do período
+    const [anoI, mesI] = periodoInic.split('-');
+    const [anoF, mesF] = (periodoFim||periodoInic).split('-');
+    const periodoLabel = (periodoInic === (periodoFim||periodoInic))
+        ? `${MESES_NOME[mesI]}/${anoI}`
+        : `${MESES_NOME[mesI]}/${anoI}–${MESES_NOME[mesF]}/${anoF}`;
 
     let base = [...window._receitaNorm, ...window._contaBancNorm];
 
-    // Filtros — usa _campo() para ser robusto a variações no nome
-    base = base.filter(r => _campo(r,'ano_de_exercicio','ano') === ano);
+    // Filtro por período AAAA-MM
     base = base.filter(r => {
-        const raw = _campo(r,'mes_descritivo','mes_numerico','mes');
-        const m = _mesDescritivoParaNum(raw) || raw.padStart(2,'0');
-        return m >= mesInic && m <= mesFim;
+        const anoR = _campo(r,'ano_de_exercicio','ano');
+        const raw  = _campo(r,'mes_descritivo','mes_numerico','mes');
+        const mesR = _mesDescritivoParaNum(raw) || raw.padStart(2,'0');
+        if (!anoR || !mesR || mesR === '00') return false;
+        const periodoR = `${anoR}-${mesR}`;
+        return periodoR >= periodoInic && periodoR <= (periodoFim||periodoInic);
     });
+
     if(classif) base = base.filter(r=>
         _campo(r,'classificacao_receita_formatado').toLowerCase().includes(classif)||
         _campo(r,'classificacao_receita_descricao').toLowerCase().includes(classif));
@@ -2409,6 +2425,7 @@ function calcularTabelaREC() {
     // AGRUPAMENTO por UO + classificação + tipo, somando valores do período
     const grupos = new Map();
     base.forEach(r => {
+        const anoR    = _campo(r,'ano_de_exercicio','ano');
         const uoCod   = _campo(r,'unidade_orcamentaria_codigo');
         const uoNome  = _campo(r,'unidade_orcamentaria_nome');
         const classCod= _campo(r,'classificacao_receita_formatado');
@@ -2418,11 +2435,11 @@ function calcularTabelaREC() {
         const nomeFonteG = _campo(r,'fonte_recurso_descricao','nome_fonte_recurso','fonte_recurso') ||
                            (codFonteG && window.mapaFonteRecurso ? (window.mapaFonteRecurso[codFonteG]||'') : '');
         const fontePortG = _campo(r,'fonte_portaria_stn','fonte_portaria');
-        const chave   = [ano, uoCod, uoNome, classCod, classDesc, codFonteG, tpLinha].join('||');
+        const chave   = [uoCod, uoNome, classCod, classDesc, codFonteG, tpLinha].join('||');
 
         if (!grupos.has(chave)) {
             grupos.set(chave, {
-                ano_de_exercicio:                ano,
+                ano_de_exercicio:                anoR||'-',
                 periodo_desc:                    periodoLabel,
                 unidade_orcamentaria_codigo:     uoCod||'-',
                 unidade_orcamentaria_nome:       uoNome||'-',
@@ -2441,7 +2458,8 @@ function calcularTabelaREC() {
         const g = grupos.get(chave);
         g.valor_previsto_inicial    += parseNum(_campo(r,'valor_previsto_inicial'));
         g.valor_previsto_atualizado += parseNum(_campo(r,'valor_previsto_atualizado'));
-        g.valor_contabilizado       += parseNum(_campo(r,'valor_contabilizado'));
+        // valor_contabilizado = valor_efetivado_ajustado (quando disponível) ou valor_contabilizado
+        g.valor_contabilizado       += parseNum(_campo(r,'valor_efetivado_ajustado','valor_contabilizado'));
         g.valor_arrecadado_liquido  += parseNum(_campo(r,'valor_arrecadado_liquido'));
     });
 
@@ -2490,7 +2508,6 @@ function _linhaREC(r) {
         ? '899 - OUTROS RECURSOS VINCULADOS'
         : fontePortariaRaw;
     return `<tr>
-        <td style="text-align:center;">${r.ano_de_exercicio||'-'}</td>
         <td style="text-align:center;white-space:nowrap;">${r.periodo_desc||'-'}</td>
         <td>${r.unidade_orcamentaria_codigo||'-'}</td>
         <td title="${uo_nome.replace(/"/g,'&quot;')}">${uo_nome.substring(0,35)}${uo_nome.length>35?'...':''}</td>
@@ -2530,7 +2547,7 @@ function atualizarTabelaREC() {
 
     const tfoot = document.getElementById('tfootReceita');
     if(tfoot) tfoot.innerHTML=`
-        <td colspan="9"><strong>TOTAL (${data.length} registros)</strong></td>
+        <td colspan="8"><strong>TOTAL (${data.length} registros)</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.prev_ini)}</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.prev_atu)}</strong></td>
         <td class="text-right"><strong>${formatarMoeda(tot.contab)}</strong></td>
@@ -2560,17 +2577,9 @@ window.limparFiltrosREC  = function(){
     ['filtroClassifREC','filtroUOREC','filtroTipoREC']
         .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     const selInic = document.getElementById('filtroMesInicREC');
-    if (selInic) selInic.value = '01';
-    // Recalcula o último mês disponível para o ano selecionado
-    const anoSel = (document.getElementById('filtroAnoREC')?.value||'').trim();
+    if (selInic) selInic.value = '2024-12';
     const selFim = document.getElementById('filtroMesFimREC');
-    if (selFim && anoSel) {
-        const meses = [...new Set([...dadosReceita,...dadosContaBancaria]
-            .filter(r=>{ const k=Object.keys(r).find(k2=>_limpar(k2).toLowerCase().includes('ano')); return k&&_limpar(r[k])===anoSel; })
-            .map(r=>{ const k=Object.keys(r).find(k2=>_limpar(k2).toLowerCase().includes('mes')); const raw=k?_limpar(r[k]):''; return _mesDescritivoParaNum(raw)||raw.padStart(2,'0'); })
-            .filter(m=>m&&m!=='00'))].sort();
-        selFim.value = meses[meses.length-1] || '12';
-    } else if (selFim) { selFim.value = '12'; }
+    if (selFim && selFim.options.length > 0) selFim.value = selFim.options[selFim.options.length-1].value;
     calcularTabelaREC();
 };
 window.sortREC = function(col){
@@ -2595,11 +2604,11 @@ window.buscarREC = function(termo){
     if(document.getElementById('badgeREC')) document.getElementById('badgeREC').textContent=f.length+' registros';
 };
 window.exportarReceitaCSV = function(){
-    const campos=['ano_de_exercicio','periodo_desc','unidade_orcamentaria_codigo','unidade_orcamentaria_nome',
+    const campos=['periodo_desc','unidade_orcamentaria_codigo','unidade_orcamentaria_nome',
         'classificacao_receita_formatado','classificacao_receita_descricao',
         'valor_previsto_inicial','valor_previsto_atualizado','valor_contabilizado','valor_arrecadado_liquido','_tipo_linha'];
-    const headers=['Ano','Período','Cód. UO','Unidade Orçamentária','Cód. Classificação','Classificação da Receita',
-        'Vl. Prev. Inicial','Vl. Prev. Atualizado','Vl. Contabilizado','Vl. Arrecadado Líq.','Tipo'];
+    const headers=['Período','Cód. UO','Unidade Orçamentária','Cód. Classificação','Classificação da Receita',
+        'Vl. Prev. Inicial','Vl. Prev. Atualizado','Vl. Arrecadado','Vl. Arrecadado Líq.','Tipo'];
     const data=window.receitaFiltradaView||[];
     const csv=[headers.join(';'),...data.map(r=>campos.map(c=>{
         const v = r[c];
@@ -2610,10 +2619,9 @@ window.exportarReceitaCSV = function(){
 window.exportarReceitaPDF = function(){
     const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:'landscape'});
     doc.autoTable({
-        head:[['Ano','Período','Cód. UO','Unidade Orçamentária','Cód. Classif.','Classificação da Receita',
-               'Vl. Prev. Inicial','Vl. Prev. Atualizado','Vl. Contabilizado','Vl. Arrecadado Líq.','Tipo']],
+        head:[['Período','Cód. UO','Unidade Orçamentária','Cód. Classif.','Classificação da Receita',
+               'Vl. Prev. Inicial','Vl. Prev. Atualizado','Vl. Arrecadado','Vl. Arrecadado Líq.','Tipo']],
         body:(window.receitaFiltradaView||[]).slice(0,150).map(r=>[
-            r.ano_de_exercicio||'-',
             r.periodo_desc||'-',
             r.unidade_orcamentaria_codigo||'-',
             (r.unidade_orcamentaria_nome||'-').substring(0,25),
