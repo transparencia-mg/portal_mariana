@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.19,
+  "time": 0.199,
   "errors": [],
   "tasks": [
     {
@@ -57,13 +57,13 @@
         "scheme": "file",
         "title": "Rendimentos",
         "stats": {
-          "hash": "9a2cb055023df4016ebd948cf69c4633",
-          "bytes": 4574,
+          "hash": "646fa2126d24f8e27a50f7f6cc1f21e2",
+          "bytes": 4585,
           "fields": 9,
           "rows": 24
         }
       },
-      "time": 0.012,
+      "time": 0.017,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -229,13 +229,13 @@
         "scheme": "file",
         "title": "Empenhos",
         "stats": {
-          "hash": "8b7c4e95ac7f8ff01c53faaf63693c95",
-          "bytes": 141289,
+          "hash": "124dbf516085a9897a99a46a2252c1bc",
+          "bytes": 143202,
           "fields": 30,
-          "rows": 409
+          "rows": 412
         }
       },
-      "time": 0.057,
+      "time": 0.061,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -417,8 +417,8 @@
         "scheme": "file",
         "title": "Órgãos",
         "stats": {
-          "hash": "a186769847f1d41a7b596241f056841e",
-          "bytes": 3284,
+          "hash": "1156185aaf5ec312da15d4c7f8780573",
+          "bytes": 3296,
           "fields": 17,
           "rows": 19
         }
@@ -513,8 +513,8 @@
         "scheme": "file",
         "title": "Receita",
         "stats": {
-          "hash": "8e55bf5e4ca5c1c1b1718d6b85d00b18",
-          "bytes": 4817,
+          "hash": "44a72f808201c846664e33b057f188e7",
+          "bytes": 4825,
           "fields": 11,
           "rows": 24
         }
@@ -1225,7 +1225,7 @@
           "description": "The value does not match the schema type and format for this field."
         },
         {
-          "cell": "0,0",
+          "cell": "31794430,57",
           "fieldName": "valor_efetivado_ajustado",
           "fieldNumber": 11,
           "fieldPosition": 11,
@@ -1240,7 +1240,7 @@
             "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
             "0",
             "0",
-            "0,0"
+            "31794430,57"
           ],
           "rowNumber": 23,
           "rowPosition": 24,
@@ -1252,7 +1252,7 @@
             "#cell"
           ],
           "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"0,0\" in row \"24\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
+          "message": "Type error in the cell \"31794430,57\" in row \"24\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
           "description": "The value does not match the schema type and format for this field."
         },
         {
