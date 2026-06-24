@@ -624,13 +624,25 @@ async function carregarDados() {
     }
 }
 
-async function setupDataAtualizacao() {
+function setupDataAtualizacao() {
     const el = document.getElementById('data-atualizacao-header');
     try {
-        const r = await fetch('https://api.github.com/repos/transparencia-mg/portal_mariana/commits?path=dataset/data/empenho.csv&per_page=1');
-        if (r.ok) {
-            const cs = await r.json();
-            if (cs&&cs.length>0) { el.textContent = new Date(cs[0].commit.committer.date).toLocaleDateString('pt-BR'); return; }
+        const datas = dadosEmpenho
+            .map(e => e.data_empenho || '')
+            .filter(Boolean)
+            .map(d => {
+                if (d.includes('/')) {
+                    const [dd, mm, yyyy] = d.split('/');
+                    return new Date(`${yyyy}-${mm}-${dd}`);
+                }
+                return new Date(d.split(' ')[0]);
+            })
+            .filter(d => !isNaN(d));
+
+        if (datas.length > 0) {
+            const maxDate = new Date(Math.max(...datas));
+            el.textContent = maxDate.toLocaleDateString('pt-BR');
+            return;
         }
     } catch(e) {}
     el.textContent = 'Não disponível';
