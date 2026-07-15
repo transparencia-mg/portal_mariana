@@ -229,10 +229,10 @@
         "scheme": "file",
         "title": "Empenhos",
         "stats": {
-          "hash": "e6bfaaf2c4c0252b76a196ae903f81b7",
-          "bytes": 171745,
+          "hash": "52c9f25e76e85b4726865c76372f54d8",
+          "bytes": 173594,
           "fields": 30,
-          "rows": 494
+          "rows": 499
         }
       },
       "time": 0.069,
@@ -303,7 +303,7 @@
           "rows": 37
         }
       },
-      "time": 0.01,
+      "time": 0.011,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -417,13 +417,13 @@
         "scheme": "file",
         "title": "Órgãos",
         "stats": {
-          "hash": "709b5ad4b9f49cf0c5a7deadfa1a94a1",
-          "bytes": 3623,
+          "hash": "697a08888c125b7bc2ee025c47895877",
+          "bytes": 3621,
           "fields": 17,
           "rows": 22
         }
       },
-      "time": 0.027,
+      "time": 0.028,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -513,8 +513,8 @@
         "scheme": "file",
         "title": "Receita",
         "stats": {
-          "hash": "976eb218d58776016ea5f2d5f88baa2d",
-          "bytes": 4984,
+          "hash": "099027b3aeaaee515c0f70025da2fb64",
+          "bytes": 4991,
           "fields": 11,
           "rows": 25
         }
@@ -1194,7 +1194,7 @@
           "description": "The value does not match the schema type and format for this field."
         },
         {
-          "cell": "0,0",
+          "cell": "-198924,52",
           "fieldName": "valor_efetivado_ajustado",
           "fieldNumber": 11,
           "fieldPosition": 11,
@@ -1209,7 +1209,7 @@
             "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
             "0",
             "0",
-            "0,0"
+            "-198924,52"
           ],
           "rowNumber": 22,
           "rowPosition": 23,
@@ -1221,7 +1221,7 @@
             "#cell"
           ],
           "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"0,0\" in row \"23\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
+          "message": "Type error in the cell \"-198924,52\" in row \"23\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
           "description": "The value does not match the schema type and format for this field."
         },
         {
