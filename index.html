@@ -624,8 +624,41 @@ async function carregarDados() {
     }
 }
 
-function setupDataAtualizacao() {
+async function setupDataAtualizacao() {
     const el = document.getElementById('data-atualizacao-header');
+
+    // Tenta obter a data real do último commit que alterou os arquivos
+    // do dataset no GitHub (transparencia-mg/portal_mariana e
+    // transparencia-mg/portal_licitacoes_mg). Essa é a data efetiva de
+    // atualização dos arquivos, e não a maior data encontrada dentro dos dados.
+    try {
+        const urls = [
+            'https://api.github.com/repos/transparencia-mg/portal_mariana/commits?path=dataset/data&sha=main&per_page=1',
+            'https://api.github.com/repos/transparencia-mg/portal_licitacoes_mg/commits?path=dataset/data&sha=main&per_page=1'
+        ];
+
+        const respostas = await Promise.all(
+            urls.map(u => fetch(u).then(r => r.ok ? r.json() : []).catch(() => []))
+        );
+
+        const datasCommits = respostas
+            .flat()
+            .map(c => c && c.commit && c.commit.committer && c.commit.committer.date)
+            .filter(Boolean)
+            .map(d => new Date(d))
+            .filter(d => !isNaN(d));
+
+        if (datasCommits.length > 0) {
+            const maxDateCommit = new Date(Math.max(...datasCommits));
+            el.textContent = maxDateCommit.toLocaleDateString('pt-BR');
+            return;
+        }
+    } catch(e) {
+        console.error('Erro ao obter data de atualização via GitHub API:', e);
+    }
+
+    // Fallback: caso a API do GitHub falhe (ex.: limite de requisições
+    // atingido), usa a maior data encontrada na coluna data_empenho.
     try {
         const datas = dadosEmpenho
             .map(e => e.data_empenho || '')
