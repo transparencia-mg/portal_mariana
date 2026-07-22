@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.177,
+  "time": 0.182,
   "errors": [],
   "tasks": [
     {
@@ -229,13 +229,13 @@
         "scheme": "file",
         "title": "Empenhos",
         "stats": {
-          "hash": "52c9f25e76e85b4726865c76372f54d8",
-          "bytes": 173594,
+          "hash": "bb8b125b0ba79e4dce871ab5c78a9e32",
+          "bytes": 175458,
           "fields": 30,
-          "rows": 499
+          "rows": 504
         }
       },
-      "time": 0.06,
+      "time": 0.062,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -417,8 +417,8 @@
         "scheme": "file",
         "title": "Órgãos",
         "stats": {
-          "hash": "697a08888c125b7bc2ee025c47895877",
-          "bytes": 3621,
+          "hash": "aed930a50d9aa586ef98b05d2bd8e30b",
+          "bytes": 3619,
           "fields": 17,
           "rows": 22
         }
