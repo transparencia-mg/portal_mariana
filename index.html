@@ -460,6 +460,31 @@ function formatarData(d) {
     return `${p[2]}/${p[1]}/${p[0]}`;
 }
 
+// Normaliza uma data (DD/MM/AAAA ou AAAA-MM-DD[ HH:MM:SS]) para o formato AAAA-MM-DD,
+// compatível com o valor retornado por <input type="date">, permitindo comparação por período.
+function _dataParaISO(d) {
+    if (!d) return '';
+    const s = String(d).trim().split(' ')[0];
+    if (s.includes('/')) {
+        const [dd, mm, yyyy] = s.split('/');
+        if (!dd || !mm || !yyyy) return '';
+        return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+    }
+    const p = s.split('-');
+    if (p.length < 3) return '';
+    return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`;
+}
+
+function mascararCpfCnpj(v) {
+    if (!v) return '-';
+    const digits = String(v).replace(/\D/g,'');
+    if (digits.length === 11) {
+        // CPF: oculta os 3 primeiros e os 2 últimos dígitos -> ***.456.789-**
+        return `***.${digits.substring(3,6)}.${digits.substring(6,9)}-**`;
+    }
+    return v; // CNPJ (14 dígitos) ou outro formato: exibe normalmente
+}
+
 function parseNum(v) {
     if (!v||v==='') return 0;
     return parseFloat(v.toString().replace(',','.')) || 0;
@@ -967,8 +992,12 @@ function renderizarExecucao() {
     <div class="filter-container">
         <div class="filters-row">
             <div class="filter-group">
-                <label class="filter-label">Ano</label>
-                <div class="combo-filter-wrap"><input type="text" class="combo-filter-input form-control" id="filtroAnoExec" placeholder="Todos os anos" autocomplete="off"><button class="combo-clear-btn" title="Limpar">✕</button><div class="combo-filter-dropdown"></div></div>
+                <label class="filter-label">Período - De</label>
+                <input type="date" class="form-control" id="filtroDataInicExec" title="Data inicial do período">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Período - Até</label>
+                <input type="date" class="form-control" id="filtroDataFimExec" title="Data final do período">
             </div>
             <div class="filter-group" style="flex:3;min-width:160px;">
                 <label class="filter-label">Iniciativa</label>
@@ -1136,19 +1165,26 @@ function getOptsExecByAno(ano) {
 }
 
 function inicializarCombosExec() {
-    const anos = [...new Set(dadosEmpenho.map(e=>e.ano).filter(Boolean))].sort((a,b)=>b-a).map(v=>({value:v,label:String(v)}));
     const opts = getOptsExecByAno('');
-    // Ano
-    if (!window._combos['filtroAnoExec']) {
-        window._combos['filtroAnoExec'] = new ComboFilter('filtroAnoExec', anos, (ano)=>{
-            const newOpts = getOptsExecByAno(ano);
-            if(window._combos['filtroInicExec']) window._combos['filtroInicExec'].updateOptions(newOpts.inicOpts);
-            if(window._combos['filtroAnexoExec']) window._combos['filtroAnexoExec'].updateOptions(newOpts.anexosF);
-            if(window._combos['filtroOrgaoExec']) window._combos['filtroOrgaoExec'].updateOptions(newOpts.orgaosF);
-            if(window._combos['filtroModalExec']) window._combos['filtroModalExec'].updateOptions(newOpts.modF);
-            aplicarFiltrosEXEC();
-        });
+
+    // Período (Filtro de Período com seletores de data / calendário)
+    const datasISO = dadosEmpenho.map(e=>_dataParaISO(e.data_empenho)).filter(Boolean).sort();
+    const dataInicEl = document.getElementById('filtroDataInicExec');
+    const dataFimEl  = document.getElementById('filtroDataFimExec');
+    if (dataInicEl && dataFimEl && datasISO.length) {
+        // Define limites min/max com base nos dados, para orientar o calendário
+        dataInicEl.min = dataFimEl.min = datasISO[0];
+        dataInicEl.max = dataFimEl.max = datasISO[datasISO.length-1];
     }
+    if (dataInicEl && !dataInicEl._bound) {
+        dataInicEl.addEventListener('change', ()=>aplicarFiltrosEXEC());
+        dataInicEl._bound = true;
+    }
+    if (dataFimEl && !dataFimEl._bound) {
+        dataFimEl.addEventListener('change', ()=>aplicarFiltrosEXEC());
+        dataFimEl._bound = true;
+    }
+
     if (!window._combos['filtroInicExec'])    window._combos['filtroInicExec']    = new ComboFilter('filtroInicExec',    opts.inicOpts,   ()=>aplicarFiltrosEXEC());
     if (!window._combos['filtroAnexoExec'])   window._combos['filtroAnexoExec']   = new ComboFilter('filtroAnexoExec',   opts.anexosF,    ()=>aplicarFiltrosEXEC());
     if (!window._combos['filtroOrgaoExec'])   window._combos['filtroOrgaoExec']   = new ComboFilter('filtroOrgaoExec',   opts.orgaosF,    ()=>aplicarFiltrosEXEC());
@@ -1157,7 +1193,7 @@ function inicializarCombosExec() {
     // Novos combos com autocomplete — opções dinâmicas dos dados
     const empOpts    = [...new Set(dadosEmpenho.map(e=>(e.no_empenho||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
     const credOpts   = [...new Set(dadosEmpenho.map(e=>(e.credor||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
-    const cnpjOpts   = [...new Set(dadosEmpenho.map(e=>(e.cnpj_cpf_credor||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
+    const cnpjOpts   = [...new Set(dadosEmpenho.map(e=>(e.cnpj_cpf_credor||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:mascararCpfCnpj(v)}));
     const procOpts   = [...new Set(dadosEmpenho.map(e=>(e.no_processo_compra||'').trim()).filter(Boolean))].sort().map(v=>({value:v,label:v}));
     const elemOpts   = [...new Set(dadosEmpenho.map(e=>{
         const n=(e.nome_elemento_despesa||'').trim(); const c=(e.cod_elemento_despesa||'').trim();
@@ -1181,7 +1217,7 @@ function inicializarCombosExec() {
         if (el) el.addEventListener('input', ()=>{ setTimeout(()=>aplicarFiltrosEXEC(), 0); });
     });
 
-    ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec',
+    ['filtroDataInicExec','filtroDataFimExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec',
      'filtroEmpenhoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroElementoExec','filtroItemExec'
     ].forEach(id=>{const el=document.getElementById(id);if(el)el.removeAttribute('readonly');});
 }
@@ -1307,7 +1343,7 @@ function buildRowEXEC(e) {
         'codigo_orgao': `<td>${e.codigo_orgao||'-'}</td>`,
         'nome_orgao': `<td title="${e.nome_orgao||''}">${(e.nome_orgao||'-').substring(0,30)}${(e.nome_orgao||'').length>30?'...':''}</td>`,
         'credor': `<td title="${e.credor||''}">${(e.credor||'-').substring(0,30)}${(e.credor||'').length>30?'...':''}</td>`,
-        'cnpj_cpf_credor': `<td>${e.cnpj_cpf_credor||'-'}</td>`,
+        'cnpj_cpf_credor': `<td>${mascararCpfCnpj(e.cnpj_cpf_credor)}</td>`,
         'no_processo_compra': `<td>${procDisplay}</td>`,
         'contrato_display': `<td>${contratoDisplay}</td>`,
         'modalidade_licitacao': `<td>${(e.modalidade_licitacao||'-').substring(0,25)}${(e.modalidade_licitacao||'').length>25?'...':''}</td>`,
@@ -1381,7 +1417,8 @@ function sortEXEC(col) {
 }
 
 window.aplicarFiltrosEXEC = function() {
-    const ano      = window._combos['filtroAnoExec']?.value      || '';
+    const dataInic = (document.getElementById('filtroDataInicExec')?.value || '').trim();
+    const dataFim  = (document.getElementById('filtroDataFimExec')?.value  || '').trim();
     const inic     = window._combos['filtroInicExec']?.value     || '';
     const anx      = window._combos['filtroAnexoExec']?.value    || '';
     const mod      = window._combos['filtroModalExec']?.value    || '';
@@ -1401,7 +1438,12 @@ window.aplicarFiltrosEXEC = function() {
     const item     = _comboVal('filtroItemExec');
     const contrato = (document.getElementById('filtroContratoExec')?.value||'').toLowerCase().trim();
     window.execFiltrada = ordenar(dadosEmpenho.filter(e=>{
-        if (ano&&e.ano!==ano) return false;
+        if (dataInic||dataFim) {
+            const dISO = _dataParaISO(e.data_empenho);
+            if (!dISO) return false;
+            if (dataInic && dISO < dataInic) return false;
+            if (dataFim && dISO > dataFim) return false;
+        }
         if (inic&&(e.codigo_iniciativa||'').trim()!==inic) return false;
         if (anx) {
             const iObj=getIniciativaParaEmpenho(e);
@@ -1429,8 +1471,8 @@ window.aplicarFiltrosEXEC = function() {
 };
 
 window.limparFiltrosEXEC = function() {
-    ['filtroContratoExec'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec',
+    ['filtroContratoExec','filtroDataInicExec','filtroDataFimExec'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['filtroInicExec','filtroAnexoExec','filtroOrgaoExec','filtroModalExec',
      'filtroEmpenhoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroElementoExec','filtroItemExec'
     ].forEach(id=>{if(window._combos[id])window._combos[id].clear();});
     const novoOpts=getOptsExecByAno('');
@@ -1588,7 +1630,7 @@ window.verDetalhesEmpenho = function(numEmpenho) {
             <div class="col-md-6">
                 <div class="info-card">
                     <div class="info-label">Razão Social</div><div class="info-value">${e.credor||'-'}</div>
-                    <div class="info-label mt-2">CNPJ/CPF</div><div class="info-value">${e.cnpj_cpf_credor||'-'}</div>
+                    <div class="info-label mt-2">CNPJ/CPF</div><div class="info-value">${mascararCpfCnpj(e.cnpj_cpf_credor)}</div>
                 </div>
             </div>
             <div class="col-md-6">
@@ -1763,12 +1805,12 @@ window.exportarIniciativasPDF = function() {
 };
 window.exportarExecucaoCSV = function() {
     const campos=['no_empenho','data_empenho','ano','codigo_iniciativa','nome_orgao','credor','cnpj_cpf_credor','no_processo_compra','modalidade_licitacao','valor_empenhado','valor_liquidado','valor_pago_financeiro','valor_total_pag'];
-    const csv=[campos.join(';'),...(window.execFiltrada||[]).map(e=>campos.map(c=>`"${e[c]||''}"`).join(';'))].join('\n');
+    const csv=[campos.join(';'),...(window.execFiltrada||[]).map(e=>campos.map(c=>`"${c==='cnpj_cpf_credor'?mascararCpfCnpj(e[c]):(e[c]||'')}"`).join(';'))].join('\n');
     const blob=new Blob(['\uFEFF'+csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='execucao_acordomariana.csv'; a.click();
 };
 window.exportarExecucaoPDF = function() {
     const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:'landscape'});
-    doc.autoTable({ head:[['Empenho','Data','Ano','Credor','CNPJ/CPF','Proc. Compra','Modalidade','Empenhado','Liquidado','Pago']], body:(window.execFiltrada||[]).slice(0,100).map(e=>[e.no_empenho,formatarData(e.data_empenho),e.ano,e.credor,e.cnpj_cpf_credor,e.no_processo_compra,e.modalidade_licitacao,formatarMoeda(e.valor_empenhado),formatarMoeda(e.valor_liquidado),formatarMoeda(e.valor_total_pag)]), headStyles:{fillColor:[32,68,93]}, styles:{fontSize:7}, didDrawPage:()=>{doc.setFontSize(9);doc.text('Execução Financeira - Acordo de Mariana',14,10);doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,doc.internal.pageSize.height-5);} });
+    doc.autoTable({ head:[['Empenho','Data','Ano','Credor','CNPJ/CPF','Proc. Compra','Modalidade','Empenhado','Liquidado','Pago']], body:(window.execFiltrada||[]).slice(0,100).map(e=>[e.no_empenho,formatarData(e.data_empenho),e.ano,e.credor,mascararCpfCnpj(e.cnpj_cpf_credor),e.no_processo_compra,e.modalidade_licitacao,formatarMoeda(e.valor_empenhado),formatarMoeda(e.valor_liquidado),formatarMoeda(e.valor_total_pag)]), headStyles:{fillColor:[32,68,93]}, styles:{fontSize:7}, didDrawPage:()=>{doc.setFontSize(9);doc.text('Execução Financeira - Acordo de Mariana',14,10);doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,doc.internal.pageSize.height-5);} });
     doc.save('execucao_acordomariana.pdf');
 };
 window.exportarModalPDF = function() {
@@ -1810,7 +1852,7 @@ function copiarLinkContexto(tabOverride) {
     }
     const url = new URL(baseUrl);
     // Remove params antigos para reconstruir
-    ['tab','empenho','filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec',
+    ['tab','empenho','filtroDataInicExec','filtroDataFimExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec',
      'filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec',
      'filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao',
      'filtroCodigoINIC','filtroNomeINIC','filtroAnexoINIC'].forEach(k=>url.searchParams.delete(k));
@@ -1839,7 +1881,7 @@ function copiarLinkContexto(tabOverride) {
         return el ? (el.value||'') : '';
     }
     if (tabAtiva === 'execucao') {
-        ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].forEach(id => {
+        ['filtroDataInicExec','filtroDataFimExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].forEach(id => {
             const v = getFiltroVal(id); if (v) url.searchParams.set(id, v);
         });
     }
@@ -1904,12 +1946,12 @@ function carregarFiltrosDaURL() {
     }
     // Restaurar filtros de execução
     setTimeout(()=>{
-        ['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].forEach(id=>{
+        ['filtroDataInicExec','filtroDataFimExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].forEach(id=>{
             const v = p.get(id); if (!v) return;
             if (window._combos[id]) { const opt=window._combos[id].allOptions.find(o=>o.value===v); window._combos[id].setValue(v); if(opt) window._combos[id].input.value=opt.label; }
             else { const el = document.getElementById(id); if(el) el.value = v; }
         });
-        if (['filtroAnoExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].some(id=>p.get(id))) aplicarFiltrosEXEC();
+        if (['filtroDataInicExec','filtroDataFimExec','filtroInicExec','filtroAnexoExec','filtroModalExec','filtroOrgaoExec','filtroCredorExec','filtroCnpjExec','filtroProcessoExec','filtroEmpenhoExec'].some(id=>p.get(id))) aplicarFiltrosEXEC();
         // Restaurar filtros execucao-orgao
         ['filtroAnexoOrgao','filtroInicOrgao','filtroCodigoUOOrgao','filtroNomeUOOrgao'].forEach(id=>{
             const v = p.get(id); if (!v) return;
