@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.214,
+  "time": 0.208,
   "errors": [],
   "tasks": [
     {
@@ -57,13 +57,13 @@
         "scheme": "file",
         "title": "Rendimentos",
         "stats": {
-          "hash": "198fed4e9cd5485163d1acbcb165a16c",
+          "hash": "e061a3d8e81b74e845ca8b8299d80f1a",
           "bytes": 4749,
           "fields": 9,
           "rows": 25
         }
       },
-      "time": 0.017,
+      "time": 0.014,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -229,13 +229,13 @@
         "scheme": "file",
         "title": "Empenhos",
         "stats": {
-          "hash": "bb8b125b0ba79e4dce871ab5c78a9e32",
-          "bytes": 175458,
+          "hash": "e315372f9c580dc3f719104a3881e70c",
+          "bytes": 177674,
           "fields": 30,
-          "rows": 504
+          "rows": 510
         }
       },
-      "time": 0.074,
+      "time": 0.071,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -297,13 +297,13 @@
         "scheme": "file",
         "title": "Iniciativas",
         "stats": {
-          "hash": "24c9473a980ecbd3e93c54c59780300b",
-          "bytes": 7809,
+          "hash": "0eb449517cd67ab9005375719f4f027a",
+          "bytes": 7777,
           "fields": 4,
-          "rows": 41
+          "rows": 40
         }
       },
-      "time": 0.01,
+      "time": 0.011,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -325,36 +325,11 @@
         "unique-error"
       ],
       "partial": false,
-      "errors": [
-        {
-          "cell": "Total Geral",
-          "fieldName": "codigo_iniciativa",
-          "fieldNumber": 1,
-          "fieldPosition": 1,
-          "cells": [
-            "Total Geral",
-            "",
-            "",
-            "7220315707,121777"
-          ],
-          "rowNumber": 41,
-          "rowPosition": 42,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"Total Geral\" in row \"42\" and field \"codigo_iniciativa\" at position \"1\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        }
-      ],
+      "errors": [],
       "stats": {
-        "errors": 1
+        "errors": 0
       },
-      "valid": false
+      "valid": true
     },
     {
       "resource": {
@@ -442,13 +417,13 @@
         "scheme": "file",
         "title": "Órgãos",
         "stats": {
-          "hash": "aed930a50d9aa586ef98b05d2bd8e30b",
-          "bytes": 3619,
+          "hash": "593a86cd3d83070ed310786143796726",
+          "bytes": 3870,
           "fields": 17,
-          "rows": 22
+          "rows": 24
         }
       },
-      "time": 0.027,
+      "time": 0.028,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -1350,7 +1325,7 @@
     }
   ],
   "stats": {
-    "errors": 26,
+    "errors": 25,
     "tasks": 5
   },
   "valid": false
