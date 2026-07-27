@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.208,
+  "time": 0.206,
   "errors": [],
   "tasks": [
     {
@@ -57,13 +57,13 @@
         "scheme": "file",
         "title": "Rendimentos",
         "stats": {
-          "hash": "e061a3d8e81b74e845ca8b8299d80f1a",
-          "bytes": 4749,
+          "hash": "42e402ebb0f53d82093dc24329a9a010",
+          "bytes": 3506,
           "fields": 9,
-          "rows": 25
+          "rows": 20
         }
       },
-      "time": 0.014,
+      "time": 0.013,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -229,10 +229,10 @@
         "scheme": "file",
         "title": "Empenhos",
         "stats": {
-          "hash": "e315372f9c580dc3f719104a3881e70c",
-          "bytes": 177674,
+          "hash": "fd7032f2a41327a52c89696ec317b1f1",
+          "bytes": 178834,
           "fields": 30,
-          "rows": 510
+          "rows": 513
         }
       },
       "time": 0.071,
@@ -303,7 +303,7 @@
           "rows": 40
         }
       },
-      "time": 0.011,
+      "time": 0.01,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -417,13 +417,13 @@
         "scheme": "file",
         "title": "Órgãos",
         "stats": {
-          "hash": "593a86cd3d83070ed310786143796726",
-          "bytes": 3870,
+          "hash": "633ee9b68bbbee29ffb67e478c27e939",
+          "bytes": 3873,
           "fields": 17,
           "rows": 24
         }
       },
-      "time": 0.028,
+      "time": 0.029,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -513,13 +513,13 @@
         "scheme": "file",
         "title": "Receita",
         "stats": {
-          "hash": "099027b3aeaaee515c0f70025da2fb64",
-          "bytes": 4991,
+          "hash": "08fa45ea88d4b63eb04f4e5cffe0e2cd",
+          "bytes": 1590,
           "fields": 11,
-          "rows": 25
+          "rows": 5
         }
       },
-      "time": 0.017,
+      "time": 0.015,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -543,37 +543,6 @@
       "partial": false,
       "errors": [
         {
-          "cell": "4600135,94",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2024",
-            "Dezembro",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "4700000",
-            "4600135,94"
-          ],
-          "rowNumber": 1,
-          "rowPosition": 2,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"4600135,94\" in row \"2\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
           "cell": "740335914,3",
           "fieldName": "valor_efetivado_ajustado",
           "fieldNumber": 11,
@@ -591,8 +560,8 @@
             "740335000",
             "740335914,3"
           ],
-          "rowNumber": 2,
-          "rowPosition": 3,
+          "rowNumber": 1,
+          "rowPosition": 2,
           "code": "type-error",
           "name": "Type Error",
           "tags": [
@@ -601,162 +570,7 @@
             "#cell"
           ],
           "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"740335914,3\" in row \"3\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "7970149,65",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Abril",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "7970149,65"
-          ],
-          "rowNumber": 3,
-          "rowPosition": 4,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"7970149,65\" in row \"4\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "20665598,17",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Agosto",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "20665598,17"
-          ],
-          "rowNumber": 4,
-          "rowPosition": 5,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"20665598,17\" in row \"5\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "21574633,64",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Dezembro",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "21574633,64"
-          ],
-          "rowNumber": 5,
-          "rowPosition": 6,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"21574633,64\" in row \"6\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "1931832,88",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Fevereiro",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "89000000",
-            "1931832,88"
-          ],
-          "rowNumber": 6,
-          "rowPosition": 7,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"1931832,88\" in row \"7\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "7398834,46",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Janeiro",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "7398834,46"
-          ],
-          "rowNumber": 7,
-          "rowPosition": 8,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"7398834,46\" in row \"8\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
+          "message": "Type error in the cell \"740335914,3\" in row \"2\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
           "description": "The value does not match the schema type and format for this field."
         },
         {
@@ -777,8 +591,8 @@
             "809526379",
             "275043,58"
           ],
-          "rowNumber": 8,
-          "rowPosition": 9,
+          "rowNumber": 2,
+          "rowPosition": 3,
           "code": "type-error",
           "name": "Type Error",
           "tags": [
@@ -787,69 +601,7 @@
             "#cell"
           ],
           "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"275043,58\" in row \"9\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "22427853,45",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Julho",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "22427853,45"
-          ],
-          "rowNumber": 9,
-          "rowPosition": 10,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"22427853,45\" in row \"10\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "16983866,92",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Junho",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "16983866,92"
-          ],
-          "rowNumber": 10,
-          "rowPosition": 11,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"16983866,92\" in row \"11\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
+          "message": "Type error in the cell \"275043,58\" in row \"3\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
           "description": "The value does not match the schema type and format for this field."
         },
         {
@@ -870,8 +622,8 @@
             "0",
             "1001443461,88"
           ],
-          "rowNumber": 11,
-          "rowPosition": 12,
+          "rowNumber": 3,
+          "rowPosition": 4,
           "code": "type-error",
           "name": "Type Error",
           "tags": [
@@ -880,193 +632,7 @@
             "#cell"
           ],
           "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"1001443461,88\" in row \"12\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "8609495,35",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Maio",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "8609495,35"
-          ],
-          "rowNumber": 12,
-          "rowPosition": 13,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"8609495,35\" in row \"13\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "12559500,71",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Março",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "12559500,71"
-          ],
-          "rowNumber": 13,
-          "rowPosition": 14,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"12559500,71\" in row \"14\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "18924889,14",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Novembro",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "18924889,14"
-          ],
-          "rowNumber": 14,
-          "rowPosition": 15,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"18924889,14\" in row \"15\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "11116248,04",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Outubro",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "11116248,04"
-          ],
-          "rowNumber": 15,
-          "rowPosition": 16,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"11116248,04\" in row \"16\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "33649951,89",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2025",
-            "Setembro",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "33649951,89"
-          ],
-          "rowNumber": 16,
-          "rowPosition": 17,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"33649951,89\" in row \"17\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "18942112,58",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2026",
-            "Abril",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "18942112,58"
-          ],
-          "rowNumber": 17,
-          "rowPosition": 18,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"18942112,58\" in row \"18\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
+          "message": "Type error in the cell \"1001443461,88\" in row \"4\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
           "description": "The value does not match the schema type and format for this field."
         },
         {
@@ -1087,8 +653,8 @@
             "0",
             "1235142134,67"
           ],
-          "rowNumber": 18,
-          "rowPosition": 19,
+          "rowNumber": 4,
+          "rowPosition": 5,
           "code": "type-error",
           "name": "Type Error",
           "tags": [
@@ -1097,69 +663,7 @@
             "#cell"
           ],
           "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"1235142134,67\" in row \"19\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "17183256,57",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2026",
-            "Fevereiro",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "960000000",
-            "17183256,57"
-          ],
-          "rowNumber": 19,
-          "rowPosition": 20,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"17183256,57\" in row \"20\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "20377508,26",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2026",
-            "Janeiro",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "20377508,26"
-          ],
-          "rowNumber": 20,
-          "rowPosition": 21,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"20377508,26\" in row \"21\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
+          "message": "Type error in the cell \"1235142134,67\" in row \"5\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
           "description": "The value does not match the schema type and format for this field."
         },
         {
@@ -1180,8 +684,8 @@
             "1141788255",
             "0,0"
           ],
-          "rowNumber": 21,
-          "rowPosition": 22,
+          "rowNumber": 5,
+          "rowPosition": 6,
           "code": "type-error",
           "name": "Type Error",
           "tags": [
@@ -1190,142 +694,18 @@
             "#cell"
           ],
           "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"0,0\" in row \"22\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "-198924,52",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2026",
-            "Julho",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "-198924,52"
-          ],
-          "rowNumber": 22,
-          "rowPosition": 23,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"-198924,52\" in row \"23\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "32196417,6",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2026",
-            "Junho",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "32196417,6"
-          ],
-          "rowNumber": 23,
-          "rowPosition": 24,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"32196417,6\" in row \"24\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "31794430,57",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2026",
-            "Maio",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "31794430,57"
-          ],
-          "rowNumber": 24,
-          "rowPosition": 25,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"31794430,57\" in row \"25\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
-          "description": "The value does not match the schema type and format for this field."
-        },
-        {
-          "cell": "20910819,96",
-          "fieldName": "valor_efetivado_ajustado",
-          "fieldNumber": 11,
-          "fieldPosition": 11,
-          "cells": [
-            "2026",
-            "Março",
-            "9999",
-            "EMG - ADMINISTRACAO DIRETA",
-            "1321.01.0.1.01.000",
-            "REMUNERACAO DEPOSITOS BANCARIOS - PRINC.",
-            "80",
-            "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            "0",
-            "0",
-            "20910819,96"
-          ],
-          "rowNumber": 25,
-          "rowPosition": 26,
-          "code": "type-error",
-          "name": "Type Error",
-          "tags": [
-            "#table",
-            "#row",
-            "#cell"
-          ],
-          "note": "type is \"integer/default\"",
-          "message": "Type error in the cell \"20910819,96\" in row \"26\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
+          "message": "Type error in the cell \"0,0\" in row \"6\" and field \"valor_efetivado_ajustado\" at position \"11\": type is \"integer/default\"",
           "description": "The value does not match the schema type and format for this field."
         }
       ],
       "stats": {
-        "errors": 25
+        "errors": 5
       },
       "valid": false
     }
   ],
   "stats": {
-    "errors": 25,
+    "errors": 5,
     "tasks": 5
   },
   "valid": false
