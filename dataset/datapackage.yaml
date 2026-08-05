@@ -1,5 +1,5 @@
 name: portal_mariana
-owner_org: ''
+owner_org: 'secretaria-de-estado-de-planejamento-e-gestao-seplag'
 profile: data-package
 resources:
   - dialect:
