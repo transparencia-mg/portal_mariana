@@ -1,6 +1,6 @@
 {
   "version": "4.16.6",
-  "time": 0.151,
+  "time": 0.181,
   "errors": [],
   "tasks": [
     {
@@ -57,13 +57,13 @@
         "scheme": "file",
         "title": "Rendimentos",
         "stats": {
-          "hash": "b43d842a8651060dc88c562d20e12bf7",
-          "bytes": 3808,
+          "hash": "24b8d8ab9efa83bdb73f2a5f12188ae2",
+          "bytes": 3818,
           "fields": 9,
           "rows": 22
         }
       },
-      "time": 0.011,
+      "time": 0.013,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -1318,7 +1318,7 @@
             "1321.01.0.1.01.000",
             "80,0",
             "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            ""
+            "36273133,75"
           ],
           "rowNumber": 15,
           "rowPosition": 16,
@@ -1347,7 +1347,7 @@
             "1321.01.0.1.01.000",
             "80,0",
             "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            ""
+            "36273133,75"
           ],
           "rowNumber": 15,
           "rowPosition": 16,
@@ -1376,7 +1376,7 @@
             "1321.01.0.1.01.000",
             "80,0",
             "RECURSOS DO ACORDO DE REPACTUACAO DO RIO DOCE",
-            ""
+            "36273133,75"
           ],
           "rowNumber": 15,
           "rowPosition": 16,
@@ -2057,13 +2057,13 @@
         "scheme": "file",
         "title": "Empenhos",
         "stats": {
-          "hash": "ae95e4ff584720a5d794ac2437fd523a",
-          "bytes": 179925,
+          "hash": "501b694db43e4edf60b9906f1af0b150",
+          "bytes": 184788,
           "fields": 30,
-          "rows": 516
+          "rows": 529
         }
       },
-      "time": 0.052,
+      "time": 0.06,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -2131,7 +2131,7 @@
           "rows": 40
         }
       },
-      "time": 0.008,
+      "time": 0.015,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -2245,13 +2245,13 @@
         "scheme": "file",
         "title": "Órgãos",
         "stats": {
-          "hash": "8955b3837f3ce12ceebcbb010d32a708",
-          "bytes": 3901,
+          "hash": "eb865de7258a3a0461127059b60a3350",
+          "bytes": 3899,
           "fields": 17,
           "rows": 24
         }
       },
-      "time": 0.02,
+      "time": 0.026,
       "scope": [
         "hash-count-error",
         "byte-count-error",
@@ -2347,7 +2347,7 @@
           "rows": 5
         }
       },
-      "time": 0.01,
+      "time": 0.011,
       "scope": [
         "hash-count-error",
         "byte-count-error",
