@@ -968,6 +968,11 @@ const EXEC_COLS_CONFIG = [
     { key:'valor_total_pago',        label:'Valor Total Pago',           fixed:true,  tip:'Somatório dos valores pagos neste exercício e pagos em restos a pagar processados e não processados' },
 ];
 
+// Colunas de valor (numéricas) — usadas para ordenação (alinhamento à direita) e para o rodapé de subtotal/total
+const EXEC_NUM_KEYS = ['valor_empenhado','valor_liquidado','valor_pago_financeiro','valor_total_pago',
+    'valor_liquidado_rp','valor_cancelado_rp','valor_empenhado_efetivo',
+    'valor_pago_rp','valor_cancelado_processado','valor_restabelecido_processado','valor_cancelado_nao_processado','valor_restabelecido_nao_processado'];
+
 // Estado das colunas visíveis (opcionais)
 let execColsVisiveis = {};
 EXEC_COLS_CONFIG.filter(c=>!c.fixed).forEach(c=>{ execColsVisiveis[c.key] = c.defaultVisible!==false; });
@@ -1110,6 +1115,7 @@ function renderizarExecucao() {
             <table class="table" id="tabelaExecucao">
                 <thead id="theadExecucao"><tr></tr></thead>
                 <tbody id="tbodyExecucao"></tbody>
+                <tfoot id="tfootExecucao"></tfoot>
             </table>
         </div>
         <div class="pagination-container" id="pagContainerEXEC"></div>
@@ -1241,9 +1247,7 @@ function reconstruirCabecalhoEXEC() {
     if (!tr) return;
     const colsVisiveis = getColunasVisiveis();
     tr.innerHTML = colsVisiveis.map(col=>{
-        const numKeys=['valor_empenhado','valor_liquidado','valor_pago_financeiro','valor_total_pago',
-            'valor_liquidado_rp','valor_cancelado_rp','valor_empenhado_efetivo',
-            'valor_pago_rp','valor_cancelado_processado','valor_restabelecido_processado','valor_cancelado_nao_processado','valor_restabelecido_nao_processado'];
+        const numKeys=EXEC_NUM_KEYS;
         const cls = numKeys.includes(col.key)?'sortable-header text-right':'sortable-header';
         const tipIcon = col.tip ? `<i class="col-tooltip-icon" data-tip="${col.tip.replace(/"/g,"&quot;")}">?</i>` : '';
         if (col.key==='contrato_display'||col.key==='iniciativa_display'||col.key==='anexo_display') {
@@ -1367,6 +1371,32 @@ function buildRowEXEC(e) {
     return `<tr><td class="text-center"><button class="btn-action" onclick="verDetalhesEmpenho('${esc(e.no_empenho||'')}')"><i class="material-icons" style="font-size:15px">visibility</i></button></td>${cells}</tr>`;
 }
 
+// Monta uma linha de rodapé (subtotal da página ou total geral) somando as colunas de valor visíveis
+function _linhaRodapeEXEC(rotulo, dados, estilo) {
+    const colsVis = getColunasVisiveis();
+    const somas = {};
+    EXEC_NUM_KEYS.forEach(k => { somas[k] = dados.reduce((s,e)=>s+parseNum(e[k]),0); });
+    // Primeira célula (coluna "Ações") recebe o rótulo; ocupa também as colunas não-numéricas até a primeira coluna de valor
+    let rotuloColuna = true;
+    const cells = colsVis.map(col=>{
+        if (EXEC_NUM_KEYS.includes(col.key)) {
+            rotuloColuna = false;
+            return `<td class="text-right"><strong>${formatarMoeda(somas[col.key])}</strong></td>`;
+        }
+        return rotuloColuna ? '' : `<td></td>`;
+    }).join('');
+    const nColsRotulo = 1 + colsVis.filter(col=>!EXEC_NUM_KEYS.includes(col.key)).length;
+    return `<tr style="${estilo}"><td colspan="${nColsRotulo}"><strong>${rotulo}</strong></td>${cells}</tr>`;
+}
+
+function renderizarRodapeEXEC(dadosPagina, dadosTotal) {
+    const tf = document.getElementById('tfootExecucao');
+    if (!tf) return;
+    tf.innerHTML =
+        _linhaRodapeEXEC(`Subtotal desta página (${dadosPagina.length} registros)`, dadosPagina, 'background:#f1f5f9;') +
+        _linhaRodapeEXEC(`TOTAL GERAL (${dadosTotal.length} registros filtrados)`, dadosTotal, 'background:#e2e8f0;border-top:2px solid #94a3b8;');
+}
+
 function atualizarMetricasEXEC(dados) {
     const m = calcMetricas(dados);
     const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
@@ -1405,6 +1435,7 @@ function atualizarTabelaEXEC() {
         : rows.map(e=>buildRowEXEC(e)).join('');
     document.getElementById('badgeExec').textContent = window.execFiltrada.length+' registros';
     renderizarPag('execucao');
+    renderizarRodapeEXEC(rows, window.execFiltrada);
     atualizarMetricasEXEC(window.execFiltrada);
 }
 
@@ -1504,8 +1535,12 @@ window.buscarEXEC = function(termo) {
             (inic&&String(inic.iniciativa||'').toLowerCase().includes(t));
     });
     const nCols = getColunasVisiveis().length + 1;
-    document.getElementById('tbodyExecucao').innerHTML = f.slice(0,pag.execucao.porPag).map(e=>buildRowEXEC(e)).join('');
+    const pagina = f.slice(0,pag.execucao.porPag);
+    document.getElementById('tbodyExecucao').innerHTML = pagina.length===0
+        ? `<tr><td colspan="${nCols}" class="text-center py-4">Nenhum registro encontrado</td></tr>`
+        : pagina.map(e=>buildRowEXEC(e)).join('');
     document.getElementById('badgeExec').textContent = f.length+' registros';
+    renderizarRodapeEXEC(pagina, f);
 };
 
 // ============================================================
