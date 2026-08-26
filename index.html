@@ -427,7 +427,7 @@ let sortCfg = {
     iniciativas: { col: 'codigo_iniciativa', dir: 'asc' },
     execucao:    { col: 'data_empenho', dir: 'desc' }
 };
-let sortCfgReceita = { col: 'ano', dir: 'desc' };
+let sortCfgReceita = { col: 'mes_ordem', dir: 'asc' };
 let pagReceita = { atual: 1, porPag: 50, total: 1 };
 let pag = {
     iniciativas: { atual: 1, porPag: 50, total: 1 },
@@ -2386,7 +2386,7 @@ function renderizarReceita() {
         <div class="table-fixed-header-container">
             <table class="table" id="tabelaReceita">
                 <thead><tr>
-                    <th class="sortable-header" onclick="sortREC('periodo_desc')" style="min-width:80px;">Período <i class="col-tooltip-icon" data-tip="Compreende o período da receita contabilizada">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
+                    <th class="sortable-header" onclick="sortREC('mes_ordem')" style="min-width:80px;">Período <i class="col-tooltip-icon" data-tip="Mês/ano de referência da linha. Ao selecionar um intervalo de meses, cada mês é exibido em uma linha própria, com o total geral ao final da tabela">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortREC('unidade_orcamentaria_codigo')" style="min-width:65px;white-space:normal;">Cód.<br>Órgão <i class="col-tooltip-icon" data-tip="Código da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortREC('unidade_orcamentaria_nome')" style="min-width:140px;">Órgão <i class="col-tooltip-icon" data-tip="Descrição da unidade orçamentária responsável pela iniciativa">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
                     <th class="sortable-header" onclick="sortREC('classificacao_receita_formatado')" style="min-width:100px;white-space:normal;">Cód. Classif.<br>da Receita <i class="col-tooltip-icon" data-tip="Classificação que identifica os recursos que ingressaram nos cofres públicos e indicam: categoria econômica, origem, espécie, desdobramento 1, desdobramento 2, desdobramento 3, tipo">?</i> <i class="material-icons sort-icon">unfold_more</i></th>
@@ -2469,6 +2469,14 @@ function _campo(r, ...nomes) {
     return '';
 }
 
+// Remove sufixo decimal espúrio gerado por exportação de planilha
+// (ex.: "2024,0" -> "2024", "9999,0" -> "9999", "80,0" -> "80")
+function _limparSufixoDecimal(v) {
+    if (v === undefined || v === null) return v;
+    const s = String(v).trim();
+    return s.replace(/,0$/, '');
+}
+
 function calcularTabelaREC() {
     const periodoInic = (document.getElementById('filtroMesInicREC')?.value||'2024-12').trim();
     const periodoFim  = (document.getElementById('filtroMesFimREC')?.value||'').trim();
@@ -2482,18 +2490,11 @@ function calcularTabelaREC() {
 
     const MESES_NOME = {'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'};
 
-    // Constrói label do período
-    const [anoI, mesI] = periodoInic.split('-');
-    const [anoF, mesF] = (periodoFim||periodoInic).split('-');
-    const periodoLabel = (periodoInic === (periodoFim||periodoInic))
-        ? `${MESES_NOME[mesI]}/${anoI}`
-        : `${MESES_NOME[mesI]}/${anoI}–${MESES_NOME[mesF]}/${anoF}`;
-
     let base = [...window._receitaNorm, ...window._contaBancNorm];
 
     // Filtro por período AAAA-MM
     base = base.filter(r => {
-        const anoR = _campo(r,'ano_de_exercicio','ano');
+        const anoR = _limparSufixoDecimal(_campo(r,'ano_de_exercicio','ano'));
         const raw  = _campo(r,'mes_descritivo','mes_numerico','mes');
         const mesR = _mesDescritivoParaNum(raw) || raw.padStart(2,'0');
         if (!anoR || !mesR || mesR === '00') return false;
@@ -2509,25 +2510,30 @@ function calcularTabelaREC() {
         _campo(r,'unidade_orcamentaria_nome').toLowerCase().includes(uo));
     if(tipo) base = base.filter(r=>r._tipo_linha===tipo);
 
-    // AGRUPAMENTO por UO + classificação + tipo, somando valores do período
+    // AGRUPAMENTO por MÊS + UO + classificação + fonte + contrato/convênio + tipo
+    // (cada mês do período selecionado vira uma linha própria — não soma o período inteiro numa única linha)
     const grupos = new Map();
     base.forEach(r => {
-        const anoR    = _campo(r,'ano_de_exercicio','ano');
-        const uoCod   = _campo(r,'unidade_orcamentaria_codigo');
+        const anoR    = _limparSufixoDecimal(_campo(r,'ano_de_exercicio','ano'));
+        const rawMes  = _campo(r,'mes_descritivo','mes_numerico','mes');
+        const mesR    = _mesDescritivoParaNum(rawMes) || rawMes.padStart(2,'0');
+        const mesLinhaDesc = `${MESES_NOME[mesR]||mesR}/${anoR}`;
+        const uoCod   = _limparSufixoDecimal(_campo(r,'unidade_orcamentaria_codigo'));
         const uoNome  = _campo(r,'unidade_orcamentaria_nome');
         const classCod= _campo(r,'classificacao_receita_formatado');
         const classDesc=_campo(r,'classificacao_receita_descricao');
         const tpLinha = r._tipo_linha||'';
-        const codFonteG  = _campo(r,'fonte_recurso_codigo','codigo_fonte_recurso','cod_fonte_recurso');
+        const codFonteG  = _limparSufixoDecimal(_campo(r,'fonte_recurso_codigo','codigo_fonte_recurso','cod_fonte_recurso'));
         const nomeFonteG = _campo(r,'fonte_recurso_descricao','nome_fonte_recurso','fonte_recurso') ||
                            (codFonteG && window.mapaFonteRecurso ? (window.mapaFonteRecurso[codFonteG]||'') : '');
         const fontePortG = _campo(r,'fonte_portaria_stn','fonte_portaria');
-        const chave   = [uoCod, uoNome, classCod, classDesc, codFonteG, tpLinha].join('||');
+        const chave   = [anoR, mesR, uoCod, uoNome, classCod, classDesc, codFonteG, tpLinha].join('||');
 
         if (!grupos.has(chave)) {
             grupos.set(chave, {
                 ano_de_exercicio:                anoR||'-',
-                periodo_desc:                    periodoLabel,
+                mes_ordem:                        `${anoR}${mesR}`,
+                periodo_desc:                    mesLinhaDesc,
                 unidade_orcamentaria_codigo:     uoCod||'-',
                 unidade_orcamentaria_nome:       uoNome||'-',
                 classificacao_receita_formatado: classCod,
@@ -2681,6 +2687,7 @@ window.buscarREC = function(termo){
     const t=(termo||'').toLowerCase().trim();
     if(!t){atualizarTabelaREC();return;}
     const f=(window.receitaFiltradaView||[]).filter(r=>
+        (r.periodo_desc||'').toLowerCase().includes(t)||
         (r.ano_de_exercicio||'').includes(t)||
         (r.unidade_orcamentaria_codigo||'').toLowerCase().includes(t)||
         (r.unidade_orcamentaria_nome||'').toLowerCase().includes(t)||
@@ -2695,8 +2702,10 @@ window.buscarREC = function(termo){
 window.exportarReceitaCSV = function(){
     const campos=['periodo_desc','unidade_orcamentaria_codigo','unidade_orcamentaria_nome',
         'classificacao_receita_formatado','classificacao_receita_descricao',
+        'codigo_fonte_recurso','nome_fonte_recurso',
         'valor_previsto_inicial','valor_previsto_atualizado','valor_contabilizado','valor_arrecadado_liquido','_tipo_linha'];
     const headers=['Período','Cód. UO','Unidade Orçamentária','Cód. Classificação','Classificação da Receita',
+        'Cód. Fonte de Recurso','Fonte de Recurso',
         'Vl. Prev. Inicial','Vl. Prev. Atualizado','Vl. Arrecadado','Vl. Arrecadado Líq.','Tipo'];
     const data=window.receitaFiltradaView||[];
     const csv=[headers.join(';'),...data.map(r=>campos.map(c=>{
